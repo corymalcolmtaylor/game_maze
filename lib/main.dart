@@ -7,10 +7,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Maze maze = Maze(8, 8);
+    Maze maze = Maze(1, 1);
     maze.carveLabyrinth();
     return MaterialApp(
-      title: 'Mazes and Minotaurs',
+      title: 'my flutter app',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Mazes and Minotaurs'),
+          title: Text('my flutter app'),
         ),
         body: MazeRoom(maze).build(),
       ),
@@ -37,98 +37,120 @@ class MazeRoom {
   final Maze maze;
   MazeRoom(this.maze);
   Widget makeRoom(String name, IconData icon) {
-    return Table(columnWidths: {
-      1: FixedColumnWidth(10.0),
-      2: FixedColumnWidth(50.0),
-      3: FixedColumnWidth(10.0)
-    }, children: [
-      TableRow(children: [
-        TableCell(
-          child: SizedBox(
-            width: 10.0,
-            height: 10.0,
-          ),
-        ),
-        TableCell(
-          child: SizedBox(
-            height: 10.0,
-          ),
-        ),
-        TableCell(
-          child: SizedBox(
-            width: 10.0,
-            height: 10.0,
-          ),
-        ),
-      ]),
-      TableRow(
-        children: [
+    return GestureDetector(
+      onTap: () => print('$name was tappped'),
+      child: Table(columnWidths: {
+        0: FixedColumnWidth(10.0),
+        1: FixedColumnWidth(150.0),
+        2: FixedColumnWidth(10.0)
+      }, children: [
+        TableRow(children: [
           TableCell(
-            child: SizedBox(
-              width: 10.0,
-            ),
-          ),
-          TableCell(
-            child: GestureDetector(
-              onTap: () => print('pressed'),
-              child: Container(
-                color: Colors.amber,
-                margin: EdgeInsets.all(0.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  verticalDirection: VerticalDirection.down,
-                  children: <Widget>[
-                    Center(
-                      child: Icon(icon),
-                    ),
-                    Center(child: Text(name)),
-                  ],
-                ),
+            child: Container(
+              color: Colors.black,
+              child: SizedBox(
+                width: 10.0,
+                height: 10.0,
               ),
             ),
           ),
           TableCell(
-            child: SizedBox(
-              width: 10.0,
+            child: Container(
+              color: Colors.blue,
+              child: SizedBox(
+                height: 10.0,
+              ),
             ),
           ),
-        ],
-      ),
-      TableRow(children: [
-        TableCell(
-          child: SizedBox(
-            width: 10.0,
-            height: 10.0,
+          TableCell(
+            child: Container(
+              color: Colors.green,
+              child: SizedBox(
+                width: 10.0,
+                height: 10.0,
+              ),
+            ),
           ),
+        ]),
+        TableRow(
+          children: [
+            TableCell(
+              child: Container(
+                color: Colors.blue,
+                child: SizedBox(
+                  width: 10.0,
+                ),
+              ),
+            ),
+            TableCell(
+              child: Container(
+                color: Colors.red,
+                alignment: Alignment.center,
+                child: Center(
+                  child: Icon(
+                    icon,
+                  ),
+                ),
+              ),
+            ),
+            TableCell(
+              child: Container(
+                color: Colors.blue,
+                child: SizedBox(
+                  width: 10.0,
+                ),
+              ),
+            ),
+          ],
         ),
-        TableCell(
-          child: SizedBox(
-            height: 10.0,
+        TableRow(children: [
+          TableCell(
+            child: Container(
+              color: Colors.green,
+              child: SizedBox(
+                width: 10.0,
+                height: 10.0,
+              ),
+            ),
           ),
-        ),
-        TableCell(
-          child: SizedBox(
-            width: 10.0,
-            height: 10.0,
+          TableCell(
+            child: Container(
+              color: Colors.greenAccent,
+              child: SizedBox(
+                height: 10.0,
+              ),
+            ),
           ),
-        ),
+          TableCell(
+            child: Container(
+              color: Colors.grey,
+              child: SizedBox(
+                width: 10.0,
+                height: 10.0,
+              ),
+            ),
+          ),
+        ]),
       ]),
-    ]);
+    );
   }
 
-  GridView build() {
+  Widget build() {
+    return makeRoom('test', Icons.adb);
+
+/*
     return GridView.count(
       primary: true,
-      padding: EdgeInsets.all(0.0),
+      //padding: EdgeInsets.all(0.0),
       crossAxisCount: maze.maxCol,
       childAspectRatio: 1.0,
-      mainAxisSpacing: 0.0,
-      crossAxisSpacing: 0.0,
+      mainAxisSpacing: 10.0,
+      crossAxisSpacing: 10.0,
       children: List.from(maze.myLabyrinth.entries
           .map((el) => makeRoom(
               el.value.x.toString() + '_' + el.value.y.toString(), Icons.adb))
           .toList()),
     );
+    */
   }
 }

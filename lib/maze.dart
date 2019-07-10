@@ -49,7 +49,7 @@ class Maze {
     for (var yloop = 1; yloop < maxRow + 1; yloop++) {
       for (var xloop = 1; xloop < maxCol + 1; xloop++) {
         myLabyrinth['b_${xloop}_$yloop'] = new Room();
-        numberOfRooms++;
+        //numberOfRooms++;
         myLabyrinth['b_${xloop}_$yloop'].x = xloop;
         myLabyrinth['b_${xloop}_$yloop'].y = yloop;
         print('b_${xloop}_$yloop   ' + myLabyrinth.length.toString());
