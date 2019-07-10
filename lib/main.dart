@@ -7,6 +7,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Maze maze = Maze(8, 8);
+    maze.carveLabyrinth();
     return MaterialApp(
       title: 'Mazes and Minotaurs',
       theme: ThemeData(
@@ -22,41 +24,107 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        body: MazeRoom().build(),
+        appBar: AppBar(
+          title: Text('Mazes and Minotaurs'),
+        ),
+        body: MazeRoom(maze).build(),
       ),
     );
   }
 }
 
 class MazeRoom {
-  Card makeRoom(String name, IconData icon) {
-    return Card(
-      elevation: 1.0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        verticalDirection: VerticalDirection.down,
-        children: <Widget>[
-          Center(
-            child: Icon(icon),
+  final Maze maze;
+  MazeRoom(this.maze);
+  Widget makeRoom(String name, IconData icon) {
+    return Table(columnWidths: {
+      1: FixedColumnWidth(10.0),
+      2: FixedColumnWidth(50.0),
+      3: FixedColumnWidth(10.0)
+    }, children: [
+      TableRow(children: [
+        TableCell(
+          child: SizedBox(
+            width: 10.0,
+            height: 10.0,
           ),
-          Center(child: Text(name)),
+        ),
+        TableCell(
+          child: SizedBox(
+            height: 10.0,
+          ),
+        ),
+        TableCell(
+          child: SizedBox(
+            width: 10.0,
+            height: 10.0,
+          ),
+        ),
+      ]),
+      TableRow(
+        children: [
+          TableCell(
+            child: SizedBox(
+              width: 10.0,
+            ),
+          ),
+          TableCell(
+            child: GestureDetector(
+              onTap: () => print('pressed'),
+              child: Container(
+                color: Colors.amber,
+                margin: EdgeInsets.all(0.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  verticalDirection: VerticalDirection.down,
+                  children: <Widget>[
+                    Center(
+                      child: Icon(icon),
+                    ),
+                    Center(child: Text(name)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          TableCell(
+            child: SizedBox(
+              width: 10.0,
+            ),
+          ),
         ],
       ),
-    );
+      TableRow(children: [
+        TableCell(
+          child: SizedBox(
+            width: 10.0,
+            height: 10.0,
+          ),
+        ),
+        TableCell(
+          child: SizedBox(
+            height: 10.0,
+          ),
+        ),
+        TableCell(
+          child: SizedBox(
+            width: 10.0,
+            height: 10.0,
+          ),
+        ),
+      ]),
+    ]);
   }
 
   GridView build() {
-    Maze maze = Maze(8, 8);
-    maze.carveLabyrinth();
-
     return GridView.count(
       primary: true,
-      padding: EdgeInsets.all(1.0),
+      padding: EdgeInsets.all(0.0),
       crossAxisCount: maze.maxCol,
       childAspectRatio: 1.0,
-      mainAxisSpacing: 1.0,
-      crossAxisSpacing: 1.0,
+      mainAxisSpacing: 0.0,
+      crossAxisSpacing: 0.0,
       children: List.from(maze.myLabyrinth.entries
           .map((el) => makeRoom(
               el.value.x.toString() + '_' + el.value.y.toString(), Icons.adb))
