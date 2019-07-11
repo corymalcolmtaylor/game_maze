@@ -37,88 +37,189 @@ class MazeRoom {
   final Maze maze;
   MazeRoom(this.maze);
   Widget makeRoom(String name, IconData icon) {
-    return GestureDetector(
-      onTap: () => print('$name was tappped'),
-      child: Table(
-          /* columnWidths: {
-        0: FixedColumnWidth(10.0),
-        1: FixedColumnWidth(40.0),
-        2: FixedColumnWidth(10.0)
-      }, */
-          children: [
-            TableRow(children: [
-              TableCell(
-                child: Container(
-                  color: Colors.black,
-                  child: SizedBox.expand(),
-                ),
+    /*  get right sizes */
+    // MediaQuery.of(context)
+    var wallThickness = 4.0;
+    var roomLength = 65.0;
+    var wallColor = Colors.red;
+    var floorColor = Colors.blueGrey;
+
+    return Table(columnWidths: {
+      0: FixedColumnWidth(wallThickness),
+      1: FixedColumnWidth(roomLength),
+      2: FixedColumnWidth(wallThickness)
+    }, children: [
+      TableRow(children: [
+        TableCell(
+          child: Container(
+            color: wallColor,
+            child: SizedBox(
+              height: wallThickness,
+              width: wallThickness,
+            ),
+          ),
+        ),
+        TableCell(
+          child: Container(
+            color: wallColor,
+            child: SizedBox(
+              height: wallThickness,
+              width: double.infinity,
+            ),
+          ),
+        ),
+        TableCell(
+          child: Container(
+            color: wallColor,
+            child: SizedBox(
+              height: wallThickness,
+              width: wallThickness,
+            ),
+          ),
+        ),
+      ]),
+      TableRow(
+        children: [
+          TableCell(
+            child: Container(
+              color: wallColor,
+              child: SizedBox(
+                height: roomLength,
+                width: wallThickness,
               ),
-              TableCell(
-                child: Container(
-                  color: Colors.blueGrey,
-                  child: SizedBox.expand(),
-                ),
-              ),
-              TableCell(
-                child: Container(
-                  color: Colors.brown,
-                  child: SizedBox.expand(),
-                ),
-              ),
-            ]),
-            TableRow(
-              children: [
-                TableCell(
-                  child: Container(
-                    color: Colors.blueGrey,
-                    child: SizedBox.expand(),
-                  ),
-                ),
-                TableCell(
-                  child: Container(
-                    color: Colors.red,
-                    alignment: Alignment.center,
-                    child: Center(
-                      child: Icon(
-                        icon,
-                      ),
+            ),
+          ),
+          TableCell(
+            child: GestureDetector(
+              onTap: () => print('$name was tappped'),
+              child: Container(
+                color: floorColor,
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: roomLength,
+                  height: roomLength,
+                  /*
+                  child: Center(
+                    child: Icon(
+                      icon,
                     ),
                   ),
+                  */
                 ),
-                TableCell(
-                  child: Container(
-                    color: Colors.lightBlue,
-                    child: SizedBox.expand(),
-                  ),
-                ),
-              ],
+              ),
             ),
-            TableRow(children: [
-              TableCell(
-                child: Container(
-                  color: Colors.greenAccent,
-                  child: SizedBox.expand(),
-                ),
+          ),
+          TableCell(
+            child: Container(
+              color: wallColor,
+              child: SizedBox(
+                width: wallThickness,
+                height: roomLength,
               ),
-              TableCell(
-                child: Container(
-                  color: Colors.green,
-                  child: SizedBox.expand(),
-                ),
-              ),
-              TableCell(
-                child: Container(
-                  color: Colors.lightGreen,
-                  child: SizedBox.expand(),
-                ),
-              ),
-            ]),
-          ]),
-    );
+            ),
+          ),
+        ],
+      ),
+      TableRow(children: [
+        TableCell(
+          child: Container(
+            color: wallColor,
+            child: SizedBox(
+              width: wallThickness,
+              height: wallThickness,
+            ),
+          ),
+        ),
+        TableCell(
+          child: Container(
+            color: wallColor,
+            child: SizedBox(
+              width: roomLength,
+              height: wallThickness,
+            ),
+          ),
+        ),
+        TableCell(
+          child: Container(
+            color: wallColor,
+            child: SizedBox(
+              width: wallThickness,
+              height: wallThickness,
+            ),
+          ),
+        ),
+      ]),
+    ]);
   }
 
   Widget build() {
-    return makeRoom('_cccc', Icons.adb);
+    //return makeRoom('_cccc', Icons.adb);
+    var trs = <TableRow>[];
+    for (int i = 1; i <= maze.maxRow; i++) {
+      trs.add(TableRow(
+          children: List.from(maze.myLabyrinth.entries
+              .where((elroom) => elroom.value.y == i)
+              .map((el) => makeRoom(
+                  el.value.x.toString() + '_' + el.value.y.toString(),
+                  Icons.adb))
+              .toList())));
+    }
+
+    return Table(children: trs
+
+        /*
+        TableRow(
+            children: List.from(maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == 2)
+                .map((el) => makeRoom(
+                    el.value.x.toString() + '_' + el.value.y.toString(),
+                    Icons.adb))
+                .toList())),
+        TableRow(
+            children: List.from(maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == 3)
+                .map((el) => makeRoom(
+                    el.value.x.toString() + '_' + el.value.y.toString(),
+                    Icons.adb))
+                .toList())),
+        TableRow(
+            children: List.from(maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == 4)
+                .map((el) => makeRoom(
+                    el.value.x.toString() + '_' + el.value.y.toString(),
+                    Icons.adb))
+                .toList())),
+        TableRow(
+            children: List.from(maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == 5)
+                .map((el) => makeRoom(
+                    el.value.x.toString() + '_' + el.value.y.toString(),
+                    Icons.adb))
+                .toList())),
+        TableRow(
+            children: List.from(maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == 6)
+                .map((el) => makeRoom(
+                    el.value.x.toString() + '_' + el.value.y.toString(),
+                    Icons.adb))
+                .toList())),
+        TableRow(
+            children: List.from(maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == 7)
+                .map((el) => makeRoom(
+                    el.value.x.toString() + '_' + el.value.y.toString(),
+                    Icons.adb))
+                .toList())),
+        TableRow(
+            children: List.from(maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == 8)
+                .map((el) => makeRoom(
+                    el.value.x.toString() + '_' + el.value.y.toString(),
+                    Icons.adb))
+                .toList())),
+                */
+
+        );
 
     return GridView.count(
       primary: true,
