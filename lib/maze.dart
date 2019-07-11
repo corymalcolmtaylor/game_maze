@@ -53,7 +53,7 @@ class Maze {
         myLabyrinth['b_${xloop}_$yloop'].x = xloop;
         myLabyrinth['b_${xloop}_$yloop'].y = yloop;
         print('b_${xloop}_$yloop   ' + myLabyrinth.length.toString());
-        print(myLabyrinth['b_${xloop}_$yloop']);
+        print(myLabyrinth['b_${xloop}_$yloop']); 
         //this['b_' + xloop + '_' + yloop].setid = this.numberOfRooms;
         //this['b_' + xloop + '_' + yloop].original_setid = this.numberOfRooms;
       }
