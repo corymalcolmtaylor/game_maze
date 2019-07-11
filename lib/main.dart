@@ -7,7 +7,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Maze maze = Maze(8, 8);
+    final numRows = 8;
+    Maze maze = Maze(numRows);
     maze.carveLabyrinth();
     return MaterialApp(
       title: 'my flutter app',
@@ -27,20 +28,23 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: Text('my flutter app'),
         ),
-        body: MazeRoom(maze).build(),
+        body: MazeRoom(maze),
       ),
     );
   }
 }
 
-class MazeRoom {
+class MazeRoom extends StatelessWidget {
   final Maze maze;
+  var maxWidth;
+
   MazeRoom(this.maze);
   Widget makeRoom(String name, IconData icon) {
     /*  get right sizes */
     // MediaQuery.of(context)
+
     var wallThickness = 4.0;
-    var roomLength = 65.0;
+    var roomLength = ((maxWidth - (4 * (maze.maxRow + 1))) / maze.maxRow);
     var wallColor = Colors.red;
     var floorColor = Colors.blueGrey;
 
@@ -152,87 +156,31 @@ class MazeRoom {
     ]);
   }
 
-  Widget build() {
-    //return makeRoom('_cccc', Icons.adb);
+  @override
+  Widget build(BuildContext context) {
+    maxWidth = MediaQuery.of(context).size.width;
+
+    if (maxWidth > MediaQuery.of(context).size.height) {
+      maxWidth = MediaQuery.of(context).size.height;
+    }
     var trs = <TableRow>[];
     for (int i = 1; i <= maze.maxRow; i++) {
-      trs.add(TableRow(
-          children: List.from(maze.myLabyrinth.entries
-              .where((elroom) => elroom.value.y == i)
-              .map((el) => makeRoom(
-                  el.value.x.toString() + '_' + el.value.y.toString(),
-                  Icons.adb))
-              .toList())));
+      trs.add(
+        TableRow(
+          children: List.from(
+            maze.myLabyrinth.entries
+                .where((elroom) => elroom.value.y == i)
+                .map(
+                  (el) => makeRoom(
+                      el.value.x.toString() + '_' + el.value.y.toString(),
+                      Icons.adb),
+                )
+                .toList(),
+          ),
+        ),
+      );
     }
 
-    return Table(children: trs
-
-        /*
-        TableRow(
-            children: List.from(maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == 2)
-                .map((el) => makeRoom(
-                    el.value.x.toString() + '_' + el.value.y.toString(),
-                    Icons.adb))
-                .toList())),
-        TableRow(
-            children: List.from(maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == 3)
-                .map((el) => makeRoom(
-                    el.value.x.toString() + '_' + el.value.y.toString(),
-                    Icons.adb))
-                .toList())),
-        TableRow(
-            children: List.from(maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == 4)
-                .map((el) => makeRoom(
-                    el.value.x.toString() + '_' + el.value.y.toString(),
-                    Icons.adb))
-                .toList())),
-        TableRow(
-            children: List.from(maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == 5)
-                .map((el) => makeRoom(
-                    el.value.x.toString() + '_' + el.value.y.toString(),
-                    Icons.adb))
-                .toList())),
-        TableRow(
-            children: List.from(maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == 6)
-                .map((el) => makeRoom(
-                    el.value.x.toString() + '_' + el.value.y.toString(),
-                    Icons.adb))
-                .toList())),
-        TableRow(
-            children: List.from(maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == 7)
-                .map((el) => makeRoom(
-                    el.value.x.toString() + '_' + el.value.y.toString(),
-                    Icons.adb))
-                .toList())),
-        TableRow(
-            children: List.from(maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == 8)
-                .map((el) => makeRoom(
-                    el.value.x.toString() + '_' + el.value.y.toString(),
-                    Icons.adb))
-                .toList())),
-                */
-
-        );
-
-    return GridView.count(
-      primary: true,
-      padding: EdgeInsets.all(0.0),
-      crossAxisCount: maze.maxCol,
-      //childAspectRatio: 1.0,
-      mainAxisSpacing: 0.0,
-      crossAxisSpacing: 0.0,
-
-      children: List.from(maze.myLabyrinth.entries
-          .map((el) => makeRoom(
-              el.value.x.toString() + '_' + el.value.y.toString(), Icons.adb))
-          .toList()),
-    );
+    return Table(children: trs);
   }
 }

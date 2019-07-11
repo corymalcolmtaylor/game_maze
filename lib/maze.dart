@@ -23,8 +23,16 @@ class Room {
 }
 
 class Maze {
-  final maxRow;
-  final maxCol;
+  final int _maxRow;
+  int _maxCol;
+
+  int get maxRow {
+    return _maxRow;
+  }
+
+  int get maxCol {
+    return _maxCol;
+  }
 
   var numberOfRooms = 0;
   Map<String, Room> myLabyrinth = Map();
@@ -37,23 +45,24 @@ class Maze {
   // create and initialize the labyrinth
 // squares named b_x_y eg b_1_3 for square A3 on a chess board
 // each square starts as its own set and has its own number; eg 1-64
-  Maze(this.maxRow, this.maxCol) {
+  Maze(this._maxRow) {
     initMaze();
   } // END FUNCTION ***********************
 
   initMaze() {
+    _maxCol = _maxRow;
     numberOfRooms = 0; // integer
     //this.b_1_1 = null; //object
     //this.NFlag_1_1 = 0; // integer 'NFlag_' + rowid + '_' + setid
 
-    for (var yloop = 1; yloop < maxRow + 1; yloop++) {
-      for (var xloop = 1; xloop < maxCol + 1; xloop++) {
+    for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
+      for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
         myLabyrinth['b_${xloop}_$yloop'] = new Room();
         //numberOfRooms++;
         myLabyrinth['b_${xloop}_$yloop'].x = xloop;
         myLabyrinth['b_${xloop}_$yloop'].y = yloop;
         print('b_${xloop}_$yloop   ' + myLabyrinth.length.toString());
-        print(myLabyrinth['b_${xloop}_$yloop']); 
+        print(myLabyrinth['b_${xloop}_$yloop']);
         //this['b_' + xloop + '_' + yloop].setid = this.numberOfRooms;
         //this['b_' + xloop + '_' + yloop].original_setid = this.numberOfRooms;
       }
@@ -71,7 +80,7 @@ class Maze {
         aNext.total = aNext.total + 1;
       }
     }
-    if ((x + 1) <= maxCol) {
+    if ((x + 1) <= _maxCol) {
       print('b_${x + 1}_$y');
       print(myLabyrinth['b_${x + 1}_$y']);
       if (myLabyrinth['b_${x + 1}_$y'].visited == false) {
@@ -87,7 +96,7 @@ class Maze {
         aNext.total++;
       }
     }
-    if ((y + 1) <= maxRow) {
+    if ((y + 1) <= _maxRow) {
       if (myLabyrinth['b_${x}_${y + 1}' /*   'b_' + x + '_' + (y + 1)*/]
               .visited ==
           false) {
@@ -114,7 +123,7 @@ class Maze {
       aNext.max = aNext.one;
       dir = 'b_' + (x - 1) + '_' + y;
     }
-    if ((x + 1) <= maxCol && (myLabyrinth['b_' + x + '_' + y]?.east != null)) {
+    if ((x + 1) <= _maxCol && (myLabyrinth['b_' + x + '_' + y]?.east != null)) {
       aNext.two = (myLabyrinth['b_' + x + '_' + y].setid -
               myLabyrinth['b_' + (x + 1) + '_' + y].setid)
           .abs()
@@ -134,7 +143,8 @@ class Maze {
       aNext.max = aNext.three;
       dir = 'b_' + x + '_' + (y - 1);
     }
-    if ((y + 1) <= maxRow && (myLabyrinth['b_' + x + '_' + y]?.north != null)) {
+    if ((y + 1) <= _maxRow &&
+        (myLabyrinth['b_' + x + '_' + y]?.north != null)) {
       aNext.four = (myLabyrinth['b_' + x + '_' + y].setid -
               myLabyrinth['b_' + x + '_' + (y + 1)].setid)
           .abs()
@@ -226,15 +236,15 @@ class Maze {
     //  for MAXROW<12 choose x/y = 4 or 5 for initial cell, ie 4 possible cells,
     //  for larger labyrinths choose size/2-1 to size/2+1, ie 16 possible cells
 
-    numberOfRooms = maxRow * maxCol;
+    numberOfRooms = _maxRow * _maxCol;
     myStack.clear();
     specialcells.clear();
     //myLabyrinth.clear();
 
-    var half = (maxRow / 2).floor();
+    var half = (_maxRow / 2).floor();
     var x = 0;
     var y = 0;
-    if (maxRow < 12) {
+    if (_maxRow < 12) {
       x = half + Math.Random.secure().nextInt(2);
       y = half + Math.Random.secure().nextInt(2);
     } else {
@@ -264,7 +274,7 @@ class Maze {
       x = myLabyrinth[currentCell].x;
       y = myLabyrinth[currentCell].y;
       if (notfoundfirstedge &&
-          (x == 1 || x == maxCol || y == 1 || y == maxRow)) {
+          (x == 1 || x == _maxCol || y == 1 || y == _maxRow)) {
         specialcells.add(currentCell);
         //special++;
         //specialcells[special++] = CurrentCell;
