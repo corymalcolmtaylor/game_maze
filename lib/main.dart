@@ -162,10 +162,10 @@ class MazeRoom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var maxWidth = MediaQuery.of(context).size.width;
-
-    if (maxWidth > MediaQuery.of(context).size.height) {
+    if (MediaQuery.of(context).orientation == Orientation.landscape) {
       maxWidth = MediaQuery.of(context).size.height;
     }
+
     var trs = <TableRow>[];
     for (int i = 1; i <= maze.maxRow; i++) {
       trs.add(
@@ -185,6 +185,9 @@ class MazeRoom extends StatelessWidget {
       );
     }
 
-    return Table(children: trs);
+    return Center(
+      child: SizedBox(
+          width: maxWidth, height: maxWidth, child: Table(children: trs)),
+    );
   }
 }
