@@ -36,17 +36,20 @@ class MyApp extends StatelessWidget {
 
 class MazeRoom extends StatelessWidget {
   final Maze maze;
-  var maxWidth;
 
   MazeRoom(this.maze);
-  Widget makeRoom(String name, IconData icon) {
+  Widget makeRoom(String name, IconData icon, double maxWidth) {
     /*  get right sizes */
     // MediaQuery.of(context)
 
-    var wallThickness = 4.0;
-    var roomLength = ((maxWidth - (4 * (maze.maxRow + 1))) / maze.maxRow);
+    var wallThickness = 2.0;
+    var roomLength =
+        ((maxWidth.floor() - (2 * (maze.maxRow + 1))) / maze.maxRow)
+            .floor()
+            .toDouble();
     var wallColor = Colors.red;
     var floorColor = Colors.blueGrey;
+    print(' roomlength is $roomLength');
 
     return Table(columnWidths: {
       0: FixedColumnWidth(wallThickness),
@@ -158,7 +161,7 @@ class MazeRoom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    maxWidth = MediaQuery.of(context).size.width;
+    var maxWidth = MediaQuery.of(context).size.width;
 
     if (maxWidth > MediaQuery.of(context).size.height) {
       maxWidth = MediaQuery.of(context).size.height;
@@ -173,7 +176,8 @@ class MazeRoom extends StatelessWidget {
                 .map(
                   (el) => makeRoom(
                       el.value.x.toString() + '_' + el.value.y.toString(),
-                      Icons.adb),
+                      Icons.adb,
+                      maxWidth),
                 )
                 .toList(),
           ),
