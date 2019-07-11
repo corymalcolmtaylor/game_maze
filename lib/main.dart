@@ -8,10 +8,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final numRows = 8;
+    final title = 'Mazes and Minotaurs';
     Maze maze = Maze(numRows);
     maze.carveLabyrinth();
     return MaterialApp(
-      title: 'my flutter app',
+      title: title,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('my flutter app'),
+          title: Text(title),
         ),
         body: MazeRoom(maze),
       ),
@@ -163,7 +164,10 @@ class MazeRoom extends StatelessWidget {
   Widget build(BuildContext context) {
     var maxWidth = MediaQuery.of(context).size.width;
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      maxWidth = MediaQuery.of(context).size.height;
+      print('in landscape mode');
+      maxWidth = MediaQuery.of(context).size.height * 0.75;
+    } else {
+      print('in portrait mode');
     }
 
     var trs = <TableRow>[];
