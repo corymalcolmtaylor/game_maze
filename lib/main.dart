@@ -35,22 +35,33 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MazeRoom extends StatelessWidget {
+class MazeRoom extends StatefulWidget {
   final Maze maze;
 
   MazeRoom(this.maze);
-  Widget makeRoom(String name, IconData icon, double maxWidth) {
+
+  @override
+  _MazeRoomState createState() => _MazeRoomState();
+}
+
+class _MazeRoomState extends State<MazeRoom> {
+  Widget makeRoom(Room room, String name, IconData icon, double maxWidth) {
     /*  get right sizes */
     // MediaQuery.of(context)
 
-    var wallThickness = 2.0;
+    var wallThickness = 4.0;
     var roomLength =
-        ((maxWidth.floor() - (2 * (maze.maxRow + 1))) / maze.maxRow)
+        ((maxWidth.floor() - (wallThickness * (widget.maze.maxRow + 1))) /
+                widget.maze.maxRow)
             .floor()
             .toDouble();
-    var wallColor = Colors.red;
     var floorColor = Colors.blueGrey;
-    print(' roomlength is $roomLength');
+    var northColor = (room.north == true) ? Colors.black : floorColor;
+    var eastColor = (room.east == true) ? Colors.black : floorColor;
+    var southColor = (room.south == true) ? Colors.black : floorColor;
+    var westColor = (room.west == true) ? Colors.black : floorColor;
+
+    var cornerColor = Colors.black;
 
     return Table(columnWidths: {
       0: FixedColumnWidth(wallThickness),
@@ -60,7 +71,7 @@ class MazeRoom extends StatelessWidget {
       TableRow(children: [
         TableCell(
           child: Container(
-            color: wallColor,
+            color: cornerColor,
             child: SizedBox(
               height: wallThickness,
               width: wallThickness,
@@ -69,7 +80,7 @@ class MazeRoom extends StatelessWidget {
         ),
         TableCell(
           child: Container(
-            color: wallColor,
+            color: northColor,
             child: SizedBox(
               height: wallThickness,
               width: double.infinity,
@@ -78,7 +89,7 @@ class MazeRoom extends StatelessWidget {
         ),
         TableCell(
           child: Container(
-            color: wallColor,
+            color: cornerColor,
             child: SizedBox(
               height: wallThickness,
               width: wallThickness,
@@ -90,7 +101,7 @@ class MazeRoom extends StatelessWidget {
         children: [
           TableCell(
             child: Container(
-              color: wallColor,
+              color: westColor,
               child: SizedBox(
                 height: roomLength,
                 width: wallThickness,
@@ -119,7 +130,7 @@ class MazeRoom extends StatelessWidget {
           ),
           TableCell(
             child: Container(
-              color: wallColor,
+              color: eastColor,
               child: SizedBox(
                 width: wallThickness,
                 height: roomLength,
@@ -131,7 +142,7 @@ class MazeRoom extends StatelessWidget {
       TableRow(children: [
         TableCell(
           child: Container(
-            color: wallColor,
+            color: cornerColor,
             child: SizedBox(
               width: wallThickness,
               height: wallThickness,
@@ -140,7 +151,7 @@ class MazeRoom extends StatelessWidget {
         ),
         TableCell(
           child: Container(
-            color: wallColor,
+            color: southColor,
             child: SizedBox(
               width: roomLength,
               height: wallThickness,
@@ -149,7 +160,7 @@ class MazeRoom extends StatelessWidget {
         ),
         TableCell(
           child: Container(
-            color: wallColor,
+            color: cornerColor,
             child: SizedBox(
               width: wallThickness,
               height: wallThickness,
@@ -164,21 +175,19 @@ class MazeRoom extends StatelessWidget {
   Widget build(BuildContext context) {
     var maxWidth = MediaQuery.of(context).size.width;
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      print('in landscape mode');
       maxWidth = MediaQuery.of(context).size.height * 0.75;
-    } else {
-      print('in portrait mode');
     }
 
     var trs = <TableRow>[];
-    for (int i = 1; i <= maze.maxRow; i++) {
+    for (int i = 1; i <= widget.maze.maxRow; i++) {
       trs.add(
         TableRow(
           children: List.from(
-            maze.myLabyrinth.entries
+            widget.maze.myLabyrinth.entries
                 .where((elroom) => elroom.value.y == i)
                 .map(
                   (el) => makeRoom(
+                      el.value,
                       el.value.x.toString() + '_' + el.value.y.toString(),
                       Icons.adb,
                       maxWidth),
@@ -189,9 +198,29 @@ class MazeRoom extends StatelessWidget {
       );
     }
 
-    return Center(
-      child: SizedBox(
-          width: maxWidth, height: maxWidth, child: Table(children: trs)),
+    return Column(
+      children: <Widget>[
+        Center(
+          child: SizedBox(
+              width: maxWidth, height: maxWidth, child: Table(children: trs)),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Center(
+          child: FlatButton(
+            color: Colors.amber,
+            onPressed: () {
+              setState(() {
+                print('reinit maze');
+                widget.maze.initMaze();
+                widget.maze.carveLabyrinth();
+              });
+            },
+            child: Text('Re-Carve'),
+          ),
+        )
+      ],
     );
   }
 }

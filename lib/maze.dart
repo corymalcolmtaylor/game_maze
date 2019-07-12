@@ -12,10 +12,10 @@ class Next {
 class Room {
   var x = 0;
   var y = 0;
-  var east = false;
-  var west = false;
-  var south = false;
-  var north = false;
+  var east = true;
+  var west = true;
+  var south = true;
+  var north = true;
   var dir = '';
   var visited = false;
   var setid = 0;
@@ -60,8 +60,7 @@ class Maze {
         //numberOfRooms++;
         myLabyrinth['b_${xloop}_$yloop'].x = xloop;
         myLabyrinth['b_${xloop}_$yloop'].y = yloop;
-        print('b_${xloop}_$yloop   ' + myLabyrinth.length.toString());
-        print(myLabyrinth['b_${xloop}_$yloop']);
+
         //this['b_' + xloop + '_' + yloop].setid = this.numberOfRooms;
         //this['b_' + xloop + '_' + yloop].original_setid = this.numberOfRooms;
       }
@@ -80,8 +79,6 @@ class Maze {
       }
     }
     if ((x + 1) <= _maxCol) {
-      print('b_${x + 1}_$y');
-      print(myLabyrinth['b_${x + 1}_$y']);
       if (myLabyrinth['b_${x + 1}_$y'].visited == false) {
         aNext.two = 'b_${x + 1}_$y'; //'b_' + (x + 1) + '_' + y;
         aNext.total++;
@@ -199,25 +196,30 @@ class Maze {
   }
 
   joinRooms(String room1, String room2) {
+    print('try to join $room1 and $room2');
     if (myLabyrinth[room1].x == myLabyrinth[room2].x - 1) {
       myLabyrinth[room1].east = false;
       myLabyrinth[room2].west = false;
       myLabyrinth[room2].visited = true;
+      print('joined east to west');
     }
     if (myLabyrinth[room1].x == myLabyrinth[room2].x + 1) {
       myLabyrinth[room1].west = false;
       myLabyrinth[room2].east = false;
       myLabyrinth[room2].visited = true;
+      print('joined west to east');
     }
     if (myLabyrinth[room1].y == myLabyrinth[room2].y + 1) {
-      myLabyrinth[room1].south = false;
-      myLabyrinth[room2].north = false;
-      myLabyrinth[room2].visited = true;
-    }
-    if (myLabyrinth[room1].y == myLabyrinth[room2].y - 1) {
       myLabyrinth[room1].north = false;
       myLabyrinth[room2].south = false;
       myLabyrinth[room2].visited = true;
+      print('joined south to north');
+    }
+    if (myLabyrinth[room1].y == myLabyrinth[room2].y - 1) {
+      myLabyrinth[room1].south = false;
+      myLabyrinth[room2].north = false;
+      myLabyrinth[room2].visited = true;
+      print('joined north to south');
     }
   }
 
@@ -259,7 +261,7 @@ class Maze {
     //var special = 0;
     var notfoundfirstedge = true;
 
-    myLabyrinth[currentCell] = Room();
+    //myLabyrinth[currentCell] = Room();
     myLabyrinth[currentCell].x = x;
     myLabyrinth[currentCell].y = y;
 
