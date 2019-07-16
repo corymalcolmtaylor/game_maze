@@ -136,7 +136,11 @@ class _MazeAreaState extends State<MazeArea> {
     TableCellVerticalAlignment val = TableCellVerticalAlignment.middle;
 
     return Table(
-      border: TableBorder.all(width: 1.0, color: cornerColor),
+      border: TableBorder(
+          top: BorderSide(width: 1.0, color: northColor),
+          right: BorderSide(width: 1.0, color: eastColor),
+          left: BorderSide(width: 1.0, color: westColor),
+          bottom: BorderSide(width: 1.0, color: southColor)),
       children: [
         TableRow(
           children: [
