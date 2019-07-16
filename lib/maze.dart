@@ -1,12 +1,12 @@
 import 'dart:math' as Math;
 
 class Next {
-  String one;
-  String two;
-  String three;
-  String four;
+  String one = '0';
+  String two = '0';
+  String three = '0';
+  String four = '0';
   var total = 0;
-  String max;
+  String max = '0';
 }
 
 class Room {
@@ -19,6 +19,21 @@ class Room {
   var dir = '';
   var visited = false;
   var setid = 0;
+  bool spUsed = false;
+}
+
+enum Ilk { player, minotaur, lamb }
+
+class Pixie {
+  Pixie(this.ilk);
+  var location = '';
+  var moveRate = 4;
+  var lastLocation = '';
+  var dx = 0.0;
+  var dy = 0.0;
+  var x = 0;
+  var y = 0;
+  var ilk = Ilk.player;
 }
 
 class Maze {
@@ -40,6 +55,9 @@ class Maze {
   //var specialcells =  <String>[];
   List<String> specialcells = [];
   var firstedge = '';
+  var minotaur = Pixie(Ilk.minotaur);
+  var player = Pixie(Ilk.player);
+  var lambs = <Pixie>[];
 
   // create and initialize the labyrinth
 // squares named b_x_y eg b_1_3 for square A3 on a chess board
@@ -50,19 +68,14 @@ class Maze {
 
   initMaze() {
     _maxCol = _maxRow;
-    numberOfRooms = 0; // integer
-    //this.b_1_1 = null; //object
-    //this.NFlag_1_1 = 0; // integer 'NFlag_' + rowid + '_' + setid
+    lambs.clear();
 
     for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
       for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
         myLabyrinth['b_${xloop}_$yloop'] = new Room();
-        //numberOfRooms++;
+
         myLabyrinth['b_${xloop}_$yloop'].x = xloop;
         myLabyrinth['b_${xloop}_$yloop'].y = yloop;
-
-        //this['b_' + xloop + '_' + yloop].setid = this.numberOfRooms;
-        //this['b_' + xloop + '_' + yloop].original_setid = this.numberOfRooms;
       }
     }
   }
@@ -109,47 +122,46 @@ class Maze {
     Next aNext = Next();
 
     var dir = '';
-    if ((x - 1) > 0 && (myLabyrinth['b_' + x + '_' + y]?.west != null)) {
-      aNext.one = (myLabyrinth['b_' + x + '_' + y].setid -
-              myLabyrinth['b_' + (x - 1) + '_' + y].setid)
+    if ((x - 1) > 0 && (myLabyrinth['b_${x}_${y}']?.west != null)) {
+      aNext.one = (myLabyrinth['b_${x}_${y}'].setid -
+              myLabyrinth['b_${(x - 1)}_${y}'].setid)
           .abs()
           .toString();
     }
     if (int.tryParse(aNext.one) > int.tryParse(aNext.max)) {
       aNext.max = aNext.one;
-      dir = 'b_' + (x - 1) + '_' + y;
+      dir = 'b_${(x - 1)}_${y}';
     }
-    if ((x + 1) <= _maxCol && (myLabyrinth['b_' + x + '_' + y]?.east != null)) {
-      aNext.two = (myLabyrinth['b_' + x + '_' + y].setid -
-              myLabyrinth['b_' + (x + 1) + '_' + y].setid)
+    if ((x + 1) <= _maxCol && (myLabyrinth['b_${x}_${y}']?.east != null)) {
+      aNext.two = (myLabyrinth['b_${x}_${y}'].setid -
+              myLabyrinth['b_${(x + 1)}_${y}'].setid)
           .abs()
           .toString();
     }
     if (int.tryParse(aNext.two) > int.tryParse(aNext.max)) {
       aNext.max = aNext.two;
-      dir = 'b_' + (x + 1) + '_' + y;
+      dir = 'b_${(x + 1)}_${y}';
     }
-    if ((y - 1) > 0 && myLabyrinth['b_' + x + '_' + y]?.south != null) {
-      aNext.three = (myLabyrinth['b_' + x + '_' + y].setid -
-              myLabyrinth['b_' + x + '_' + (y - 1)].setid)
+    if ((y - 1) > 0 && myLabyrinth['b_${x}_${y}']?.south != null) {
+      aNext.three = (myLabyrinth['b_${x}_${y}'].setid -
+              myLabyrinth['b_${x}_${(y - 1)}'].setid)
           .abs()
           .toString();
     }
     if (int.tryParse(aNext.three) > int.tryParse(aNext.max)) {
       aNext.max = aNext.three;
-      dir = 'b_' + x + '_' + (y - 1);
+      dir = 'b_${x}_${(y - 1)}';
     }
-    if ((y + 1) <= _maxRow &&
-        (myLabyrinth['b_' + x + '_' + y]?.north != null)) {
-      aNext.four = (myLabyrinth['b_' + x + '_' + y].setid -
-              myLabyrinth['b_' + x + '_' + (y + 1)].setid)
+    if ((y + 1) <= _maxRow && (myLabyrinth['b_${x}_${y}']?.north != null)) {
+      aNext.four = (myLabyrinth['b_${x}_${y}'].setid -
+              myLabyrinth['b_${x}_${(y + 1)}'].setid)
           .abs()
           .toString();
     }
     //return a string giving the room to join to from room x,y
     if (int.tryParse(aNext.four) > int.tryParse(aNext.max)) {
       aNext.max = aNext.four;
-      dir = 'b_' + x + '_' + (y + 1);
+      dir = 'b_${x}_${(y + 1)}';
     }
     return dir;
   }
@@ -160,7 +172,7 @@ class Maze {
     var total = 0;
     while (total < 4) {
       if (num == 1) {
-        if (next.one != null) {
+        if (next.one != '0') {
           return next.one;
         } else {
           num++;
@@ -168,7 +180,7 @@ class Maze {
         }
       }
       if (num == 2) {
-        if (next.two != null) {
+        if (next.two != '0') {
           return next.two;
         } else {
           num++;
@@ -176,7 +188,7 @@ class Maze {
         }
       }
       if (num == 3) {
-        if (next.three != null) {
+        if (next.three != '0') {
           return next.three;
         } else {
           num++;
@@ -184,7 +196,7 @@ class Maze {
         }
       }
       if (num == 4) {
-        if (next.four != null) {
+        if (next.four != '0') {
           return next.four;
         } else {
           num = 1;
@@ -196,36 +208,30 @@ class Maze {
   }
 
   joinRooms(String room1, String room2) {
-    print('try to join $room1 and $room2');
     if (myLabyrinth[room1].x == myLabyrinth[room2].x - 1) {
       myLabyrinth[room1].east = false;
       myLabyrinth[room2].west = false;
       myLabyrinth[room2].visited = true;
-      print('joined east to west');
     }
     if (myLabyrinth[room1].x == myLabyrinth[room2].x + 1) {
       myLabyrinth[room1].west = false;
       myLabyrinth[room2].east = false;
       myLabyrinth[room2].visited = true;
-      print('joined west to east');
     }
     if (myLabyrinth[room1].y == myLabyrinth[room2].y + 1) {
       myLabyrinth[room1].north = false;
       myLabyrinth[room2].south = false;
       myLabyrinth[room2].visited = true;
-      print('joined south to north');
     }
     if (myLabyrinth[room1].y == myLabyrinth[room2].y - 1) {
       myLabyrinth[room1].south = false;
       myLabyrinth[room2].north = false;
       myLabyrinth[room2].visited = true;
-      print('joined north to south');
     }
   }
 
   //carve the labyrinth
   void carveLabyrinth() {
-    print('carve labyrinth messages');
     //NOW USE DFS algo
     //from mazeworks.com,  DSF Depth First Search algorithm for making mazes
     //  create a CellStack (LIFO) to hold a list of cell locations
@@ -240,19 +246,18 @@ class Maze {
     numberOfRooms = _maxRow * _maxCol;
     myStack.clear();
     specialcells.clear();
-    //myLabyrinth.clear();
 
     var half = (_maxRow / 2).floor();
     var x = 0;
     var y = 0;
-    if (_maxRow < 12) {
-      x = half + Math.Random.secure().nextInt(2);
-      y = half + Math.Random.secure().nextInt(2);
-    } else {
+    var inc = 2;
+    if (_maxRow > 10) {
       half = half - 1;
-      x = half + Math.Random.secure().nextInt(2);
-      y = half + Math.Random.secure().nextInt(2);
+      inc = inc + 2;
     }
+    x = half + Math.Random.secure().nextInt(inc);
+    y = half + Math.Random.secure().nextInt(inc);
+
     var currentCell = 'b_' + x.toString() + '_' + y.toString();
 
     var visitedCells = 0;
@@ -261,15 +266,13 @@ class Maze {
     //var special = 0;
     var notfoundfirstedge = true;
 
-    //myLabyrinth[currentCell] = Room();
     myLabyrinth[currentCell].x = x;
     myLabyrinth[currentCell].y = y;
 
     myLabyrinth[currentCell].visited = true;
     myLabyrinth[currentCell].setid = ++visitedCells;
     specialcells.add(currentCell);
-    //special++;
-    //specialcells[special++] = CurrentCell;
+
     while (visitedCells < numberOfRooms) {
       //find all neighbors of CurrentCell with all walls intact
       x = myLabyrinth[currentCell].x;
@@ -277,8 +280,7 @@ class Maze {
       if (notfoundfirstedge &&
           (x == 1 || x == _maxCol || y == 1 || y == _maxRow)) {
         specialcells.add(currentCell);
-        //special++;
-        //specialcells[special++] = CurrentCell;
+
         notfoundfirstedge = false;
         firstedge = currentCell;
       }
@@ -286,6 +288,7 @@ class Maze {
       if (myNext.total > 0) {
         //choose one at random
         next = getNext(myNext);
+
         //knock down the wall between it and CurrentCell
         joinRooms(currentCell, next);
         //push CurrentCell location on the CellStack
@@ -293,30 +296,85 @@ class Maze {
         //make the new cell CurrentCell
         currentCell = next;
         myLabyrinth[currentCell].setid = ++visitedCells;
-        //add 1 to VisitedCells else
-        //VisitedCells++;
       } else {
         //every dead end is a special square
         specialcells.add(currentCell);
-        //special++;
-        //specialcells[special++] = CurrentCell;
+
         //pop the most recent cell entry off the CellStack
         //and make it CurrentCell
         currentCell = myStack.removeLast();
       }
     } //endWhile
     //get last cell visited -- it is myNext
-    specialcells.add(next);
+    //specialcells.add(next);
     // get the number of walls to knock down, based on MAXROWS
-    //makeloops();
+    makeloops();
+
+    //place minotaur, player and youths
+    placeMinotaur();
+    placePlayer();
+    placeLambs();
   } // END FUNCTION ***********************
 
-}
+  Pixie placePixie(bool inCenter) {
+    var x = 0;
+    var y = 0;
+    var rand = Math.Random.secure();
+    if (inCenter == true) {
+      var inc = 2;
+      var half = (_maxRow / 2).floor();
+      if (_maxRow > 10) {
+        half = half - 1;
+        inc = inc + 2;
+      }
+      x = half + Math.Random.secure().nextInt(inc);
+      y = half + Math.Random.secure().nextInt(inc);
+    } else {
+      x = 1 + rand.nextInt(_maxRow - 1);
+      y = 1 + rand.nextInt(_maxCol - 1);
+    }
+    var p = Pixie(Ilk.lamb);
+    p.location = 'b_${x}_$y';
+    p.x = x;
+    p.y = y;
+    return p;
+  }
 
-/* 
-// makeloops - num loops = floor(MAXROW / 3) + possible extra for treasure room
+  void placeMinotaur() {
+    var loc = placePixie(false);
+    while (player.location == loc.location) {
+      loc = placePixie(false);
+    }
+    loc.ilk = Ilk.minotaur;
+    minotaur = loc;
+  }
+
+  void placePlayer() {
+    var loc = placePixie(false);
+    while (minotaur.location == loc.location) {
+      loc = placePixie(false);
+    }
+    loc.ilk = Ilk.player;
+    player = loc;
+  }
+
+  void placeLambs() {
+    lambs.clear();
+
+    for (int i = 0; i < _maxRow; i++) {
+      var loc = placePixie(false);
+      while (minotaur.location == loc.location ||
+          player.location == loc.location) {
+        loc = placePixie(false);
+        loc.ilk = Ilk.lamb;
+      }
+      lambs.add(loc);
+    }
+  }
+
+// makeloops : num loops = floor(MAXROW /4).floor + possible extra for treasure room
   void makeloops() {
-    var numloops =  (MAXROW / 3).floor();
+    var numloops = (_maxRow / 4).floor();
     //for each special room
     //check that there is an orthogonally adjacent square with a setid 9 apart
     //from the special squares setid
@@ -330,15 +388,15 @@ class Maze {
     //minimum setid differences
     var indx = 0;
     // myLabyrinth[specialcells[indx++]].paint();
-    if (myLabyrinth[specialcells[indx++]].knockextrawall(false)) {
+    if (knockextrawall(myLabyrinth[specialcells[indx++]], true)) {
       numloops--;
     }
-    if (myLabyrinth[firstedge].knockextrawall(false)) {
+    if (knockextrawall(myLabyrinth[firstedge], true)) {
       numloops--;
     }
     var tmp = numloops;
     while (tmp > 0) {
-      if (myLabyrinth[specialcells[indx++]].knockextrawall(true)) {
+      if (knockextrawall(myLabyrinth[specialcells[indx++]], true)) {
         numloops--;
       }
       tmp--;
@@ -346,44 +404,50 @@ class Maze {
     indx = 1;
     var i = 0;
     while (numloops > 0 && i < specialcells.length) {
-      if (myLabyrinth[specialcells[indx++]].knockextrawall(false)) {
+      if (knockextrawall(myLabyrinth[specialcells[indx++]], false)) {
         numloops--;
       }
       i++;
     }
   }
 
-  knockextrawall(bool){  
-      var nextroom = null;
-      if (this.sp_used){ return false;}
-      if (bool){
-        //knock down a wall if there is one with a large difference in setid
-        //examine adjacent rooms for setid 
-        //find room2 - a non-joined room with the largest variance in setid
-        
-        nextroom = makepassage(this.x, this.y);        
-        if (nextroom.length > 1 && Math.abs(myLabyrinth[nextroom].setid - this.setid) > 9){
-          join('b_' + this.x + '_' + this.y, nextroom);
-          this.sp_used = true;
-          //alert('b_' + this.x + '_' + this.y + ' to ' + nextroom + ' ' + ++numknocks);
-          return true;
-        }else{
-          return false;          
-        }
-      }else{
-        //knock down a wall regardless of setid variance       
-        nextroom = makepassage(this.x, this.y);        
-        if( nextroom.length > 1 ){
-          join('b_' + this.x + '_' + this.y, nextroom);        
-          //alert('b_' + this.x + '_' + this.y + '  to ' + nextroom + ' ' + ++numknocks);
-          this.sp_used = true;
-          return true;
-          }
+  knockextrawall(Room room, bool onlyIfLargeSetIdDifference) {
+    var nextroom;
+
+    if (room.spUsed == true) {
+      return false;
+    }
+    if (onlyIfLargeSetIdDifference) {
+      //knock down a wall if there is one with a large difference in setid
+      //examine adjacent rooms for setid
+      //find room2 - a non-joined room with the largest variance in setid
+
+      nextroom = makePassage(room.x, room.y);
+      if (nextroom.length > 1 &&
+          (myLabyrinth[nextroom].setid - room.setid).abs() > 9) {
+        joinRooms('b_${room.x}_${room.y}', nextroom);
+        room.spUsed = true;
+
+        return true;
+      } else {
         return false;
       }
-    }//end func
+    } else {
+      //knock down a wall regardless of setid variance
+      nextroom = makePassage(room.x, room.y);
+      if (nextroom.length > 1) {
+        joinRooms('b_${room.x}_${room.y}', nextroom);
+
+        room.spUsed = true;
+
+        return true;
+      }
+
+      return false;
+    }
+  } //end func
 }
-*/
+
 /*
 // create GLOBAL Constants  ***********************
 var DEBUG = false;
