@@ -7,7 +7,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final numRows = 15;
+    final numRows = 8;
     final title = 'Mazes and Minotaurs';
     Maze maze = Maze(numRows);
     maze.carveLabyrinth();
@@ -81,9 +81,9 @@ class _MazeAreaState extends State<MazeArea> {
   setPixieXY(Pixie pix) {
     print(
         ' 1 setpixiexy  ${pix.x} ${pix.y}  ${delta()}  ${pix.dx} ${pix.dy}  ');
-    pix.dx = wallThickness + ((pix.x - 1) * delta());
+    //pix.dx = wallThickness + ((pix.x - 1) * delta());
     //((pix.x - 1) * (roomLength + (wallThickness)));
-    pix.dy = wallThickness + ((pix.y - 1) * delta());
+    //pix.dy = wallThickness + ((pix.y - 1) * delta());
     //((pix.y - 1) * (roomLength + (wallThickness)));
     print(
         ' 2 setpixiexy  ${pix.x} ${pix.y}  ${delta()}  ${pix.dx} ${pix.dy}  ');
@@ -91,39 +91,25 @@ class _MazeAreaState extends State<MazeArea> {
 
   void setPixies() {
     pixies.clear();
-    setPixieXY(widget.maze.player);
-    setPixieXY(widget.maze.minotaur);
-    pixies.add(getIconOfPixie(widget.maze.player));
-    pixies.add(getIconOfPixie(widget.maze.minotaur));
+    // setPixieXY(widget.maze.player);
+    // setPixieXY(widget.maze.minotaur);
+    //pixies.add(getIconOfPixie(widget.maze.player));
+    // pixies.add(getIconOfPixie(widget.maze.minotaur));
     widget.maze.lambs.forEach((p) {
-      setPixieXY(p);
-      pixies.add(getIconOfPixie(p));
+      // setPixieXY(p);
+      //pixies.add(getIconOfPixie(p));
     });
   }
 
   Widget getRoomPixieIcon(Room room) {
     if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      return Positioned(
-        left: 0,
-        top: 0,
-        child: Transform.translate(
-          offset: Offset(widget.maze.minotaur.dx, widget.maze.minotaur.dy),
-          child: Center(
-            child: Icon(Icons.android),
-          ),
-        ),
+      return Center(
+        child: Icon(Icons.android),
       );
     }
     if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
-      return Positioned(
-        left: 0,
-        top: 0,
-        child: Transform.translate(
-          offset: Offset(widget.maze.player.dx, widget.maze.player.dy),
-          child: Center(
-            child: Icon(Icons.directions_run),
-          ),
-        ),
+      return Center(
+        child: Icon(Icons.directions_run),
       );
     }
     final lamb = widget.maze.lambs.firstWhere(
@@ -131,16 +117,8 @@ class _MazeAreaState extends State<MazeArea> {
         orElse: () => null);
 
     if (lamb != null) {
-      return Positioned(
-        left: 0,
-        top: 0,
-        child: Transform.translate(
-          key: Key(lamb.location),
-          offset: Offset(lamb.dx, lamb.dy),
-          child: Center(
-            child: Icon(Icons.mood_bad),
-          ),
-        ),
+      return Center(
+        child: Icon(Icons.mood_bad),
       );
     }
     return null;
@@ -158,126 +136,31 @@ class _MazeAreaState extends State<MazeArea> {
     TableCellVerticalAlignment val = TableCellVerticalAlignment.middle;
 
     return Table(
-        border: TableBorder(
-            top: BorderSide(width: 0.0, color: floorColor),
-            right: BorderSide(width: 0.0, color: floorColor),
-            bottom: BorderSide(width: 0.0, color: floorColor),
-            left: BorderSide(width: 0.0, color: floorColor),
-            horizontalInside: BorderSide.none,
-            verticalInside: BorderSide.none),
-        columnWidths: {
-          0: FixedColumnWidth(wallThickness),
-          1: FixedColumnWidth(roomLength),
-          2: FixedColumnWidth(wallThickness)
-        },
-        children: [
-          TableRow(children: [
+      border: TableBorder.all(width: 1.0, color: cornerColor),
+      children: [
+        TableRow(
+          children: [
             TableCell(
               verticalAlignment: val,
-              child: Container(
-                color: cornerColor,
-                child: SizedBox(
-                  height: wallThickness,
-                  width: wallThickness,
-                ),
-              ),
-            ),
-            TableCell(
-              verticalAlignment: val,
-              child: Container(
-                color: northColor,
-                child: SizedBox(
-                  height: wallThickness,
-                  width: double.infinity,
-                ),
-              ),
-            ),
-            TableCell(
-              verticalAlignment: val,
-              child: Container(
-                color: cornerColor,
-                child: SizedBox(
-                  height: wallThickness,
-                  width: wallThickness,
-                ),
-              ),
-            ),
-          ]),
-          TableRow(
-            children: [
-              TableCell(
-                verticalAlignment: val,
+              child: GestureDetector(
+                onTap: () => {
+                  print('_MazeRoomState makeRoom b_${room.x}_${room.y} tapped')
+                },
                 child: Container(
-                  color: westColor,
+                  color: floorColor,
+                  alignment: Alignment.center,
                   child: SizedBox(
+                    width: roomLength,
                     height: roomLength,
-                    width: wallThickness,
+                    child: getRoomPixieIcon(room),
                   ),
                 ),
               ),
-              TableCell(
-                verticalAlignment: val,
-                child: GestureDetector(
-                  onTap: () => {
-                    print(
-                        '_MazeRoomState makeRoom b_${room.x}_${room.y} tapped')
-                  },
-                  child: Container(
-                    color: floorColor,
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      width: roomLength,
-                      height: roomLength,
-                      //child: pixieIcon,
-                    ),
-                  ),
-                ),
-              ),
-              TableCell(
-                verticalAlignment: val,
-                child: Container(
-                  color: eastColor,
-                  child: SizedBox(
-                    width: wallThickness,
-                    height: roomLength,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          TableRow(children: [
-            TableCell(
-              verticalAlignment: val,
-              child: Container(
-                color: cornerColor,
-                child: SizedBox(
-                  width: wallThickness,
-                  height: wallThickness,
-                ),
-              ),
             ),
-            TableCell(
-              verticalAlignment: val,
-              child: Container(
-                color: southColor,
-                child: SizedBox(
-                  width: roomLength,
-                  height: wallThickness,
-                ),
-              ),
-            ),
-            TableCell(
-              verticalAlignment: val,
-              child: Container(
-                color: cornerColor,
-                child: SizedBox(
-                  width: wallThickness,
-                  height: wallThickness,
-                ),
-              ),
-            ),
-          ]),
-        ]);
+          ],
+        ),
+      ],
+    );
   }
 
   @override
@@ -335,7 +218,7 @@ class _MazeAreaState extends State<MazeArea> {
               //widget.maze.player.y = 1;
               widget.maze.player.dx = widget.maze.player.dx + delta();
               //widget.maze.player.dy = widget.maze.player.dy + 0.0;
-              pixies[0] = getIconOfPixie(widget.maze.player);
+              //pixies[0] = getIconOfPixie(widget.maze.player);
 
               print(
                   'newlocation ${widget.maze.player.dx} ${widget.maze.player.dy}');
@@ -348,7 +231,7 @@ class _MazeAreaState extends State<MazeArea> {
           height: maxWidth,
           child: Stack(overflow: Overflow.visible, children: [
             Table(children: trs),
-            ...pixies,
+            // ...pixies,
           ]),
         ),
       ],
