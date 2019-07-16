@@ -341,9 +341,9 @@ class Maze {
   }
 
   void placeMinotaur() {
-    var loc = placePixie(false);
+    var loc = placePixie(true);
     while (player.location == loc.location) {
-      loc = placePixie(false);
+      loc = placePixie(true);
     }
     loc.ilk = Ilk.minotaur;
     minotaur = loc;

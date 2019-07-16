@@ -7,7 +7,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final numRows = 8;
+    final numRows = 15;
     final title = 'Mazes and Minotaurs';
     Maze maze = Maze(numRows);
     maze.carveLabyrinth();
@@ -64,6 +64,8 @@ class _MazeAreaState extends State<MazeArea> {
     return Positioned(
       left: 0,
       top: 0,
+      height: delta(),
+      width: delta(),
       child: Transform.translate(
         key: Key(pix.location),
         offset: Offset(pix.dx, pix.dy),
@@ -72,17 +74,19 @@ class _MazeAreaState extends State<MazeArea> {
     );
   }
 
+  double delta() {
+    return (maxWidth / widget.maze.maxRow).floorToDouble();
+  }
+
   setPixieXY(Pixie pix) {
     print(
-        ' 1 setpixiexy ${wallThickness} ${roomLength}  ${pix.x} ${pix.y}  ${pix.dx} ${pix.dy}  ');
-    pix.dx = (pix.x - 1) +
-        wallThickness +
-        ((pix.x - 1) * (roomLength + (wallThickness)));
-    pix.dy = (pix.y - 1) +
-        wallThickness +
-        ((pix.y - 1) * (roomLength + (wallThickness)));
+        ' 1 setpixiexy  ${pix.x} ${pix.y}  ${delta()}  ${pix.dx} ${pix.dy}  ');
+    pix.dx = wallThickness + ((pix.x - 1) * delta());
+    //((pix.x - 1) * (roomLength + (wallThickness)));
+    pix.dy = wallThickness + ((pix.y - 1) * delta());
+    //((pix.y - 1) * (roomLength + (wallThickness)));
     print(
-        ' 2 setpixiexy ${wallThickness} ${roomLength}  ${pix.x} ${pix.y}  ${pix.dx} ${pix.dy}  ');
+        ' 2 setpixiexy  ${pix.x} ${pix.y}  ${delta()}  ${pix.dx} ${pix.dy}  ');
   }
 
   void setPixies() {
@@ -104,7 +108,9 @@ class _MazeAreaState extends State<MazeArea> {
         top: 0,
         child: Transform.translate(
           offset: Offset(widget.maze.minotaur.dx, widget.maze.minotaur.dy),
-          child: Icon(Icons.android),
+          child: Center(
+            child: Icon(Icons.android),
+          ),
         ),
       );
     }
@@ -114,7 +120,9 @@ class _MazeAreaState extends State<MazeArea> {
         top: 0,
         child: Transform.translate(
           offset: Offset(widget.maze.player.dx, widget.maze.player.dy),
-          child: Icon(Icons.directions_run),
+          child: Center(
+            child: Icon(Icons.directions_run),
+          ),
         ),
       );
     }
@@ -129,7 +137,9 @@ class _MazeAreaState extends State<MazeArea> {
         child: Transform.translate(
           key: Key(lamb.location),
           offset: Offset(lamb.dx, lamb.dy),
-          child: Icon(Icons.mood_bad),
+          child: Center(
+            child: Icon(Icons.mood_bad),
+          ),
         ),
       );
     }
@@ -149,10 +159,10 @@ class _MazeAreaState extends State<MazeArea> {
 
     return Table(
         border: TableBorder(
-            top: BorderSide.none,
-            right: BorderSide.none,
-            bottom: BorderSide.none,
-            left: BorderSide.none,
+            top: BorderSide(width: 0.0, color: floorColor),
+            right: BorderSide(width: 0.0, color: floorColor),
+            bottom: BorderSide(width: 0.0, color: floorColor),
+            left: BorderSide(width: 0.0, color: floorColor),
             horizontalInside: BorderSide.none,
             verticalInside: BorderSide.none),
         columnWidths: {
@@ -323,8 +333,7 @@ class _MazeAreaState extends State<MazeArea> {
             setState(() {
               widget.maze.player.x = widget.maze.player.x + 1;
               //widget.maze.player.y = 1;
-              widget.maze.player.dx =
-                  widget.maze.player.dx + roomLength + (2 * wallThickness);
+              widget.maze.player.dx = widget.maze.player.dx + delta();
               //widget.maze.player.dy = widget.maze.player.dy + 0.0;
               pixies[0] = getIconOfPixie(widget.maze.player);
 
