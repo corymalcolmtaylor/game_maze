@@ -12,10 +12,10 @@ class Next {
 class Room {
   var x = 0;
   var y = 0;
-  var east = true;
-  var west = true;
-  var south = true;
-  var north = true;
+  var left = true;
+  var right = true;
+  var down = true;
+  var up = true;
   var dir = '';
   var visited = false;
   var setid = 0;
@@ -23,6 +23,7 @@ class Room {
 }
 
 enum Ilk { player, minotaur, lamb }
+enum Directions { up, down, right, left }
 
 class Pixie {
   Pixie(this.ilk);
@@ -80,6 +81,64 @@ class Maze {
     }
   }
 
+  bool movePixie(Pixie pix, Directions dir) {
+    switch (dir) {
+      case Directions.down:
+        {
+          //is south wall up?
+          if (!myLabyrinth[pix.location].down) {
+            pix.y = pix.y + 1;
+            pix.location = 'b_${pix.x}_${pix.y}';
+            print('moved down ');
+            return true;
+          } else {
+            print('failed to move down');
+            return false;
+          }
+        }
+        break;
+      case Directions.up:
+        {
+          if (!myLabyrinth[pix.location].up) {
+            pix.y = pix.y - 1;
+            pix.location = 'b_${pix.x}_${pix.y}';
+            print('moved up');
+            return true;
+          } else {
+            print('failed to move up');
+            return false;
+          }
+        }
+        break;
+      case Directions.right:
+        {
+          if (!myLabyrinth[pix.location].right) {
+            pix.x = pix.x + 1;
+            pix.location = 'b_${pix.x}_${pix.y}';
+            print('moved right');
+            return true;
+          } else {
+            print('failed to move right');
+            return false;
+          }
+        }
+        break;
+      case Directions.left:
+        {
+          if (!myLabyrinth[pix.location].left) {
+            pix.x = pix.x - 1;
+            pix.location = 'b_${pix.x}_${pix.y}';
+            print('moved left');
+            return true;
+          } else {
+            print('failed to move left');
+            return false;
+          }
+        }
+    }
+    return true;
+  }
+
   Next aNext(x, y) {
     var aNext = Next();
 
@@ -122,28 +181,28 @@ class Maze {
     Next aNext = Next();
 
     var dir = '';
-    if ((x - 1) > 0 && (myLabyrinth['b_${x}_${y}']?.west != null)) {
-      aNext.one = (myLabyrinth['b_${x}_${y}'].setid -
-              myLabyrinth['b_${(x - 1)}_${y}'].setid)
+    if ((x - 1) > 0 && (myLabyrinth['b_${x}_$y']?.left != null)) {
+      aNext.one = (myLabyrinth['b_${x}_$y'].setid -
+              myLabyrinth['b_${(x - 1)}_$y'].setid)
           .abs()
           .toString();
     }
     if (int.tryParse(aNext.one) > int.tryParse(aNext.max)) {
       aNext.max = aNext.one;
-      dir = 'b_${(x - 1)}_${y}';
+      dir = 'b_${(x - 1)}_$y';
     }
-    if ((x + 1) <= _maxCol && (myLabyrinth['b_${x}_${y}']?.east != null)) {
-      aNext.two = (myLabyrinth['b_${x}_${y}'].setid -
-              myLabyrinth['b_${(x + 1)}_${y}'].setid)
+    if ((x + 1) <= _maxCol && (myLabyrinth['b_${x}_$y']?.right != null)) {
+      aNext.two = (myLabyrinth['b_${x}_$y'].setid -
+              myLabyrinth['b_${(x + 1)}_$y'].setid)
           .abs()
           .toString();
     }
     if (int.tryParse(aNext.two) > int.tryParse(aNext.max)) {
       aNext.max = aNext.two;
-      dir = 'b_${(x + 1)}_${y}';
+      dir = 'b_${(x + 1)}_$y';
     }
-    if ((y - 1) > 0 && myLabyrinth['b_${x}_${y}']?.south != null) {
-      aNext.three = (myLabyrinth['b_${x}_${y}'].setid -
+    if ((y - 1) > 0 && myLabyrinth['b_${x}_$y']?.up != null) {
+      aNext.three = (myLabyrinth['b_${x}_$y'].setid -
               myLabyrinth['b_${x}_${(y - 1)}'].setid)
           .abs()
           .toString();
@@ -152,8 +211,8 @@ class Maze {
       aNext.max = aNext.three;
       dir = 'b_${x}_${(y - 1)}';
     }
-    if ((y + 1) <= _maxRow && (myLabyrinth['b_${x}_${y}']?.north != null)) {
-      aNext.four = (myLabyrinth['b_${x}_${y}'].setid -
+    if ((y + 1) <= _maxRow && (myLabyrinth['b_${x}_$y']?.down != null)) {
+      aNext.four = (myLabyrinth['b_${x}_$y'].setid -
               myLabyrinth['b_${x}_${(y + 1)}'].setid)
           .abs()
           .toString();
@@ -209,23 +268,23 @@ class Maze {
 
   joinRooms(String room1, String room2) {
     if (myLabyrinth[room1].x == myLabyrinth[room2].x - 1) {
-      myLabyrinth[room1].east = false;
-      myLabyrinth[room2].west = false;
+      myLabyrinth[room1].right = false;
+      myLabyrinth[room2].left = false;
       myLabyrinth[room2].visited = true;
     }
     if (myLabyrinth[room1].x == myLabyrinth[room2].x + 1) {
-      myLabyrinth[room1].west = false;
-      myLabyrinth[room2].east = false;
+      myLabyrinth[room1].left = false;
+      myLabyrinth[room2].right = false;
       myLabyrinth[room2].visited = true;
     }
     if (myLabyrinth[room1].y == myLabyrinth[room2].y + 1) {
-      myLabyrinth[room1].north = false;
-      myLabyrinth[room2].south = false;
+      myLabyrinth[room1].up = false;
+      myLabyrinth[room2].down = false;
       myLabyrinth[room2].visited = true;
     }
     if (myLabyrinth[room1].y == myLabyrinth[room2].y - 1) {
-      myLabyrinth[room1].south = false;
-      myLabyrinth[room2].north = false;
+      myLabyrinth[room1].down = false;
+      myLabyrinth[room2].up = false;
       myLabyrinth[room2].visited = true;
     }
   }
@@ -358,12 +417,20 @@ class Maze {
     player = loc;
   }
 
+  bool closeToMinotaur(Pixie pix) {
+    if ((minotaur.x - pix.x).abs() < 2 || (minotaur.y - pix.y).abs() < 2) {
+      return true;
+    }
+    return false;
+  }
+
   void placeLambs() {
     lambs.clear();
 
     for (int i = 0; i < _maxRow; i++) {
       var loc = placePixie(false);
-      while (minotaur.location == loc.location ||
+      while (closeToMinotaur(loc) ||
+          minotaur.location == loc.location ||
           player.location == loc.location) {
         loc = placePixie(false);
         loc.ilk = Ilk.lamb;
