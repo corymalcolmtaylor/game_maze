@@ -24,17 +24,22 @@ class Room {
 
 enum Ilk { player, minotaur, lamb }
 enum Directions { up, down, right, left }
+enum Status { alive, dead }
 
 class Pixie {
   Pixie(this.ilk);
+
   var location = '';
-  var moveRate = 4;
   var lastLocation = '';
-  var dx = 0.0;
-  var dy = 0.0;
+  var moveRate = 0;
+  var movesLeft = 0;
   var x = 0;
   var y = 0;
   var ilk = Ilk.player;
+  var living = Status.alive;
+  var savedLambs = 0;
+  var lostLambs = 0;
+  var emoji = '🐉';
 }
 
 class Maze {
@@ -81,31 +86,62 @@ class Maze {
     }
   }
 
+  void saveLamb(Pixie lamb) {
+    lamb.location = '';
+    lamb.lastLocation = '';
+    lamb.living = Status.dead;
+    player.savedLambs++;
+  }
+
+  bool killLambInRoom(Pixie pix) {
+    var killed = false;
+    lambs.forEach((el) {
+      if (el.location == pix.location) {
+        el.location = '';
+        el.living = Status.dead;
+        killed = true;
+      }
+    });
+    return killed;
+  }
+
+  bool moveTo(Pixie pix, int x, int y) {
+    final newloc = 'b_${x}_$y';
+    if (minotaur.location == newloc) {
+      return false;
+    }
+
+    if ((pix.ilk == Ilk.lamb || pix.ilk == Ilk.minotaur) &&
+        pix.lastLocation == newloc) {
+      pix.lastLocation = '';
+      return false;
+    }
+    pix.lastLocation = 'b_${pix.x}_${pix.y}';
+    pix.x = x;
+    pix.y = y;
+    pix.location = newloc;
+
+    return true;
+  }
+
   bool movePixie(Pixie pix, Directions dir) {
     switch (dir) {
       case Directions.down:
         {
           //is south wall up?
           if (!myLabyrinth[pix.location].down) {
-            pix.y = pix.y + 1;
-            pix.location = 'b_${pix.x}_${pix.y}';
-            print('moved down ');
-            return true;
+            return moveTo(pix, pix.x, pix.y + 1);
           } else {
-            print('failed to move down');
             return false;
           }
         }
         break;
       case Directions.up:
         {
+          //is north wall up?
           if (!myLabyrinth[pix.location].up) {
-            pix.y = pix.y - 1;
-            pix.location = 'b_${pix.x}_${pix.y}';
-            print('moved up');
-            return true;
+            return moveTo(pix, pix.x, pix.y - 1);
           } else {
-            print('failed to move up');
             return false;
           }
         }
@@ -113,12 +149,8 @@ class Maze {
       case Directions.right:
         {
           if (!myLabyrinth[pix.location].right) {
-            pix.x = pix.x + 1;
-            pix.location = 'b_${pix.x}_${pix.y}';
-            print('moved right');
-            return true;
+            return moveTo(pix, pix.x + 1, pix.y);
           } else {
-            print('failed to move right');
             return false;
           }
         }
@@ -126,12 +158,8 @@ class Maze {
       case Directions.left:
         {
           if (!myLabyrinth[pix.location].left) {
-            pix.x = pix.x - 1;
-            pix.location = 'b_${pix.x}_${pix.y}';
-            print('moved left');
-            return true;
+            return moveTo(pix, pix.x - 1, pix.y);
           } else {
-            print('failed to move left');
             return false;
           }
         }
@@ -143,32 +171,26 @@ class Maze {
     var aNext = Next();
 
     if ((x - 1) > 0) {
-      if (myLabyrinth['b_${x - 1}_$y' /*  'b_' + (x - 1) + '_' + y */]
-              .visited ==
-          false) {
-        aNext.one = 'b_${x - 1}_$y'; //'b_' + (x - 1) + '_' + y;
+      if (myLabyrinth['b_${x - 1}_$y'].visited == false) {
+        aNext.one = 'b_${x - 1}_$y';
         aNext.total = aNext.total + 1;
       }
     }
     if ((x + 1) <= _maxCol) {
       if (myLabyrinth['b_${x + 1}_$y'].visited == false) {
-        aNext.two = 'b_${x + 1}_$y'; //'b_' + (x + 1) + '_' + y;
+        aNext.two = 'b_${x + 1}_$y';
         aNext.total++;
       }
     }
     if ((y - 1) > 0) {
-      if (myLabyrinth['b_${x}_${y - 1}' /*   'b_' + x + '_' + (y - 1)*/]
-              .visited ==
-          false) {
-        aNext.three = 'b_${x}_${y - 1}'; //'b_' + x + '_' + (y - 1);
+      if (myLabyrinth['b_${x}_${y - 1}'].visited == false) {
+        aNext.three = 'b_${x}_${y - 1}';
         aNext.total++;
       }
     }
     if ((y + 1) <= _maxRow) {
-      if (myLabyrinth['b_${x}_${y + 1}' /*   'b_' + x + '_' + (y + 1)*/]
-              .visited ==
-          false) {
-        aNext.four = 'b_${x}_${y + 1}'; //'b_' + x + '_' + (y + 1);
+      if (myLabyrinth['b_${x}_${y + 1}'].visited == false) {
+        aNext.four = 'b_${x}_${y + 1}';
         aNext.total++;
       }
     }
@@ -291,8 +313,8 @@ class Maze {
 
   //carve the labyrinth
   void carveLabyrinth() {
-    //NOW USE DFS algo
-    //from mazeworks.com,  DSF Depth First Search algorithm for making mazes
+    // NOW USE DFS algo
+    // from mazeworks.com,  DSF Depth First Search algorithm for making mazes
     //  create a CellStack (LIFO) to hold a list of cell locations
     //  use Global myStack
     //  set TotalCells = number of cells in grid
@@ -317,12 +339,11 @@ class Maze {
     x = half + Math.Random.secure().nextInt(inc);
     y = half + Math.Random.secure().nextInt(inc);
 
-    var currentCell = 'b_' + x.toString() + '_' + y.toString();
+    var currentCell = 'b_${x}_$y';
 
     var visitedCells = 0;
     var myNext;
     var next;
-    //var special = 0;
     var notfoundfirstedge = true;
 
     myLabyrinth[currentCell].x = x;
@@ -347,7 +368,6 @@ class Maze {
       if (myNext.total > 0) {
         //choose one at random
         next = getNext(myNext);
-
         //knock down the wall between it and CurrentCell
         joinRooms(currentCell, next);
         //push CurrentCell location on the CellStack
@@ -358,14 +378,13 @@ class Maze {
       } else {
         //every dead end is a special square
         specialcells.add(currentCell);
-
         //pop the most recent cell entry off the CellStack
         //and make it CurrentCell
         currentCell = myStack.removeLast();
       }
-    } //endWhile
-    //get last cell visited -- it is myNext
-    //specialcells.add(next);
+    } // end while
+    // get last cell visited -- it is myNext
+    // specialcells.add(next);
     // get the number of walls to knock down, based on MAXROWS
     makeloops();
 
@@ -386,8 +405,8 @@ class Maze {
         half = half - 1;
         inc = inc + 2;
       }
-      x = half + Math.Random.secure().nextInt(inc);
-      y = half + Math.Random.secure().nextInt(inc);
+      x = half + rand.nextInt(inc);
+      y = half + rand.nextInt(inc);
     } else {
       x = 1 + rand.nextInt(_maxRow - 1);
       y = 1 + rand.nextInt(_maxCol - 1);
@@ -424,22 +443,32 @@ class Maze {
     return false;
   }
 
+  bool hasLamb(String loc) {
+    var hasLamb = false;
+    lambs.forEach((lamb) {
+      if (lamb.location == loc) {
+        hasLamb = true;
+      }
+    });
+    return hasLamb;
+  }
+
   void placeLambs() {
     lambs.clear();
-
     for (int i = 0; i < _maxRow; i++) {
       var loc = placePixie(false);
       while (closeToMinotaur(loc) ||
           minotaur.location == loc.location ||
-          player.location == loc.location) {
+          player.location == loc.location ||
+          hasLamb(loc.location)) {
         loc = placePixie(false);
-        loc.ilk = Ilk.lamb;
       }
+      loc.ilk = Ilk.lamb;
       lambs.add(loc);
     }
   }
 
-// makeloops : num loops = floor(MAXROW /4).floor + possible extra for treasure room
+  // makeloops : num loops = floor(MAXROW /4).floor + possible extra for treasure room
   void makeloops() {
     var numloops = (_maxRow / 4).floor();
     //for each special room
@@ -454,7 +483,7 @@ class Maze {
     //then loop again using any unused special squares without checking for
     //minimum setid differences
     var indx = 0;
-    // myLabyrinth[specialcells[indx++]].paint();
+
     if (knockextrawall(myLabyrinth[specialcells[indx++]], true)) {
       numloops--;
     }
@@ -480,7 +509,6 @@ class Maze {
 
   knockextrawall(Room room, bool onlyIfLargeSetIdDifference) {
     var nextroom;
-
     if (room.spUsed == true) {
       return false;
     }
@@ -488,13 +516,11 @@ class Maze {
       //knock down a wall if there is one with a large difference in setid
       //examine adjacent rooms for setid
       //find room2 - a non-joined room with the largest variance in setid
-
       nextroom = makePassage(room.x, room.y);
       if (nextroom.length > 1 &&
           (myLabyrinth[nextroom].setid - room.setid).abs() > 9) {
         joinRooms('b_${room.x}_${room.y}', nextroom);
         room.spUsed = true;
-
         return true;
       } else {
         return false;
@@ -504,12 +530,9 @@ class Maze {
       nextroom = makePassage(room.x, room.y);
       if (nextroom.length > 1) {
         joinRooms('b_${room.x}_${room.y}', nextroom);
-
         room.spUsed = true;
-
         return true;
       }
-
       return false;
     }
   } //end func
