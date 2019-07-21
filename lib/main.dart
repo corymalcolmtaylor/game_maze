@@ -53,6 +53,7 @@ class _MazeAreaState extends State<MazeArea> {
   var maxWidth = 0.0;
   var rand = Math.Random.secure();
   var numRows = 8;
+  var GameIsOver = false;
 
   Widget getRoomPixieIcon(Room room) {
     if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
@@ -184,15 +185,61 @@ class _MazeAreaState extends State<MazeArea> {
   }
 
   bool moveMinotaur() {
+    if (GameIsOver) return false;
     return tryToMove(widget.maze.minotaur, rand.nextInt(4), 0);
   }
 
-  void moveLambs() {
+  bool moveLambs() {
+    if (GameIsOver) return false;
     widget.maze.lambs.forEach((lamb) {
       if (lamb.living == Status.alive) {
         tryToMove(lamb, rand.nextInt(4), 0);
       }
     });
+    var anyLeftAlive =
+        widget.maze.lambs.any((lamb) => lamb.living == Status.alive);
+    if (!anyLeftAlive) {
+      return endGame();
+    }
+    return true;
+  }
+
+  bool endGame() {
+    GameIsOver = true;
+    Text message;
+    if (widget.maze.player.savedLambs > widget.maze.player.lostLambs) {
+      message = Text('You Win');
+    } else {
+      message = Text('You Lose');
+    }
+    _neverSatisfied(message);
+
+    return false;
+  }
+
+  Future<void> _neverSatisfied(Text msg) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Game Over'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[msg],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void setSizes() {
@@ -237,7 +284,22 @@ class _MazeAreaState extends State<MazeArea> {
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Center(
+                    child: Text('Size of Maze'),
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: Colors.grey,
+                            width: 1.0,
+                            style: BorderStyle.solid),
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
                     child: DropdownButton<String>(
+                      style: TextStyle(color: Colors.black, fontSize: 16),
                       value: numRows.toString(),
                       onChanged: (String newValue) {
                         setState(() {
@@ -256,22 +318,45 @@ class _MazeAreaState extends State<MazeArea> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: FlatButton(
-                    color: Colors.amber,
-                    onPressed: () {
-                      setState(() {
-                        print('re carve pressed');
-                        pixies.clear();
-                        widget.maze.maxRow = numRows;
-                        setSizes();
-                        widget.maze.initMaze();
-                        widget.maze.carveLabyrinth();
-                      });
-                    },
-                    child: Text('New Game'),
+                  child: Center(
+                    child: Container(
+                      child: OutlineButton(
+                        color: Colors.amber,
+                        shape: new RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(30.0),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            print('re carve pressed');
+                            pixies.clear();
+                            widget.maze.maxRow = numRows;
+                            setSizes();
+                            widget.maze.initMaze();
+                            widget.maze.carveLabyrinth();
+                            GameIsOver = false;
+                          });
+                        },
+                        child: Text('New Game'),
+                      ),
+                    ),
                   ),
                 ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('Freinds Lost:'),
+                    Padding(
+                        padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                        child: Text(widget.maze.player.lostLambs.toString())),
+                    Text('Freinds Saved:'),
+                    Padding(
+                        padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                        child: Text(widget.maze.player.savedLambs.toString())),
+                  ]),
             ),
             SizedBox(
               width: maxWidth,
@@ -299,14 +384,17 @@ class _MazeAreaState extends State<MazeArea> {
                               onPressed: () {
                                 print('move north  pressed');
                                 setState(() {
-                                  movePixie(widget.maze.player, Directions.up);
-                                  if (widget.maze.player.moveRate <= 0) {
-                                    moveMinotaur();
-                                    moveLambs();
-                                  }
+                                  if (GameIsOver == false) {
+                                    movePixie(
+                                        widget.maze.player, Directions.up);
+                                    if (widget.maze.player.moveRate <= 0) {
+                                      moveMinotaur();
+                                      moveLambs();
+                                    }
 
-                                  print(
-                                      'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
+                                    print(
+                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
+                                  }
                                 });
                               },
                               icon: Icon(Icons.arrow_upward),
@@ -325,17 +413,19 @@ class _MazeAreaState extends State<MazeArea> {
                             child: IconButton(
                               onPressed: () {
                                 print('move west pressed');
-                                setState(() {
-                                  movePixie(
-                                      widget.maze.player, Directions.left);
-                                  if (widget.maze.player.moveRate <= 0) {
-                                    moveMinotaur();
-                                    moveLambs();
-                                  }
+                                if (GameIsOver == false) {
+                                  setState(() {
+                                    movePixie(
+                                        widget.maze.player, Directions.left);
+                                    if (widget.maze.player.moveRate <= 0) {
+                                      moveMinotaur();
+                                      moveLambs();
+                                    }
 
-                                  print(
-                                      'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
-                                });
+                                    print(
+                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
+                                  });
+                                }
                               },
                               icon: Icon(Icons.arrow_back),
                             ),
@@ -350,14 +440,16 @@ class _MazeAreaState extends State<MazeArea> {
                               child: IconButton(
                                 onPressed: () {
                                   print('stay  pressed');
-                                  setState(() {
-                                    widget.maze.player.movesLeft = 0;
+                                  if (GameIsOver == false) {
+                                    setState(() {
+                                      widget.maze.player.movesLeft = 0;
 
-                                    moveMinotaur();
-                                    moveLambs();
+                                      moveMinotaur();
+                                      moveLambs();
 
-                                    print('end turn ');
-                                  });
+                                      print('end turn ');
+                                    });
+                                  }
                                 },
                                 icon: Icon(Icons.pause),
                               ),
@@ -371,18 +463,19 @@ class _MazeAreaState extends State<MazeArea> {
                             child: IconButton(
                               onPressed: () {
                                 print(' move east pressed');
+                                if (GameIsOver == false) {
+                                  setState(() {
+                                    movePixie(
+                                        widget.maze.player, Directions.right);
+                                    if (widget.maze.player.moveRate <= 0) {
+                                      moveMinotaur();
+                                      moveLambs();
+                                    }
 
-                                setState(() {
-                                  movePixie(
-                                      widget.maze.player, Directions.right);
-                                  if (widget.maze.player.moveRate <= 0) {
-                                    moveMinotaur();
-                                    moveLambs();
-                                  }
-
-                                  print(
-                                      'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
-                                });
+                                    print(
+                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
+                                  });
+                                }
                               },
                               icon: Icon(Icons.arrow_forward),
                             ),
@@ -400,16 +493,18 @@ class _MazeAreaState extends State<MazeArea> {
                             child: IconButton(
                               onPressed: () {
                                 print('move south  pressed');
-                                setState(() {
-                                  movePixie(
-                                      widget.maze.player, Directions.down);
-                                  if (widget.maze.player.moveRate <= 0) {
-                                    moveMinotaur();
-                                    moveLambs();
-                                  }
-                                  print(
-                                      'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
-                                });
+                                if (GameIsOver == false) {
+                                  setState(() {
+                                    movePixie(
+                                        widget.maze.player, Directions.down);
+                                    if (widget.maze.player.moveRate <= 0) {
+                                      moveMinotaur();
+                                      moveLambs();
+                                    }
+                                    print(
+                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
+                                  });
+                                }
                               },
                               icon: Icon(Icons.arrow_downward),
                             ),
