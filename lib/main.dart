@@ -8,9 +8,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final numRows = 8;
-    final title = 'Mazes and Minotaurs';
-    Maze maze = Maze(numRows);
+    final title = 'Alice in The Hedge Maze';
+    final numberRows = 8;
+    Maze maze = Maze(numberRows);
     maze.carveLabyrinth();
 
     return MaterialApp(
@@ -52,36 +52,50 @@ class _MazeAreaState extends State<MazeArea> {
   var roomLength = 0.0;
   var maxWidth = 0.0;
   var rand = Math.Random.secure();
+  var numRows = 8;
 
   Widget getRoomPixieIcon(Room room) {
     if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
       return Center(
-        child: Icon(Icons.android),
+        child: Text(
+          widget.maze.minotaur.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+        ),
       );
     }
     if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
       return Center(
-        child: Icon(Icons.directions_run),
+        child: Text(
+          widget.maze.player.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+        ),
       );
     }
-    final lamb = widget.maze.lambs.firstWhere(
+    var lamb = widget.maze.lambs.firstWhere(
         (el) => el.location == 'b_${room.x}_${room.y}',
         orElse: () => null);
 
     if (lamb != null) {
       return Center(
-        child: Icon(Icons.mood_bad),
+        child: Text(
+          lamb.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+        ),
       );
     }
+    lamb = widget.maze.lambs.firstWhere(
+        (el) => el.lastLocation == 'b_${room.x}_${room.y}',
+        orElse: () => null);
+
     return null;
   }
 
   Widget makeRoom(Room room) {
-    var floorColor = Colors.blueGrey;
-    var northColor = (room.up == true) ? Colors.black : floorColor;
-    var southColor = (room.down == true) ? Colors.black : floorColor;
-    var westColor = (room.left == true) ? Colors.black : floorColor;
-    var eastColor = (room.right == true) ? Colors.black : floorColor;
+    var floorColor = Colors.greenAccent;
+    var northColor = (room.up == true) ? Colors.green : floorColor;
+    var southColor = (room.down == true) ? Colors.green : floorColor;
+    var westColor = (room.left == true) ? Colors.green : floorColor;
+    var eastColor = (room.right == true) ? Colors.green : floorColor;
 
     TableCellVerticalAlignment val = TableCellVerticalAlignment.middle;
 
@@ -181,18 +195,21 @@ class _MazeAreaState extends State<MazeArea> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void setSizes() {
     maxWidth = MediaQuery.of(context).size.width;
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       maxWidth = MediaQuery.of(context).size.height * 0.75;
     }
-
-    var trs = <TableRow>[];
     roomLength =
         ((maxWidth.floor() - (wallThickness * (widget.maze.maxRow + 1))) /
                 widget.maze.maxRow)
             .floorToDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    setSizes();
+    var trs = <TableRow>[];
 
     for (int i = 1; i <= widget.maze.maxRow; i++) {
       trs.add(
@@ -209,7 +226,6 @@ class _MazeAreaState extends State<MazeArea> {
       );
     }
 
-    //print('pixies == ${pixies.length}');
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
@@ -220,12 +236,34 @@ class _MazeAreaState extends State<MazeArea> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(12.0),
+                  child: Center(
+                    child: DropdownButton<String>(
+                      value: numRows.toString(),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          numRows = int.parse(newValue);
+                        });
+                      },
+                      items: <String>['8', '10', '12', '14']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
                   child: FlatButton(
                     color: Colors.amber,
                     onPressed: () {
                       setState(() {
                         print('re carve pressed');
                         pixies.clear();
+                        widget.maze.maxRow = numRows;
+                        setSizes();
                         widget.maze.initMaze();
                         widget.maze.carveLabyrinth();
                       });

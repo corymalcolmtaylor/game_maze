@@ -39,11 +39,11 @@ class Pixie {
   var living = Status.alive;
   var savedLambs = 0;
   var lostLambs = 0;
-  var emoji = '🐉';
+  var emoji = '';
 }
 
 class Maze {
-  final int _maxRow;
+  int _maxRow;
   int _maxCol;
 
   int get maxRow {
@@ -52,6 +52,11 @@ class Maze {
 
   int get maxCol {
     return _maxCol;
+  }
+
+  set maxRow(int x) {
+    _maxRow = x;
+    _maxCol = x;
   }
 
   var numberOfRooms = 0;
@@ -66,8 +71,8 @@ class Maze {
   var lambs = <Pixie>[];
 
   // create and initialize the labyrinth
-// squares named b_x_y eg b_1_3 for square A3 on a chess board
-// each square starts as its own set and has its own number; eg 1-64
+  // squares named b_x_y eg b_1_3 for square A3 on a chess board
+  // each square starts as its own set and has its own number; eg 1-64
   Maze(this._maxRow) {
     initMaze();
   } // END FUNCTION ***********************
@@ -75,7 +80,7 @@ class Maze {
   initMaze() {
     _maxCol = _maxRow;
     lambs.clear();
-
+    myLabyrinth.clear();
     for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
       for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
         myLabyrinth['b_${xloop}_$yloop'] = new Room();
@@ -425,6 +430,7 @@ class Maze {
     }
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
+    minotaur.emoji = '👺';
   }
 
   void placePlayer() {
@@ -434,6 +440,7 @@ class Maze {
     }
     loc.ilk = Ilk.player;
     player = loc;
+    player.emoji = '👧🏼';
   }
 
   bool closeToMinotaur(Pixie pix) {
@@ -453,18 +460,76 @@ class Maze {
     return hasLamb;
   }
 
+  void setLambEmoji(Pixie lamb, int i) {
+    switch (i) {
+      case 0:
+        lamb.emoji = '🐝';
+        break;
+      case 1:
+        lamb.emoji = '🐇';
+        break;
+      case 2:
+        lamb.emoji = '🐁';
+        break;
+      case 3:
+        lamb.emoji = '🐷';
+        break;
+      case 4:
+        lamb.emoji = '😸';
+        break;
+      case 5:
+        lamb.emoji = '🦔';
+        break;
+      case 6:
+        lamb.emoji = '🦆';
+        break;
+      case 7:
+        lamb.emoji = '🐢';
+        break;
+      case 8:
+        lamb.emoji = '🦋';
+        break;
+      case 9:
+        lamb.emoji = '🐿';
+        break;
+      case 10:
+        lamb.emoji = '🦜';
+        break;
+      case 11:
+        lamb.emoji = '🦢';
+        break;
+      case 12:
+        lamb.emoji = '🐓';
+        break;
+      case 13:
+        lamb.emoji = '🦀';
+        break;
+      case 14:
+        lamb.emoji = '🐌';
+        break;
+      case 15:
+        lamb.emoji = '🦉';
+        break;
+      default:
+        lamb.emoji = '🐛';
+    }
+  }
+
   void placeLambs() {
     lambs.clear();
     for (int i = 0; i < _maxRow; i++) {
-      var loc = placePixie(false);
-      while (closeToMinotaur(loc) ||
-          minotaur.location == loc.location ||
-          player.location == loc.location ||
-          hasLamb(loc.location)) {
-        loc = placePixie(false);
+      var lamb = placePixie(false);
+
+      while (closeToMinotaur(lamb) ||
+          minotaur.location == lamb.location ||
+          player.location == lamb.location ||
+          hasLamb(lamb.location)) {
+        lamb = placePixie(false);
       }
-      loc.ilk = Ilk.lamb;
-      lambs.add(loc);
+      lamb.ilk = Ilk.lamb;
+      setLambEmoji(lamb, i);
+
+      lambs.add(lamb);
     }
   }
 
