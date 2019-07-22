@@ -430,7 +430,7 @@ class Maze {
     }
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
-    minotaur.emoji = '👺';
+    minotaur.emoji = '👺'; ''
   }
 
   void placePlayer() {
