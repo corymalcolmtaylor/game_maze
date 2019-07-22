@@ -327,7 +327,7 @@ class _MazeAreaState extends State<MazeArea> {
                         ),
                         onPressed: () {
                           setState(() {
-                            print('re carve pressed');
+                            print('new game pressed');
                             pixies.clear();
                             widget.maze.maxRow = numRows;
                             setSizes();
@@ -346,17 +346,18 @@ class _MazeAreaState extends State<MazeArea> {
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text('Freinds Lost:'),
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                        child: Text(widget.maze.player.lostLambs.toString())),
-                    Text('Freinds Saved:'),
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                        child: Text(widget.maze.player.savedLambs.toString())),
-                  ]),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Friends Lost:'),
+                  Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                      child: Text(widget.maze.player.lostLambs.toString())),
+                  Text('Friends Saved:'),
+                  Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                      child: Text(widget.maze.player.savedLambs.toString())),
+                ],
+              ),
             ),
             SizedBox(
               width: maxWidth,
