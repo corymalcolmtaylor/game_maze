@@ -65,6 +65,7 @@ class _MazeAreaState extends State<MazeArea>
       value: 1.0,
       vsync: this,
     );
+    //_controller.forward();
   }
 
   Widget getAnimatedPixieIcon(Room room) {
@@ -75,10 +76,14 @@ class _MazeAreaState extends State<MazeArea>
     Animation<RelativeRect> layerAnimation;
 
     if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      beginTop = (widget.maze.minotaur.lastY - 1) * roomLength;
-      beginLeft = (widget.maze.minotaur.lastX - 1) * roomLength;
-      endTop = (widget.maze.minotaur.y - 1) * roomLength;
-      endLeft = (widget.maze.minotaur.x - 1) * roomLength;
+      beginTop = ((widget.maze.minotaur.lastY - 1) * roomLength) +
+          widget.maze.minotaur.lastY;
+      beginLeft = ((widget.maze.minotaur.lastX - 1) * roomLength) +
+          widget.maze.minotaur.lastX;
+      endTop =
+          ((widget.maze.minotaur.y - 1) * roomLength) + widget.maze.minotaur.y;
+      endLeft =
+          ((widget.maze.minotaur.x - 1) * roomLength) + widget.maze.minotaur.x;
       layerAnimation = RelativeRectTween(
         begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
         end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
@@ -92,10 +97,14 @@ class _MazeAreaState extends State<MazeArea>
       );
     }
     if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
-      beginTop = (widget.maze.player.lastY - 1) * roomLength;
-      beginLeft = (widget.maze.player.lastX - 1) * roomLength;
-      endTop = (widget.maze.player.y - 1) * roomLength;
-      endLeft = (widget.maze.player.x - 1) * roomLength;
+      beginTop = ((widget.maze.player.lastY - 1) * roomLength) +
+          (widget.maze.player.lastY - 4);
+      beginLeft = ((widget.maze.player.lastX - 1) * roomLength) +
+          (3 * widget.maze.player.lastX - 1);
+      endTop = ((widget.maze.player.y - 1) * roomLength) +
+          (widget.maze.player.y - 4);
+      endLeft = ((widget.maze.player.x - 1) * roomLength) +
+          (3 * widget.maze.player.x - 1);
       layerAnimation = RelativeRectTween(
         begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
         end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
@@ -113,10 +122,10 @@ class _MazeAreaState extends State<MazeArea>
         orElse: () => null);
 
     if (lamb != null) {
-      beginTop = (lamb.lastY - 1) * roomLength;
-      beginLeft = (lamb.lastX - 1) * roomLength;
-      endTop = (lamb.y - 1) * roomLength;
-      endLeft = (lamb.x - 1) * roomLength;
+      beginTop = ((lamb.lastY - 1) * roomLength) + lamb.lastY;
+      beginLeft = ((lamb.lastX - 1) * roomLength) + lamb.lastX;
+      endTop = ((lamb.y - 1) * roomLength) + lamb.y;
+      endLeft = ((lamb.x - 1) * roomLength) + lamb.x;
       layerAnimation = RelativeRectTween(
         begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
         end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
@@ -125,7 +134,7 @@ class _MazeAreaState extends State<MazeArea>
         rect: layerAnimation,
         child: Text(
           lamb.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
         ),
       );
     }
@@ -204,7 +213,7 @@ class _MazeAreaState extends State<MazeArea>
                   child: SizedBox(
                     width: roomLength,
                     height: roomLength,
-                    //child: getRoomPixieIcon(room),
+                    child: getRoomPixieIcon(room),
                   ),
                 ),
               ),
@@ -351,13 +360,14 @@ class _MazeAreaState extends State<MazeArea>
       );
     }
     // add pixies
+    /*
     pixies = List.from(widget.maze.myLabyrinth.entries
         .map(
           (el) => getAnimatedPixieIcon(el.value),
         )
         .toList());
     pixies.removeWhere((item) => item == null);
-
+    */
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
@@ -448,9 +458,19 @@ class _MazeAreaState extends State<MazeArea>
               width: maxWidth,
               height: maxWidth,
               child: Stack(overflow: Overflow.visible, children: [
-                Table(children: trs),
+                Table(columnWidths: {
+                  0: FixedColumnWidth(51.0),
+                  1: FixedColumnWidth(51.0),
+                  2: FixedColumnWidth(51.0),
+                  3: FixedColumnWidth(51.0),
+                  4: FixedColumnWidth(51.0),
+                  5: FixedColumnWidth(51.0),
+                  6: FixedColumnWidth(51.0),
+                  7: FixedColumnWidth(51.0),
+                }, children: trs),
+
                 // add pixies
-                ...pixies
+                //...pixies
               ]),
             ),
             Row(
@@ -479,6 +499,7 @@ class _MazeAreaState extends State<MazeArea>
                                       moveMinotaur();
                                       moveLambs();
                                     }
+                                    //_controller.fling();
 
                                     print(
                                         'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
