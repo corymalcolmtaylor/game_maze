@@ -362,6 +362,7 @@ class _MazeAreaState extends State<MazeArea>
           (el) => getAnimatedPixieIcon(el.value),
         )
         .toList());
+    pixies.removeWhere((item) => item == null);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
