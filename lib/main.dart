@@ -46,14 +46,98 @@ class MazeArea extends StatefulWidget {
   _MazeAreaState createState() => _MazeAreaState();
 }
 
-class _MazeAreaState extends State<MazeArea> {
+class _MazeAreaState extends State<MazeArea>
+    with SingleTickerProviderStateMixin {
   var pixies = <Widget>[];
   var wallThickness = 2.0;
   var roomLength = 0.0;
   var maxWidth = 0.0;
   var rand = Math.Random.secure();
   var numRows = 8;
-  var GameIsOver = false;
+  var gameIsOver = false;
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: 300),
+      value: 1.0,
+      vsync: this,
+    );
+  }
+
+  Widget getAnimatedPixieIcon(Room room) {
+    var beginTop = 0.0; //(room.x -1) * roomLength;
+    var beginLeft = 0.0;
+    var endTop = 0.0;
+    var endLeft = 0.0;
+    Animation<RelativeRect> layerAnimation;
+
+    if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
+      beginTop = (widget.maze.minotaur.lastY - 1) * roomLength;
+      beginLeft = (widget.maze.minotaur.lastX - 1) * roomLength;
+      endTop = (widget.maze.minotaur.y - 1) * roomLength;
+      endLeft = (widget.maze.minotaur.x - 1) * roomLength;
+      layerAnimation = RelativeRectTween(
+        begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
+        end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
+      ).animate(_controller.view);
+      return PositionedTransition(
+        rect: layerAnimation,
+        child: Center(
+          child: Text(
+            widget.maze.minotaur.emoji,
+            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          ),
+        ),
+      );
+    }
+    if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
+      beginTop = (widget.maze.player.lastY - 1) * roomLength;
+      beginLeft = (widget.maze.player.lastX - 1) * roomLength;
+      endTop = (widget.maze.player.y - 1) * roomLength;
+      endLeft = (widget.maze.player.x - 1) * roomLength;
+      layerAnimation = RelativeRectTween(
+        begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
+        end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
+      ).animate(_controller.view);
+      return PositionedTransition(
+        rect: layerAnimation,
+        child: Center(
+          child: Text(
+            widget.maze.player.emoji,
+            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          ),
+        ),
+      );
+    }
+    var lamb = widget.maze.lambs.firstWhere(
+        (el) => el.location == 'b_${room.x}_${room.y}',
+        orElse: () => null);
+
+    if (lamb != null) {
+      beginTop = (lamb.lastY - 1) * roomLength;
+      beginLeft = (lamb.lastX - 1) * roomLength;
+      endTop = (lamb.y - 1) * roomLength;
+      endLeft = (lamb.x - 1) * roomLength;
+      layerAnimation = RelativeRectTween(
+        begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
+        end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
+      ).animate(_controller.view);
+      return PositionedTransition(
+        rect: layerAnimation,
+        child: Center(
+          child: Text(
+            lamb.emoji,
+            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          ),
+        ),
+      );
+    }
+
+    return null;
+  }
 
   Widget getRoomPixieIcon(Room room) {
     if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
@@ -126,7 +210,7 @@ class _MazeAreaState extends State<MazeArea> {
                   child: SizedBox(
                     width: roomLength,
                     height: roomLength,
-                    child: getRoomPixieIcon(room),
+                    //child: getRoomPixieIcon(room),
                   ),
                 ),
               ),
@@ -185,12 +269,12 @@ class _MazeAreaState extends State<MazeArea> {
   }
 
   bool moveMinotaur() {
-    if (GameIsOver) return false;
+    if (gameIsOver) return false;
     return tryToMove(widget.maze.minotaur, rand.nextInt(4), 0);
   }
 
   bool moveLambs() {
-    if (GameIsOver) return false;
+    if (gameIsOver) return false;
     widget.maze.lambs.forEach((lamb) {
       if (lamb.living == Status.alive) {
         tryToMove(lamb, rand.nextInt(4), 0);
@@ -205,7 +289,7 @@ class _MazeAreaState extends State<MazeArea> {
   }
 
   bool endGame() {
-    GameIsOver = true;
+    gameIsOver = true;
     Text message;
     if (widget.maze.player.savedLambs > widget.maze.player.lostLambs) {
       message = Text('You Win');
@@ -272,6 +356,12 @@ class _MazeAreaState extends State<MazeArea> {
         ),
       );
     }
+    // add pixies
+    pixies = List.from(widget.maze.myLabyrinth.entries
+        .map(
+          (el) => getAnimatedPixieIcon(el.value),
+        )
+        .toList());
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -333,7 +423,7 @@ class _MazeAreaState extends State<MazeArea> {
                             setSizes();
                             widget.maze.initMaze();
                             widget.maze.carveLabyrinth();
-                            GameIsOver = false;
+                            gameIsOver = false;
                           });
                         },
                         child: Text('New Game'),
@@ -364,6 +454,8 @@ class _MazeAreaState extends State<MazeArea> {
               height: maxWidth,
               child: Stack(overflow: Overflow.visible, children: [
                 Table(children: trs),
+                // add pixies
+                ...pixies
               ]),
             ),
             Row(
@@ -385,7 +477,7 @@ class _MazeAreaState extends State<MazeArea> {
                               onPressed: () {
                                 print('move north  pressed');
                                 setState(() {
-                                  if (GameIsOver == false) {
+                                  if (gameIsOver == false) {
                                     movePixie(
                                         widget.maze.player, Directions.up);
                                     if (widget.maze.player.moveRate <= 0) {
@@ -414,7 +506,7 @@ class _MazeAreaState extends State<MazeArea> {
                             child: IconButton(
                               onPressed: () {
                                 print('move west pressed');
-                                if (GameIsOver == false) {
+                                if (gameIsOver == false) {
                                   setState(() {
                                     movePixie(
                                         widget.maze.player, Directions.left);
@@ -441,7 +533,7 @@ class _MazeAreaState extends State<MazeArea> {
                               child: IconButton(
                                 onPressed: () {
                                   print('stay  pressed');
-                                  if (GameIsOver == false) {
+                                  if (gameIsOver == false) {
                                     setState(() {
                                       widget.maze.player.movesLeft = 0;
 
@@ -464,7 +556,7 @@ class _MazeAreaState extends State<MazeArea> {
                             child: IconButton(
                               onPressed: () {
                                 print(' move east pressed');
-                                if (GameIsOver == false) {
+                                if (gameIsOver == false) {
                                   setState(() {
                                     movePixie(
                                         widget.maze.player, Directions.right);
@@ -494,7 +586,7 @@ class _MazeAreaState extends State<MazeArea> {
                             child: IconButton(
                               onPressed: () {
                                 print('move south  pressed');
-                                if (GameIsOver == false) {
+                                if (gameIsOver == false) {
                                   setState(() {
                                     movePixie(
                                         widget.maze.player, Directions.down);

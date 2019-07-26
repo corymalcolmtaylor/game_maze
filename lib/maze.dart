@@ -35,6 +35,9 @@ class Pixie {
   var movesLeft = 0;
   var x = 0;
   var y = 0;
+  var lastX = 0;
+  var lastY = 0;
+  var recentlyMoved = false;
   var ilk = Ilk.player;
   var living = Status.alive;
   var savedLambs = 0;
@@ -430,7 +433,7 @@ class Maze {
     }
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
-    minotaur.emoji = '👺'; ''
+    minotaur.emoji = '👺';
   }
 
   void placePlayer() {
