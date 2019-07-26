@@ -125,6 +125,8 @@ class Maze {
       return false;
     }
     pix.lastLocation = 'b_${pix.x}_${pix.y}';
+    pix.lastX = pix.x;
+    pix.lastY = pix.y;
     pix.x = x;
     pix.y = y;
     pix.location = newloc;

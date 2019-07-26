@@ -61,7 +61,7 @@ class _MazeAreaState extends State<MazeArea>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 900),
       value: 1.0,
       vsync: this,
     );
@@ -85,11 +85,9 @@ class _MazeAreaState extends State<MazeArea>
       ).animate(_controller.view);
       return PositionedTransition(
         rect: layerAnimation,
-        child: Center(
-          child: Text(
-            widget.maze.minotaur.emoji,
-            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
-          ),
+        child: Text(
+          widget.maze.minotaur.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength),
         ),
       );
     }
@@ -104,11 +102,9 @@ class _MazeAreaState extends State<MazeArea>
       ).animate(_controller.view);
       return PositionedTransition(
         rect: layerAnimation,
-        child: Center(
-          child: Text(
-            widget.maze.player.emoji,
-            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
-          ),
+        child: Text(
+          widget.maze.player.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 4),
         ),
       );
     }
@@ -127,11 +123,9 @@ class _MazeAreaState extends State<MazeArea>
       ).animate(_controller.view);
       return PositionedTransition(
         rect: layerAnimation,
-        child: Center(
-          child: Text(
-            lamb.emoji,
-            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
-          ),
+        child: Text(
+          lamb.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
         ),
       );
     }
