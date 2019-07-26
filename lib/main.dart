@@ -458,16 +458,7 @@ class _MazeAreaState extends State<MazeArea>
               width: maxWidth,
               height: maxWidth,
               child: Stack(overflow: Overflow.visible, children: [
-                Table(columnWidths: {
-                  0: FixedColumnWidth(51.0),
-                  1: FixedColumnWidth(51.0),
-                  2: FixedColumnWidth(51.0),
-                  3: FixedColumnWidth(51.0),
-                  4: FixedColumnWidth(51.0),
-                  5: FixedColumnWidth(51.0),
-                  6: FixedColumnWidth(51.0),
-                  7: FixedColumnWidth(51.0),
-                }, children: trs),
+                Table(children: trs),
 
                 // add pixies
                 //...pixies
