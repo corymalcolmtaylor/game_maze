@@ -62,10 +62,12 @@ class _MazeAreaState extends State<MazeArea>
     super.initState();
     _controller = AnimationController(
       duration: Duration(milliseconds: 900),
-      value: 1.0,
+      value: 41.0,
+      lowerBound: 1.0,
+      upperBound: 100.0,
       vsync: this,
     );
-    //_controller.forward();
+    // _controller.forward();
   }
 
   Widget getAnimatedPixieIcon(Room room) {
@@ -87,7 +89,8 @@ class _MazeAreaState extends State<MazeArea>
       layerAnimation = RelativeRectTween(
         begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
         end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
-      ).animate(_controller.view);
+      ).animate(_controller);
+
       return PositionedTransition(
         rect: layerAnimation,
         child: Text(
@@ -96,6 +99,7 @@ class _MazeAreaState extends State<MazeArea>
         ),
       );
     }
+    return null;
     if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
       beginTop = ((widget.maze.player.lastY - 1) * roomLength) +
           (widget.maze.player.lastY - 4);
@@ -147,7 +151,7 @@ class _MazeAreaState extends State<MazeArea>
       return Center(
         child: Text(
           widget.maze.minotaur.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
         ),
       );
     }
@@ -155,7 +159,7 @@ class _MazeAreaState extends State<MazeArea>
       return Center(
         child: Text(
           widget.maze.player.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
         ),
       );
     }
@@ -167,7 +171,7 @@ class _MazeAreaState extends State<MazeArea>
       return Center(
         child: Text(
           lamb.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 16),
         ),
       );
     }
@@ -360,14 +364,14 @@ class _MazeAreaState extends State<MazeArea>
       );
     }
     // add pixies
-    /*
+
     pixies = List.from(widget.maze.myLabyrinth.entries
         .map(
           (el) => getAnimatedPixieIcon(el.value),
         )
         .toList());
     pixies.removeWhere((item) => item == null);
-    */
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
@@ -461,7 +465,7 @@ class _MazeAreaState extends State<MazeArea>
                 Table(children: trs),
 
                 // add pixies
-                //...pixies
+                ...pixies
               ]),
             ),
             Row(
