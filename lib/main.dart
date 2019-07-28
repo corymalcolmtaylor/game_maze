@@ -462,7 +462,7 @@ class _MazeAreaState extends State<MazeArea>
               width: maxWidth,
               height: maxWidth,
               child: Stack(overflow: Overflow.visible, children: [
-                Table(children: trs),
+                // Table(children: trs),
 
                 // add pixies
                 ...pixies
