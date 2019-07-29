@@ -73,10 +73,13 @@ class _MazeAreaState extends State<MazeArea>
           widget.maze.minotaur.lastY;
       beginLeft = ((widget.maze.minotaur.lastX - 1) * roomLength) +
           widget.maze.minotaur.lastX;
-      endTop =
-          ((widget.maze.minotaur.y - 1) * roomLength) + widget.maze.minotaur.y;
-      endLeft =
-          ((widget.maze.minotaur.x - 1) * roomLength) + widget.maze.minotaur.x;
+      endTop = ((widget.maze.minotaur.y - 1) *
+          roomLength); // + widget.maze.minotaur.y;
+      endLeft = ((widget.maze.minotaur.x - 1) * roomLength) +
+          widget.maze.minotaur.x +
+          5;
+
+      endTop = endTop * 0.98;
 
       return AnimatedPositioned(
         key: Key(widget.maze.minotaur.key),
@@ -86,7 +89,7 @@ class _MazeAreaState extends State<MazeArea>
         duration: Duration(milliseconds: 900),
         child: Text(
           widget.maze.minotaur.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength),
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
         ),
       );
     }
@@ -96,8 +99,8 @@ class _MazeAreaState extends State<MazeArea>
           (widget.maze.player.lastY - 4);
       beginLeft = ((widget.maze.player.lastX - 1) * roomLength) +
           (3 * widget.maze.player.lastX - 1);
-      endTop = ((widget.maze.player.y - 1) * roomLength) +
-          (widget.maze.player.y - 4);
+      endTop = ((widget.maze.player.y - 1) * roomLength) * 0.99;
+      // +           (widget.maze.player.y - 4);
       endLeft = ((widget.maze.player.x - 1) * roomLength) +
           (3 * widget.maze.player.x - 1);
 
@@ -119,8 +122,9 @@ class _MazeAreaState extends State<MazeArea>
     if (lamb != null) {
       beginTop = ((lamb.lastY - 1) * roomLength) + lamb.lastY;
       beginLeft = ((lamb.lastX - 1) * roomLength) + lamb.lastX;
-      endTop = ((lamb.y - 1) * roomLength) + lamb.y;
-      endLeft = ((lamb.x - 1) * roomLength) + lamb.x;
+      endTop = ((lamb.y - 1) * roomLength) + (0.4 * lamb.y);
+      endLeft = ((lamb.x - 1) * roomLength) + (2.75 * lamb.x);
+      // endTop = endTop * 0.99;
 
       return AnimatedPositioned(
         key: Key(lamb.key),
@@ -208,7 +212,7 @@ class _MazeAreaState extends State<MazeArea>
                   child: SizedBox(
                     width: roomLength,
                     height: roomLength,
-                    child: getRoomPixieIcon(room),
+                    // child: getRoomPixieIcon(room),
                   ),
                 ),
               ),
