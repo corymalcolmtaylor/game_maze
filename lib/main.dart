@@ -178,6 +178,7 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget makeRoom(Room room) {
+    /*  rooms shall be changed to square containers in rows of a set width */
     var floorColor = Colors.greenAccent;
     var northColor = (room.up == true) ? Colors.green : floorColor;
     var southColor = (room.down == true) ? Colors.green : floorColor;
