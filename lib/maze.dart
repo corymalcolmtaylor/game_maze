@@ -1,4 +1,5 @@
 import 'dart:math' as Math;
+import 'utils.dart';
 
 class Next {
   String one = '0';
@@ -28,7 +29,7 @@ enum Status { alive, dead }
 
 class Pixie {
   Pixie(this.ilk);
-
+  var key = utils.CreateCryptoRandomString();
   var location = '';
   var lastLocation = '';
   var moveRate = 0;

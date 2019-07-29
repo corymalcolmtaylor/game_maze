@@ -60,14 +60,6 @@ class _MazeAreaState extends State<MazeArea>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: Duration(milliseconds: 900),
-      value: 41.0,
-      lowerBound: 1.0,
-      upperBound: 100.0,
-      vsync: this,
-    );
-    // _controller.forward();
   }
 
   Widget getAnimatedPixieIcon(Room room) {
@@ -75,7 +67,6 @@ class _MazeAreaState extends State<MazeArea>
     var beginLeft = 0.0;
     var endTop = 0.0;
     var endLeft = 0.0;
-    Animation<RelativeRect> layerAnimation;
 
     if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
       beginTop = ((widget.maze.minotaur.lastY - 1) * roomLength) +
@@ -88,8 +79,10 @@ class _MazeAreaState extends State<MazeArea>
           ((widget.maze.minotaur.x - 1) * roomLength) + widget.maze.minotaur.x;
 
       return AnimatedPositioned(
+        key: Key(widget.maze.minotaur.key),
         left: endLeft,
         top: endTop,
+        curve: Curves.linear,
         duration: Duration(milliseconds: 900),
         child: Text(
           widget.maze.minotaur.emoji,
@@ -109,6 +102,7 @@ class _MazeAreaState extends State<MazeArea>
           (3 * widget.maze.player.x - 1);
 
       return AnimatedPositioned(
+        key: Key(widget.maze.player.key),
         left: endLeft,
         top: endTop,
         duration: Duration(milliseconds: 900),
@@ -117,19 +111,6 @@ class _MazeAreaState extends State<MazeArea>
           style: TextStyle(color: Colors.black, fontSize: roomLength - 6),
         ),
       );
-      /*
-      layerAnimation = RelativeRectTween(
-        begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
-        end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
-      ).animate(_controller.view);
-      return PositionedTransition(
-        rect: layerAnimation,
-        child: Text(
-          widget.maze.player.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 4),
-        ),
-      );
-      */
     }
     var lamb = widget.maze.lambs.firstWhere(
         (el) => el.location == 'b_${room.x}_${room.y}',
@@ -142,6 +123,7 @@ class _MazeAreaState extends State<MazeArea>
       endLeft = ((lamb.x - 1) * roomLength) + lamb.x;
 
       return AnimatedPositioned(
+        key: Key(lamb.key),
         left: endLeft,
         top: endTop,
         duration: Duration(milliseconds: 900),
@@ -150,19 +132,6 @@ class _MazeAreaState extends State<MazeArea>
           style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
         ),
       );
-      /*
-      layerAnimation = RelativeRectTween(
-        begin: RelativeRect.fromLTRB(beginLeft, beginTop, 0.0, 0.0),
-        end: RelativeRect.fromLTRB(endLeft, endTop, 0.0, 0.0),
-      ).animate(_controller.view);
-      return PositionedTransition(
-        rect: layerAnimation,
-        child: Text(
-          lamb.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
-        ),
-      );
-      */
     }
 
     return null;
