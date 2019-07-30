@@ -1,5 +1,5 @@
 import 'dart:math' as Math;
-import 'utils.dart';
+import 'Utils.dart';
 
 class Next {
   String one = '0';
@@ -29,11 +29,10 @@ enum Status { alive, dead }
 
 class Pixie {
   Pixie(this.ilk);
-  var key = utils.CreateCryptoRandomString();
+  var key = Utils.createCryptoRandomString();
   var location = '';
   var lastLocation = '';
-  var moveRate = 0;
-  var movesLeft = 0;
+  var movesLeft = 1;
   var x = 0;
   var y = 0;
   var lastX = 0;
@@ -64,6 +63,7 @@ class Maze {
   }
 
   var numberOfRooms = 0;
+  final playerMoves = 3;
   Map<String, Room> myLabyrinth = Map();
   //var myStack = [];
   List<String> myStack = [];
@@ -437,6 +437,7 @@ class Maze {
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
     minotaur.emoji = '👺';
+    minotaur.movesLeft = maxRow;
   }
 
   void placePlayer() {
@@ -447,6 +448,7 @@ class Maze {
     loc.ilk = Ilk.player;
     player = loc;
     player.emoji = '👧🏼';
+    player.movesLeft = playerMoves;
   }
 
   bool closeToMinotaur(Pixie pix) {

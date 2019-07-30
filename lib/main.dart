@@ -55,7 +55,6 @@ class _MazeAreaState extends State<MazeArea>
   var rand = Math.Random.secure();
   var numRows = 8;
   var gameIsOver = false;
-  AnimationController _controller;
 
   @override
   void initState() {
@@ -63,23 +62,15 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget getAnimatedPixieIcon(Room room) {
-    var beginTop = 0.0; //(room.x -1) * roomLength;
-    var beginLeft = 0.0;
     var endTop = 0.0;
     var endLeft = 0.0;
 
     if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      beginTop = ((widget.maze.minotaur.lastY - 1) * roomLength) +
-          widget.maze.minotaur.lastY;
-      beginLeft = ((widget.maze.minotaur.lastX - 1) * roomLength) +
-          widget.maze.minotaur.lastX;
-      endTop = ((widget.maze.minotaur.y - 1) *
-          roomLength); // + widget.maze.minotaur.y;
+      endTop = ((widget.maze.minotaur.y - 1) * roomLength) +
+          (2 * widget.maze.minotaur.y) -
+          4;
       endLeft = ((widget.maze.minotaur.x - 1) * roomLength) +
-          widget.maze.minotaur.x +
-          5;
-
-      endTop = endTop * 0.98;
+          (2 * widget.maze.minotaur.x);
 
       return AnimatedPositioned(
         key: Key(widget.maze.minotaur.key),
@@ -95,14 +86,12 @@ class _MazeAreaState extends State<MazeArea>
     }
 
     if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
-      beginTop = ((widget.maze.player.lastY - 1) * roomLength) +
-          (widget.maze.player.lastY - 4);
-      beginLeft = ((widget.maze.player.lastX - 1) * roomLength) +
-          (3 * widget.maze.player.lastX - 1);
-      endTop = ((widget.maze.player.y - 1) * roomLength) * 0.99;
-      // +           (widget.maze.player.y - 4);
+      endTop = ((widget.maze.player.y - 1) * roomLength) +
+          (2 * widget.maze.player.y) -
+          4;
+
       endLeft = ((widget.maze.player.x - 1) * roomLength) +
-          (3 * widget.maze.player.x - 1);
+          (2 * widget.maze.player.x);
 
       return AnimatedPositioned(
         key: Key(widget.maze.player.key),
@@ -120,10 +109,8 @@ class _MazeAreaState extends State<MazeArea>
         orElse: () => null);
 
     if (lamb != null) {
-      beginTop = ((lamb.lastY - 1) * roomLength) + lamb.lastY;
-      beginLeft = ((lamb.lastX - 1) * roomLength) + lamb.lastX;
-      endTop = ((lamb.y - 1) * roomLength) + (0.4 * lamb.y);
-      endLeft = ((lamb.x - 1) * roomLength) + (2.75 * lamb.x);
+      endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y);
+      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x);
       // endTop = endTop * 0.99;
 
       return AnimatedPositioned(
@@ -177,6 +164,12 @@ class _MazeAreaState extends State<MazeArea>
     return null;
   }
 
+  void computerMove() {
+    moveMinotaur();
+    moveLambs();
+    widget.maze.player.movesLeft = widget.maze.playerMoves;
+  }
+
   Widget makeRoom(Room room) {
     /*  rooms shall be changed to square containers in rows of a set width */
     var floorColor = Colors.greenAccent;
@@ -185,42 +178,40 @@ class _MazeAreaState extends State<MazeArea>
     var westColor = (room.left == true) ? Colors.green : floorColor;
     var eastColor = (room.right == true) ? Colors.green : floorColor;
 
-    TableCellVerticalAlignment val = TableCellVerticalAlignment.middle;
+    return Container(
+      child: GestureDetector(
+        onTap: () {
+          print('_MazeRoomState   b_${room.x}_${room.y} tapped');
 
-    return Table(
-      border: TableBorder(
-        top: BorderSide(width: 1.0, color: northColor),
-        right: BorderSide(width: 1.0, color: eastColor),
-        left: BorderSide(width: 1.0, color: westColor),
-        bottom: BorderSide(width: 1.0, color: southColor),
-      ),
-      children: [
-        TableRow(
-          children: [
-            TableCell(
-              verticalAlignment: val,
-              child: GestureDetector(
-                onTap: () {
-                  print('_MazeRoomState   b_${room.x}_${room.y} tapped');
-                  widget.maze.player.x = widget.maze.player.x + 1;
-
-                  widget.maze.player.location =
-                      'b_${widget.maze.player.x}_${widget.maze.player.y}';
-                },
-                child: Container(
-                  color: floorColor,
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    width: roomLength,
-                    height: roomLength,
-                    // child: getRoomPixieIcon(room),
-                  ),
-                ),
-              ),
+          if (tryToMovePlayerToXY(widget.maze.player, room.x, room.y)) {
+            print('moved there');
+            if (widget.maze.player.movesLeft == 0) {
+              setState(() {
+                computerMove();
+              });
+            }
+          } else {
+            print('cannot move there');
+          }
+        },
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: floorColor,
+            border: Border(
+              bottom: BorderSide(color: southColor),
+              top: BorderSide(color: northColor),
+              right: BorderSide(color: eastColor),
+              left: BorderSide(color: westColor),
             ),
-          ],
+          ),
+          child: SizedBox(
+            width: roomLength,
+            height: roomLength,
+            // child: getRoomPixieIcon(room),
+          ),
         ),
-      ],
+      ),
     );
   }
 
@@ -230,10 +221,12 @@ class _MazeAreaState extends State<MazeArea>
         if (pix.ilk == Ilk.minotaur) {
           print('killed a lamb');
           widget.maze.player.lostLambs++;
+          widget.maze.minotaur.movesLeft = 0;
         }
         if (pix.ilk == Ilk.player) {
           print('saved a lamb');
           widget.maze.player.savedLambs++;
+          widget.maze.player.movesLeft = 0;
         }
       }
       if (pix.ilk == Ilk.lamb) {
@@ -241,6 +234,7 @@ class _MazeAreaState extends State<MazeArea>
           widget.maze.saveLamb(pix);
         }
       }
+      pix.movesLeft--;
       return true;
     }
     return false;
@@ -252,28 +246,72 @@ class _MazeAreaState extends State<MazeArea>
       switch (randint) {
         case 0:
           success = movePixie(pix, Directions.down);
-          randint++;
+          if (pix.ilk == Ilk.lamb) randint++;
           break;
         case 1:
           success = movePixie(pix, Directions.up);
-          randint++;
+          if (pix.ilk == Ilk.lamb) randint++;
           break;
         case 2:
           success = movePixie(pix, Directions.right);
-          randint++;
+          if (pix.ilk == Ilk.lamb) randint++;
           break;
         case 3:
           success = movePixie(pix, Directions.left);
-          randint = 0;
+          if (pix.ilk == Ilk.lamb) randint = 0;
       }
       if (success) return true;
+      if (pix.ilk == Ilk.minotaur) return false;
       numberOfMoveTries++;
     }
   }
 
+  bool tryToMovePlayerToXY(Pixie pix, int x, int y) {
+    print('try to move from  ${pix.x} ${pix.y} to $x $y');
+
+    if (x == (pix.x + 1) && y == pix.y) {
+      return movePixie(pix, Directions.right);
+    } else if (x == (pix.x - 1) && y == pix.y) {
+      return movePixie(pix, Directions.left);
+    } else if (x == (pix.x) && y == (pix.y + 1)) {
+      return movePixie(pix, Directions.down);
+    } else if (x == (pix.x) && y == (pix.y - 1)) {
+      return movePixie(pix, Directions.up);
+    }
+
+    return false;
+  }
+
   bool moveMinotaur() {
-    if (gameIsOver) return false;
-    return tryToMove(widget.maze.minotaur, rand.nextInt(4), 0);
+    // the minotaur moves in one direction until it gets a lamb,
+    // runs into a wall or stops at an intersection of halls
+    // first it charges the nearest pixie it sees (it cannot see around corners or through walls)
+    // if no pixie is targeted it moves at random until it reaches a wall or an intersection
+    // (there is a 50% chance it stops at an intersection unless it can now see a lamb when it will stop)
+
+    if (gameIsOver) {
+      return false;
+    }
+    var moved = false;
+    var dir = 0;
+    while (widget.maze.minotaur.movesLeft > 0) {
+      if (moved == false) {
+        dir = rand.nextInt(4);
+      }
+      if (tryToMove(widget.maze.minotaur, dir, 0)) {
+        moved = true;
+        print(
+            'mino moved to ${widget.maze.minotaur.x} ${widget.maze.minotaur.y}');
+      } else {
+        print('failed to move in that dir');
+        //if moved and then failed to move-- then end minotaurs turn
+        if (moved) {
+          widget.maze.minotaur.movesLeft = 0;
+        }
+      }
+    }
+    widget.maze.minotaur.movesLeft = widget.maze.maxRow;
+    return moved;
   }
 
   bool moveLambs() {
@@ -343,11 +381,11 @@ class _MazeAreaState extends State<MazeArea>
   @override
   Widget build(BuildContext context) {
     setSizes();
-    var trs = <TableRow>[];
+    var trs = <Row>[];
 
     for (int i = 1; i <= widget.maze.maxRow; i++) {
       trs.add(
-        TableRow(
+        Row(
           children: List.from(
             widget.maze.myLabyrinth.entries
                 .where((elroom) => elroom.value.y == i)
@@ -458,7 +496,7 @@ class _MazeAreaState extends State<MazeArea>
               width: maxWidth,
               height: maxWidth,
               child: Stack(overflow: Overflow.visible, children: [
-                Table(children: trs),
+                Column(children: trs),
 
                 // add pixies
                 ...pixies
@@ -481,19 +519,11 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                print('move north  pressed');
                                 setState(() {
-                                  if (gameIsOver == false) {
-                                    movePixie(
-                                        widget.maze.player, Directions.up);
-                                    if (widget.maze.player.moveRate <= 0) {
-                                      moveMinotaur();
-                                      moveLambs();
-                                    }
-                                    //_controller.fling();
-
-                                    print(
-                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
+                                  if (gameIsOver) return;
+                                  movePixie(widget.maze.player, Directions.up);
+                                  if (widget.maze.player.movesLeft <= 0) {
+                                    computerMove();
                                   }
                                 });
                               },
@@ -512,18 +542,14 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                print('move west pressed');
                                 if (gameIsOver == false) {
                                   setState(() {
                                     movePixie(
                                         widget.maze.player, Directions.left);
-                                    if (widget.maze.player.moveRate <= 0) {
+                                    if (widget.maze.player.movesLeft <= 0) {
                                       moveMinotaur();
                                       moveLambs();
                                     }
-
-                                    print(
-                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
                                   });
                                 }
                               },
@@ -562,18 +588,14 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                print(' move east pressed');
                                 if (gameIsOver == false) {
                                   setState(() {
                                     movePixie(
                                         widget.maze.player, Directions.right);
-                                    if (widget.maze.player.moveRate <= 0) {
+                                    if (widget.maze.player.movesLeft <= 0) {
                                       moveMinotaur();
                                       moveLambs();
                                     }
-
-                                    print(
-                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
                                   });
                                 }
                               },
@@ -592,17 +614,14 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                print('move south  pressed');
                                 if (gameIsOver == false) {
                                   setState(() {
                                     movePixie(
                                         widget.maze.player, Directions.down);
-                                    if (widget.maze.player.moveRate <= 0) {
+                                    if (widget.maze.player.movesLeft <= 0) {
                                       moveMinotaur();
                                       moveLambs();
                                     }
-                                    print(
-                                        'newlocation ${widget.maze.player.x} ${widget.maze.player.y}');
                                   });
                                 }
                               },
