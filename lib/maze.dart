@@ -25,7 +25,7 @@ class Room {
 
 enum Ilk { player, minotaur, lamb }
 enum Directions { up, down, right, left }
-enum Status { alive, dead }
+enum Condition { alive, dead, freed }
 
 class Pixie {
   Pixie(this.ilk);
@@ -39,10 +39,12 @@ class Pixie {
   var lastY = 0;
   var recentlyMoved = false;
   var ilk = Ilk.player;
-  var living = Status.alive;
+  var condition = Condition.alive;
   var savedLambs = 0;
   var lostLambs = 0;
   var emoji = '';
+  var newDirection = 0;
+  var follow = false;
 }
 
 class Maze {
@@ -98,20 +100,40 @@ class Maze {
   void saveLamb(Pixie lamb) {
     lamb.location = '';
     lamb.lastLocation = '';
-    lamb.living = Status.dead;
-    player.savedLambs++;
+    lamb.condition = Condition.dead;
   }
 
   bool killLambInRoom(Pixie pix) {
     var killed = false;
     lambs.forEach((el) {
       if (el.location == pix.location) {
-        el.location = '';
-        el.living = Status.dead;
+        //el.location = '';
+        if (pix.ilk == Ilk.minotaur) {
+          el.condition = Condition.dead;
+          player.lostLambs++;
+          minotaur.movesLeft = 0;
+          print('killed a lamb');
+        } else if (pix.ilk == Ilk.player) {
+          el.condition = Condition.freed;
+          player.savedLambs++;
+          player.movesLeft = 0;
+          print('saved a lamb');
+        }
         killed = true;
       }
     });
+
     return killed;
+  }
+
+  bool seeLambInRoom(Room room) {
+    var seen = false;
+    lambs.forEach((el) {
+      if (el.location == 'b_${room.x}_${room.y}') {
+        seen = true;
+      }
+    });
+    return seen;
   }
 
   bool moveTo(Pixie pix, int x, int y) {
@@ -405,11 +427,11 @@ class Maze {
     placeLambs();
   } // END FUNCTION ***********************
 
-  Pixie placePixie(bool inCenter) {
+  Pixie placePixie({bool mustBeNearCenter}) {
     var x = 0;
     var y = 0;
     var rand = Math.Random.secure();
-    if (inCenter == true) {
+    if (mustBeNearCenter == true) {
       var inc = 2;
       var half = (_maxRow / 2).floor();
       if (_maxRow > 10) {
@@ -430,9 +452,9 @@ class Maze {
   }
 
   void placeMinotaur() {
-    var loc = placePixie(true);
+    var loc = placePixie(mustBeNearCenter: true);
     while (player.location == loc.location) {
-      loc = placePixie(true);
+      loc = placePixie(mustBeNearCenter: true);
     }
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
@@ -441,14 +463,16 @@ class Maze {
   }
 
   void placePlayer() {
-    var loc = placePixie(false);
+    var loc = placePixie(mustBeNearCenter: false);
     while (minotaur.location == loc.location) {
-      loc = placePixie(false);
+      loc = placePixie(mustBeNearCenter: false);
     }
     loc.ilk = Ilk.player;
     player = loc;
     player.emoji = '👧🏼';
     player.movesLeft = playerMoves;
+    player.lostLambs = 0;
+    player.savedLambs = 0;
   }
 
   bool closeToMinotaur(Pixie pix) {
@@ -526,13 +550,13 @@ class Maze {
   void placeLambs() {
     lambs.clear();
     for (int i = 0; i < _maxRow; i++) {
-      var lamb = placePixie(false);
+      var lamb = placePixie(mustBeNearCenter: false);
 
       while (closeToMinotaur(lamb) ||
           minotaur.location == lamb.location ||
           player.location == lamb.location ||
           hasLamb(lamb.location)) {
-        lamb = placePixie(false);
+        lamb = placePixie(mustBeNearCenter: false);
       }
       lamb.ilk = Ilk.lamb;
       setLambEmoji(lamb, i);

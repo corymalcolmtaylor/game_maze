@@ -9,9 +9,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = 'Alice in The Hedge Maze';
-    final numberRows = 8;
-    Maze maze = Maze(numberRows);
-    maze.carveLabyrinth();
 
     return MaterialApp(
       title: title,
@@ -31,80 +28,77 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: Text(title),
         ),
-        body: MazeArea(maze),
+        body: MazeArea(),
       ),
     );
   }
 }
 
 class MazeArea extends StatefulWidget {
-  final Maze maze;
-
-  MazeArea(this.maze);
-
   @override
-  _MazeAreaState createState() => _MazeAreaState();
+  _MazeAreaState createState() {
+    return _MazeAreaState();
+  }
 }
 
 class _MazeAreaState extends State<MazeArea>
     with SingleTickerProviderStateMixin {
+  Maze maze;
+  var numRows = 8;
+
   var pixies = <Widget>[];
   var wallThickness = 2.0;
   var roomLength = 0.0;
   var maxWidth = 0.0;
   var rand = Math.Random.secure();
-  var numRows = 8;
+
   var gameIsOver = false;
 
   @override
   void initState() {
     super.initState();
+    maze = Maze(numRows);
+    maze.carveLabyrinth();
   }
 
   Widget getAnimatedPixieIcon(Room room) {
     var endTop = 0.0;
     var endLeft = 0.0;
 
-    if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      endTop = ((widget.maze.minotaur.y - 1) * roomLength) +
-          (2 * widget.maze.minotaur.y) -
-          4;
-      endLeft = ((widget.maze.minotaur.x - 1) * roomLength) +
-          (2 * widget.maze.minotaur.x);
+    if (maze.minotaur.location == 'b_${room.x}_${room.y}') {
+      endTop = ((maze.minotaur.y - 1) * roomLength) + (2 * maze.minotaur.y) - 4;
+      endLeft = ((maze.minotaur.x - 1) * roomLength) + (2 * maze.minotaur.x);
 
       return AnimatedPositioned(
-        key: Key(widget.maze.minotaur.key),
+        key: Key(maze.minotaur.key),
         left: endLeft,
         top: endTop,
         curve: Curves.linear,
         duration: Duration(milliseconds: 900),
         child: Text(
-          widget.maze.minotaur.emoji,
+          maze.minotaur.emoji,
           style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
         ),
       );
     }
 
-    if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
-      endTop = ((widget.maze.player.y - 1) * roomLength) +
-          (2 * widget.maze.player.y) -
-          4;
+    if (maze.player.location == 'b_${room.x}_${room.y}') {
+      endTop = ((maze.player.y - 1) * roomLength) + (2 * maze.player.y) - 4;
 
-      endLeft = ((widget.maze.player.x - 1) * roomLength) +
-          (2 * widget.maze.player.x);
+      endLeft = ((maze.player.x - 1) * roomLength) + (2 * maze.player.x);
 
       return AnimatedPositioned(
-        key: Key(widget.maze.player.key),
+        key: Key(maze.player.key),
         left: endLeft,
         top: endTop,
         duration: Duration(milliseconds: 900),
         child: Text(
-          widget.maze.player.emoji,
+          maze.player.emoji,
           style: TextStyle(color: Colors.black, fontSize: roomLength - 6),
         ),
       );
     }
-    var lamb = widget.maze.lambs.firstWhere(
+    var lamb = maze.lambs.firstWhere(
         (el) => el.location == 'b_${room.x}_${room.y}',
         orElse: () => null);
 
@@ -128,46 +122,15 @@ class _MazeAreaState extends State<MazeArea>
     return null;
   }
 
-  Widget getRoomPixieIcon(Room room) {
-    if (widget.maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      return Center(
-        child: Text(
-          widget.maze.minotaur.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
-        ),
-      );
-    }
-    if (widget.maze.player.location == 'b_${room.x}_${room.y}') {
-      return Center(
-        child: Text(
-          widget.maze.player.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
-        ),
-      );
-    }
-    var lamb = widget.maze.lambs.firstWhere(
-        (el) => el.location == 'b_${room.x}_${room.y}',
-        orElse: () => null);
-
-    if (lamb != null) {
-      return Center(
-        child: Text(
-          lamb.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 16),
-        ),
-      );
-    }
-    lamb = widget.maze.lambs.firstWhere(
-        (el) => el.lastLocation == 'b_${room.x}_${room.y}',
-        orElse: () => null);
-
-    return null;
-  }
-
   void computerMove() {
-    moveMinotaur();
-    moveLambs();
-    widget.maze.player.movesLeft = widget.maze.playerMoves;
+    setState(() {
+      moveMinotaur();
+    });
+    setState(() {
+      moveLambs();
+    });
+
+    maze.player.movesLeft = maze.playerMoves;
   }
 
   Widget makeRoom(Room room) {
@@ -182,16 +145,21 @@ class _MazeAreaState extends State<MazeArea>
       child: GestureDetector(
         onTap: () {
           print('_MazeRoomState   b_${room.x}_${room.y} tapped');
-
-          if (tryToMovePlayerToXY(widget.maze.player, room.x, room.y)) {
-            print('moved there');
-            if (widget.maze.player.movesLeft == 0) {
+          if (gameIsOver == false) {
+            if (tryToMovePlayerToXY(maze.player, room.x, room.y)) {
               setState(() {
-                computerMove();
+                print('player moved to  b_${room.x}_${room.y}');
               });
+
+              if (maze.player.movesLeft == 0) {
+                computerMove();
+              }
+            } else {
+              if (maze.player.movesLeft == 0) {
+                //computerMove();
+              }
+              print('cannot move there');
             }
-          } else {
-            print('cannot move there');
           }
         },
         child: Container(
@@ -216,22 +184,11 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   bool movePixie(Pixie pix, Directions dir) {
-    if (widget.maze.movePixie(pix, dir)) {
-      if (pix.ilk != Ilk.lamb && widget.maze.killLambInRoom(pix)) {
-        if (pix.ilk == Ilk.minotaur) {
-          print('killed a lamb');
-          widget.maze.player.lostLambs++;
-          widget.maze.minotaur.movesLeft = 0;
-        }
-        if (pix.ilk == Ilk.player) {
-          print('saved a lamb');
-          widget.maze.player.savedLambs++;
-          widget.maze.player.movesLeft = 0;
-        }
-      }
+    if (maze.movePixie(pix, dir)) {
+      if (pix.ilk != Ilk.lamb && maze.killLambInRoom(pix)) {}
       if (pix.ilk == Ilk.lamb) {
-        if (pix.location == widget.maze.player.location) {
-          widget.maze.saveLamb(pix);
+        if (pix.location == maze.player.location) {
+          maze.saveLamb(pix);
         }
       }
       pix.movesLeft--;
@@ -282,6 +239,11 @@ class _MazeAreaState extends State<MazeArea>
     return false;
   }
 
+  int directionOfSeenLamb() {
+    //  no lamb seen
+    return -1;
+  }
+
   bool moveMinotaur() {
     // the minotaur moves in one direction until it gets a lamb,
     // runs into a wall or stops at an intersection of halls
@@ -294,35 +256,57 @@ class _MazeAreaState extends State<MazeArea>
     }
     var moved = false;
     var dir = 0;
-    while (widget.maze.minotaur.movesLeft > 0) {
+    while (maze.minotaur.movesLeft > 0) {
       if (moved == false) {
         dir = rand.nextInt(4);
       }
-      if (tryToMove(widget.maze.minotaur, dir, 0)) {
+      /** at the beginning of mino's turn: 
+       * if mino can see a lamb charge it! endTurn(pix, newDirection, follow).
+       * if there is a  "newDirection" set "dir" == newDirection
+       * if !follow and "dir" leads to last square then randomly reset "dir" 
+       * look in dir direction and if it sees a dead end randomly reset "dir"
+       * MoveInDirection(pix, dir ){ //move one squre in direction "dir"
+       * if mino is on an intersection !follow and can see a lamb in another direction 
+       ** then stop and remember newDirection, set "follow" = true, endTurn(pix, newDirection, follow=true).
+       * else if mino is on an intersection then 
+       ** there is a 50% chance to -- change direction and remember a newDirection and endTurn(pix, newDirection, follow=false).
+       * if hit a wall and can see a lamb endTurn(pix, newDirection, follow=true).
+       * else if hit a wall and cannot see a lamb endTurn(pix, newDirection, follow=false).
+       * else MoveInDirection(pix, dir )
+       * 
+       * }
+       */
+      var lambDir = directionOfSeenLamb();
+      if (lambDir > -1) {
+        dir = lambDir;
+      }
+
+      if (tryToMove(maze.minotaur, dir, 0)) {
         moved = true;
-        print(
-            'mino moved to ${widget.maze.minotaur.x} ${widget.maze.minotaur.y}');
+        print('mino moved to ${maze.minotaur.x} ${maze.minotaur.y}');
       } else {
         print('failed to move in that dir');
         //if moved and then failed to move-- then end minotaurs turn
         if (moved) {
-          widget.maze.minotaur.movesLeft = 0;
+          maze.minotaur.movesLeft = 0;
         }
       }
     }
-    widget.maze.minotaur.movesLeft = widget.maze.maxRow;
+    maze.minotaur.movesLeft = maze.maxRow;
     return moved;
   }
 
   bool moveLambs() {
     if (gameIsOver) return false;
-    widget.maze.lambs.forEach((lamb) {
-      if (lamb.living == Status.alive) {
+    maze.lambs.forEach((lamb) {
+      if (lamb.condition == Condition.alive) {
         tryToMove(lamb, rand.nextInt(4), 0);
+      } else {
+        lamb.location = '';
       }
     });
     var anyLeftAlive =
-        widget.maze.lambs.any((lamb) => lamb.living == Status.alive);
+        maze.lambs.any((lamb) => lamb.condition == Condition.alive);
     if (!anyLeftAlive) {
       return endGame();
     }
@@ -332,17 +316,18 @@ class _MazeAreaState extends State<MazeArea>
   bool endGame() {
     gameIsOver = true;
     Text message;
-    if (widget.maze.player.savedLambs > widget.maze.player.lostLambs) {
-      message = Text('You Win');
-    } else {
-      message = Text('You Lose');
-    }
-    _neverSatisfied(message);
 
-    return false;
+    message = Text(
+        'Friends freed: ${maze.player.savedLambs}\nFriends lost: ${maze.player.lostLambs}');
+
+    showGameOverMessage(message);
+    print('after show dialog');
+
+    return gameIsOver;
   }
 
-  Future<void> _neverSatisfied(Text msg) async {
+  Future<void> showGameOverMessage(Text msg) async {
+    print('ere show dialog');
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -359,6 +344,10 @@ class _MazeAreaState extends State<MazeArea>
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
+                setState(() {
+                  print('new game pressed');
+                  startNewGame();
+                });
               },
             ),
           ],
@@ -373,8 +362,7 @@ class _MazeAreaState extends State<MazeArea>
       maxWidth = MediaQuery.of(context).size.height * 0.75;
     }
     roomLength =
-        ((maxWidth.floor() - (wallThickness * (widget.maze.maxRow + 1))) /
-                widget.maze.maxRow)
+        ((maxWidth.floor() - (wallThickness * (maze.maxRow + 1))) / maze.maxRow)
             .floorToDouble();
   }
 
@@ -383,11 +371,11 @@ class _MazeAreaState extends State<MazeArea>
     setSizes();
     var trs = <Row>[];
 
-    for (int i = 1; i <= widget.maze.maxRow; i++) {
+    for (int i = 1; i <= maze.maxRow; i++) {
       trs.add(
         Row(
           children: List.from(
-            widget.maze.myLabyrinth.entries
+            maze.myLabyrinth.entries
                 .where((elroom) => elroom.value.y == i)
                 .map(
                   (el) => makeRoom(el.value),
@@ -399,7 +387,7 @@ class _MazeAreaState extends State<MazeArea>
     }
     // add pixies
 
-    pixies = List.from(widget.maze.myLabyrinth.entries
+    pixies = List.from(maze.myLabyrinth.entries
         .map(
           (el) => getAnimatedPixieIcon(el.value),
         )
@@ -461,12 +449,7 @@ class _MazeAreaState extends State<MazeArea>
                         onPressed: () {
                           setState(() {
                             print('new game pressed');
-                            pixies.clear();
-                            widget.maze.maxRow = numRows;
-                            setSizes();
-                            widget.maze.initMaze();
-                            widget.maze.carveLabyrinth();
-                            gameIsOver = false;
+                            startNewGame();
                           });
                         },
                         child: Text('New Game'),
@@ -484,11 +467,11 @@ class _MazeAreaState extends State<MazeArea>
                   Text('Friends Lost:'),
                   Padding(
                       padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                      child: Text(widget.maze.player.lostLambs.toString())),
+                      child: Text(maze.player.lostLambs.toString())),
                   Text('Friends Saved:'),
                   Padding(
                       padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                      child: Text(widget.maze.player.savedLambs.toString())),
+                      child: Text(maze.player.savedLambs.toString())),
                 ],
               ),
             ),
@@ -519,13 +502,17 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                setState(() {
-                                  if (gameIsOver) return;
-                                  movePixie(widget.maze.player, Directions.up);
-                                  if (widget.maze.player.movesLeft <= 0) {
-                                    computerMove();
-                                  }
-                                });
+                                if (gameIsOver) return;
+                                if (movePixie(maze.player, Directions.up)) {
+                                  setState(() {
+                                    print('player moved up');
+                                  });
+                                } else {
+                                  maze.player.movesLeft = 0;
+                                }
+                                if (maze.player.movesLeft <= 0) {
+                                  computerMove();
+                                }
                               },
                               icon: Icon(Icons.arrow_upward),
                             ),
@@ -543,14 +530,16 @@ class _MazeAreaState extends State<MazeArea>
                             child: IconButton(
                               onPressed: () {
                                 if (gameIsOver == false) {
-                                  setState(() {
-                                    movePixie(
-                                        widget.maze.player, Directions.left);
-                                    if (widget.maze.player.movesLeft <= 0) {
-                                      moveMinotaur();
-                                      moveLambs();
-                                    }
-                                  });
+                                  if (movePixie(maze.player, Directions.left)) {
+                                    setState(() {
+                                      print('player moved left');
+                                    });
+                                  } else {
+                                    maze.player.movesLeft = 0;
+                                  }
+                                  if (maze.player.movesLeft <= 0) {
+                                    computerMove();
+                                  }
                                 }
                               },
                               icon: Icon(Icons.arrow_back),
@@ -567,14 +556,9 @@ class _MazeAreaState extends State<MazeArea>
                                 onPressed: () {
                                   print('stay  pressed');
                                   if (gameIsOver == false) {
-                                    setState(() {
-                                      widget.maze.player.movesLeft = 0;
-
-                                      moveMinotaur();
-                                      moveLambs();
-
-                                      print('end turn ');
-                                    });
+                                    maze.player.movesLeft = 0;
+                                    computerMove();
+                                    print('end turn ');
                                   }
                                 },
                                 icon: Icon(Icons.pause),
@@ -589,14 +573,17 @@ class _MazeAreaState extends State<MazeArea>
                             child: IconButton(
                               onPressed: () {
                                 if (gameIsOver == false) {
-                                  setState(() {
-                                    movePixie(
-                                        widget.maze.player, Directions.right);
-                                    if (widget.maze.player.movesLeft <= 0) {
-                                      moveMinotaur();
-                                      moveLambs();
-                                    }
-                                  });
+                                  if (movePixie(
+                                      maze.player, Directions.right)) {
+                                    setState(() {
+                                      print('player moved right');
+                                    });
+                                  } else {
+                                    maze.player.movesLeft = 0;
+                                  }
+                                  if (maze.player.movesLeft <= 0) {
+                                    computerMove();
+                                  }
                                 }
                               },
                               icon: Icon(Icons.arrow_forward),
@@ -615,14 +602,16 @@ class _MazeAreaState extends State<MazeArea>
                             child: IconButton(
                               onPressed: () {
                                 if (gameIsOver == false) {
-                                  setState(() {
-                                    movePixie(
-                                        widget.maze.player, Directions.down);
-                                    if (widget.maze.player.movesLeft <= 0) {
-                                      moveMinotaur();
-                                      moveLambs();
-                                    }
-                                  });
+                                  if (movePixie(maze.player, Directions.down)) {
+                                    setState(() {
+                                      print('player moved down');
+                                    });
+                                  } else {
+                                    maze.player.movesLeft = 0;
+                                  }
+                                  if (maze.player.movesLeft <= 0) {
+                                    computerMove();
+                                  }
                                 }
                               },
                               icon: Icon(Icons.arrow_downward),
@@ -640,4 +629,51 @@ class _MazeAreaState extends State<MazeArea>
       ],
     );
   }
+
+  void startNewGame() {
+    pixies.clear();
+    maze.maxRow = numRows;
+    setSizes();
+    maze.initMaze();
+    maze.carveLabyrinth();
+    gameIsOver = false;
+  }
+
+  /*
+  Widget getRoomPixieIcon(Room room) {
+    if (maze.minotaur.location == 'b_${room.x}_${room.y}') {
+      return Center(
+        child: Text(
+          maze.minotaur.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+        ),
+      );
+    }
+    if (maze.player.location == 'b_${room.x}_${room.y}') {
+      return Center(
+        child: Text(
+          maze.player.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+        ),
+      );
+    }
+    var lamb = maze.lambs.firstWhere(
+        (el) => el.location == 'b_${room.x}_${room.y}',
+        orElse: () => null);
+
+    if (lamb != null) {
+      return Center(
+        child: Text(
+          lamb.emoji,
+          style: TextStyle(color: Colors.black, fontSize: roomLength - 16),
+        ),
+      );
+    }
+    lamb = maze.lambs.firstWhere(
+        (el) => el.lastLocation == 'b_${room.x}_${room.y}',
+        orElse: () => null);
+
+    return null;
+  }
+*/
 }
