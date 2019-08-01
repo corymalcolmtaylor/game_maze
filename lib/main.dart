@@ -46,7 +46,7 @@ class _MazeAreaState extends State<MazeArea>
   Maze maze;
   var numRows = 8;
 
-  var pixies = <Widget>[];
+  var sprites = <Widget>[];
   var wallThickness = 2.0;
   var roomLength = 0.0;
   var maxWidth = 0.0;
@@ -61,14 +61,13 @@ class _MazeAreaState extends State<MazeArea>
     maze.carveLabyrinth();
   }
 
-  Widget getAnimatedPixieIcon(Room room) {
+  AnimatedPositioned getAnimatedSpriteIconForBosses(Pixie pix) {
     var endTop = 0.0;
     var endLeft = 0.0;
+    endTop = ((pix.y - 1) * roomLength) + (2 * pix.y) - 4;
+    endLeft = ((pix.x - 1) * roomLength) + (2 * pix.x);
 
-    if (maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      endTop = ((maze.minotaur.y - 1) * roomLength) + (2 * maze.minotaur.y) - 4;
-      endLeft = ((maze.minotaur.x - 1) * roomLength) + (2 * maze.minotaur.x);
-
+    if (pix.ilk == Ilk.minotaur) {
       return AnimatedPositioned(
         key: Key(maze.minotaur.key),
         left: endLeft,
@@ -82,11 +81,7 @@ class _MazeAreaState extends State<MazeArea>
       );
     }
 
-    if (maze.player.location == 'b_${room.x}_${room.y}') {
-      endTop = ((maze.player.y - 1) * roomLength) + (2 * maze.player.y) - 4;
-
-      endLeft = ((maze.player.x - 1) * roomLength) + (2 * maze.player.x);
-
+    if (pix.ilk == Ilk.player) {
       return AnimatedPositioned(
         key: Key(maze.player.key),
         left: endLeft,
@@ -98,28 +93,75 @@ class _MazeAreaState extends State<MazeArea>
         ),
       );
     }
-    var lamb = maze.lambs.firstWhere(
-        (el) => el.location == 'b_${room.x}_${room.y}',
-        orElse: () => null);
+    return null;
+  }
 
-    if (lamb != null) {
-      endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y);
-      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x);
-      // endTop = endTop * 0.99;
+  List<AnimatedPositioned> getAnimatedSpriteIconsForLambs(Room room) {
+    var endTop = 0.0;
+    var endLeft = 0.0;
+    List<AnimatedPositioned> icons = [];
 
-      return AnimatedPositioned(
-        key: Key(lamb.key),
-        left: endLeft,
-        top: endTop,
-        duration: Duration(milliseconds: 900),
-        child: Text(
-          lamb.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+    if (false && maze.minotaur.location == 'b_${room.x}_${room.y}') {
+      endTop = ((maze.minotaur.y - 1) * roomLength) + (2 * maze.minotaur.y) - 4;
+      endLeft = ((maze.minotaur.x - 1) * roomLength) + (2 * maze.minotaur.x);
+
+      icons.add(
+        AnimatedPositioned(
+          key: Key(maze.minotaur.key),
+          left: endLeft,
+          top: endTop,
+          curve: Curves.linear,
+          duration: Duration(milliseconds: 900),
+          child: Text(
+            maze.minotaur.emoji,
+            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
+          ),
         ),
       );
     }
 
-    return null;
+    if (false && maze.player.location == 'b_${room.x}_${room.y}') {
+      endTop = ((maze.player.y - 1) * roomLength) + (2 * maze.player.y) - 4;
+      endLeft = ((maze.player.x - 1) * roomLength) + (2 * maze.player.x);
+
+      icons.add(
+        AnimatedPositioned(
+          key: Key(maze.player.key),
+          left: endLeft,
+          top: endTop,
+          duration: Duration(milliseconds: 900),
+          child: Text(
+            maze.player.emoji,
+            style: TextStyle(color: Colors.black, fontSize: roomLength - 6),
+          ),
+        ),
+      );
+    }
+    var lambs = maze.lambs.where(
+      (el) => el.location == 'b_${room.x}_${room.y}',
+    );
+
+    if (lambs != null) {
+      lambs.forEach((lamb) {
+        endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y);
+        endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x);
+
+        icons.add(
+          AnimatedPositioned(
+            key: Key(lamb.key),
+            left: endLeft,
+            top: endTop,
+            duration: Duration(milliseconds: 900),
+            child: Text(
+              lamb.emoji,
+              style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+            ),
+          ),
+        );
+      });
+    }
+
+    return icons;
   }
 
   void computerMove() {
@@ -302,7 +344,7 @@ class _MazeAreaState extends State<MazeArea>
       if (lamb.condition == Condition.alive) {
         tryToMove(lamb, rand.nextInt(4), 0);
       } else {
-        lamb.location = '';
+        //lamb.location = '';
       }
     });
     var anyLeftAlive =
@@ -385,14 +427,18 @@ class _MazeAreaState extends State<MazeArea>
         ),
       );
     }
-    // add pixies
+    // add sprites
 
-    pixies = List.from(maze.myLabyrinth.entries
-        .map(
-          (el) => getAnimatedPixieIcon(el.value),
-        )
-        .toList());
-    pixies.removeWhere((item) => item == null);
+    var llsprites = List.from(maze.myLabyrinth.entries.map(
+      (el) => getAnimatedSpriteIconsForLambs(el.value),
+    ));
+
+    sprites.clear();
+    llsprites.forEach((ll) {
+      sprites.addAll(ll);
+    });
+    sprites.add(getAnimatedSpriteIconForBosses(maze.player));
+    sprites.add(getAnimatedSpriteIconForBosses(maze.minotaur));
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -482,7 +528,7 @@ class _MazeAreaState extends State<MazeArea>
                 Column(children: trs),
 
                 // add pixies
-                ...pixies
+                ...sprites
               ]),
             ),
             Row(
@@ -631,49 +677,11 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void startNewGame() {
-    pixies.clear();
+    sprites.clear();
     maze.maxRow = numRows;
     setSizes();
     maze.initMaze();
     maze.carveLabyrinth();
     gameIsOver = false;
   }
-
-  /*
-  Widget getRoomPixieIcon(Room room) {
-    if (maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      return Center(
-        child: Text(
-          maze.minotaur.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
-        ),
-      );
-    }
-    if (maze.player.location == 'b_${room.x}_${room.y}') {
-      return Center(
-        child: Text(
-          maze.player.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
-        ),
-      );
-    }
-    var lamb = maze.lambs.firstWhere(
-        (el) => el.location == 'b_${room.x}_${room.y}',
-        orElse: () => null);
-
-    if (lamb != null) {
-      return Center(
-        child: Text(
-          lamb.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 16),
-        ),
-      );
-    }
-    lamb = maze.lambs.firstWhere(
-        (el) => el.lastLocation == 'b_${room.x}_${room.y}',
-        orElse: () => null);
-
-    return null;
-  }
-*/
 }
