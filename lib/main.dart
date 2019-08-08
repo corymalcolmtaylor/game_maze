@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as Math;
+
 import 'maze.dart';
 
 void main() => runApp(MyApp());
@@ -44,13 +44,14 @@ class MazeArea extends StatefulWidget {
 class _MazeAreaState extends State<MazeArea>
     with SingleTickerProviderStateMixin {
   Maze maze;
-  var numRows = 8;
+  int numRows = 8;
+  final maximumMoveAttempts = 8;
+  static const animDurationMilliSeconds = 900;
 
   var sprites = <Widget>[];
-  var wallThickness = 2.0;
+  final wallThickness = 2.0;
   var roomLength = 0.0;
   var maxWidth = 0.0;
-  var rand = Math.Random.secure();
 
   var gameIsOver = false;
 
@@ -61,7 +62,7 @@ class _MazeAreaState extends State<MazeArea>
     maze.carveLabyrinth();
   }
 
-  AnimatedPositioned getAnimatedSpriteIconForBosses(Pixie pix) {
+  AnimatedPositioned getAnimatedSpriteIconForBosses({@required Pixie pix}) {
     var endTop = 0.0;
     var endLeft = 0.0;
     endTop = ((pix.y - 1) * roomLength) + (2 * pix.y) - 4;
@@ -73,7 +74,7 @@ class _MazeAreaState extends State<MazeArea>
         left: endLeft,
         top: endTop,
         curve: Curves.linear,
-        duration: Duration(milliseconds: 900),
+        duration: Duration(milliseconds: animDurationMilliSeconds),
         child: Text(
           maze.minotaur.emoji,
           style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
@@ -86,7 +87,7 @@ class _MazeAreaState extends State<MazeArea>
         key: Key(maze.player.key),
         left: endLeft,
         top: endTop,
-        duration: Duration(milliseconds: 900),
+        duration: Duration(milliseconds: animDurationMilliSeconds),
         child: Text(
           maze.player.emoji,
           style: TextStyle(color: Colors.black, fontSize: roomLength - 6),
@@ -101,78 +102,99 @@ class _MazeAreaState extends State<MazeArea>
     var endLeft = 0.0;
     List<AnimatedPositioned> icons = [];
 
-    if (false && maze.minotaur.location == 'b_${room.x}_${room.y}') {
-      endTop = ((maze.minotaur.y - 1) * roomLength) + (2 * maze.minotaur.y) - 4;
-      endLeft = ((maze.minotaur.x - 1) * roomLength) + (2 * maze.minotaur.x);
-
-      icons.add(
-        AnimatedPositioned(
-          key: Key(maze.minotaur.key),
-          left: endLeft,
-          top: endTop,
-          curve: Curves.linear,
-          duration: Duration(milliseconds: 900),
-          child: Text(
-            maze.minotaur.emoji,
-            style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
-          ),
-        ),
-      );
-    }
-
-    if (false && maze.player.location == 'b_${room.x}_${room.y}') {
-      endTop = ((maze.player.y - 1) * roomLength) + (2 * maze.player.y) - 4;
-      endLeft = ((maze.player.x - 1) * roomLength) + (2 * maze.player.x);
-
-      icons.add(
-        AnimatedPositioned(
-          key: Key(maze.player.key),
-          left: endLeft,
-          top: endTop,
-          duration: Duration(milliseconds: 900),
-          child: Text(
-            maze.player.emoji,
-            style: TextStyle(color: Colors.black, fontSize: roomLength - 6),
-          ),
-        ),
-      );
-    }
     var lambs = maze.lambs.where(
       (el) => el.location == 'b_${room.x}_${room.y}',
     );
 
-    if (lambs != null) {
-      lambs.forEach((lamb) {
-        endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y);
-        endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x);
-
+    lambs.forEach((lamb) {
+      endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y);
+      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x);
+      if (lamb.condition == Condition.dead) {
+        lamb.emoji = '☠️';
         icons.add(
           AnimatedPositioned(
             key: Key(lamb.key),
             left: endLeft,
             top: endTop,
-            duration: Duration(milliseconds: 900),
+            duration: Duration(milliseconds: animDurationMilliSeconds),
             child: Text(
               lamb.emoji,
               style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
             ),
           ),
         );
-      });
-    }
+      } else if (lamb.condition == Condition.freed) {
+        icons.add(
+          AnimatedPositioned(
+            key: Key(lamb.key),
+            left: endLeft,
+            top: endTop,
+            duration: Duration(milliseconds: animDurationMilliSeconds),
+            child: Text(
+              lamb.emoji,
+              style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+            ),
+          ),
+        );
+      } else {
+        icons.add(
+          AnimatedPositioned(
+            key: Key(lamb.key),
+            left: endLeft,
+            top: endTop,
+            duration: Duration(milliseconds: animDurationMilliSeconds),
+            child: Text(
+              lamb.emoji,
+              style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+            ),
+          ),
+        );
+      }
+    });
 
     return icons;
   }
 
   void computerMove() {
+    var gameOver = false;
+
+    maze.moveMinotaur();
     setState(() {
-      moveMinotaur();
-    });
-    setState(() {
-      moveLambs();
+      print('moved minotaur');
     });
 
-    maze.player.movesLeft = maze.playerMoves;
+    Future.delayed(const Duration(milliseconds: 100), () {
+// Here you can write your code
+
+      setState(() {
+        // Here you can write your code for open new view
+      });
+    });
+    gameOver = maze.moveLambs();
+
+    Future.delayed(const Duration(milliseconds: animDurationMilliSeconds), () {
+// Here you can write your code
+      maze.lambs.forEach((lamb) {
+        if (lamb.condition == Condition.dead) {
+          lamb.location = '';
+          lamb.lastLocation = '';
+        }
+      });
+      setState(() {
+        // Here you can write your code for open new view
+      });
+    });
+    if (gameOver) {
+      Text message;
+
+      message = Text(
+          'Friends freed: ${maze.player.savedLambs}\nFriends lost: ${maze.player.lostLambs}');
+
+      showGameOverMessage(message);
+      print('after show dialog');
+    } else {
+      maze.player.movesLeft = maze.playerMoves;
+    }
   }
 
   Widget makeRoom(Room room) {
@@ -187,19 +209,26 @@ class _MazeAreaState extends State<MazeArea>
       child: GestureDetector(
         onTap: () {
           print('_MazeRoomState   b_${room.x}_${room.y} tapped');
+          if (maze.player.movesLeft <= 0) {
+            return;
+          }
           if (gameIsOver == false) {
-            if (tryToMovePlayerToXY(maze.player, room.x, room.y)) {
+            maze.lambs.forEach((lamb) {
+              if (lamb.condition != Condition.alive && lamb.location != '') {
+                lamb.location = '';
+                lamb.lastLocation = '';
+              }
+            });
+            if (maze.tryToMovePlayerToXY(maze.player, room.x, room.y)) {
               setState(() {
                 print('player moved to  b_${room.x}_${room.y}');
               });
 
               if (maze.player.movesLeft == 0) {
+                print('now computer to move ');
                 computerMove();
               }
             } else {
-              if (maze.player.movesLeft == 0) {
-                //computerMove();
-              }
               print('cannot move there');
             }
           }
@@ -223,149 +252,6 @@ class _MazeAreaState extends State<MazeArea>
         ),
       ),
     );
-  }
-
-  bool movePixie(Pixie pix, Directions dir) {
-    if (maze.movePixie(pix, dir)) {
-      if (pix.ilk != Ilk.lamb && maze.killLambInRoom(pix)) {}
-      if (pix.ilk == Ilk.lamb) {
-        if (pix.location == maze.player.location) {
-          maze.saveLamb(pix);
-        }
-      }
-      pix.movesLeft--;
-      return true;
-    }
-    return false;
-  }
-
-  tryToMove(Pixie pix, int randint, int numberOfMoveTries) {
-    bool success = false;
-    while (numberOfMoveTries < 8) {
-      switch (randint) {
-        case 0:
-          success = movePixie(pix, Directions.down);
-          if (pix.ilk == Ilk.lamb) randint++;
-          break;
-        case 1:
-          success = movePixie(pix, Directions.up);
-          if (pix.ilk == Ilk.lamb) randint++;
-          break;
-        case 2:
-          success = movePixie(pix, Directions.right);
-          if (pix.ilk == Ilk.lamb) randint++;
-          break;
-        case 3:
-          success = movePixie(pix, Directions.left);
-          if (pix.ilk == Ilk.lamb) randint = 0;
-      }
-      if (success) return true;
-      if (pix.ilk == Ilk.minotaur) return false;
-      numberOfMoveTries++;
-    }
-  }
-
-  bool tryToMovePlayerToXY(Pixie pix, int x, int y) {
-    print('try to move from  ${pix.x} ${pix.y} to $x $y');
-
-    if (x == (pix.x + 1) && y == pix.y) {
-      return movePixie(pix, Directions.right);
-    } else if (x == (pix.x - 1) && y == pix.y) {
-      return movePixie(pix, Directions.left);
-    } else if (x == (pix.x) && y == (pix.y + 1)) {
-      return movePixie(pix, Directions.down);
-    } else if (x == (pix.x) && y == (pix.y - 1)) {
-      return movePixie(pix, Directions.up);
-    }
-
-    return false;
-  }
-
-  int directionOfSeenLamb() {
-    //  no lamb seen
-    return -1;
-  }
-
-  bool moveMinotaur() {
-    // the minotaur moves in one direction until it gets a lamb,
-    // runs into a wall or stops at an intersection of halls
-    // first it charges the nearest pixie it sees (it cannot see around corners or through walls)
-    // if no pixie is targeted it moves at random until it reaches a wall or an intersection
-    // (there is a 50% chance it stops at an intersection unless it can now see a lamb when it will stop)
-
-    if (gameIsOver) {
-      return false;
-    }
-    var moved = false;
-    var dir = 0;
-    while (maze.minotaur.movesLeft > 0) {
-      if (moved == false) {
-        dir = rand.nextInt(4);
-      }
-      /** at the beginning of mino's turn: 
-       * if mino can see a lamb charge it! endTurn(pix, newDirection, follow).
-       * if there is a  "newDirection" set "dir" == newDirection
-       * if !follow and "dir" leads to last square then randomly reset "dir" 
-       * look in dir direction and if it sees a dead end randomly reset "dir"
-       * MoveInDirection(pix, dir ){ //move one squre in direction "dir"
-       * if mino is on an intersection !follow and can see a lamb in another direction 
-       ** then stop and remember newDirection, set "follow" = true, endTurn(pix, newDirection, follow=true).
-       * else if mino is on an intersection then 
-       ** there is a 50% chance to -- change direction and remember a newDirection and endTurn(pix, newDirection, follow=false).
-       * if hit a wall and can see a lamb endTurn(pix, newDirection, follow=true).
-       * else if hit a wall and cannot see a lamb endTurn(pix, newDirection, follow=false).
-       * else MoveInDirection(pix, dir )
-       * 
-       * }
-       */
-      var lambDir = directionOfSeenLamb();
-      if (lambDir > -1) {
-        dir = lambDir;
-      }
-
-      if (tryToMove(maze.minotaur, dir, 0)) {
-        moved = true;
-        print('mino moved to ${maze.minotaur.x} ${maze.minotaur.y}');
-      } else {
-        print('failed to move in that dir');
-        //if moved and then failed to move-- then end minotaurs turn
-        if (moved) {
-          maze.minotaur.movesLeft = 0;
-        }
-      }
-    }
-    maze.minotaur.movesLeft = maze.maxRow;
-    return moved;
-  }
-
-  bool moveLambs() {
-    if (gameIsOver) return false;
-    maze.lambs.forEach((lamb) {
-      if (lamb.condition == Condition.alive) {
-        tryToMove(lamb, rand.nextInt(4), 0);
-      } else {
-        //lamb.location = '';
-      }
-    });
-    var anyLeftAlive =
-        maze.lambs.any((lamb) => lamb.condition == Condition.alive);
-    if (!anyLeftAlive) {
-      return endGame();
-    }
-    return true;
-  }
-
-  bool endGame() {
-    gameIsOver = true;
-    Text message;
-
-    message = Text(
-        'Friends freed: ${maze.player.savedLambs}\nFriends lost: ${maze.player.lostLambs}');
-
-    showGameOverMessage(message);
-    print('after show dialog');
-
-    return gameIsOver;
   }
 
   Future<void> showGameOverMessage(Text msg) async {
@@ -437,11 +323,11 @@ class _MazeAreaState extends State<MazeArea>
     llsprites.forEach((ll) {
       sprites.addAll(ll);
     });
-    sprites.add(getAnimatedSpriteIconForBosses(maze.player));
-    sprites.add(getAnimatedSpriteIconForBosses(maze.minotaur));
+    sprites.add(getAnimatedSpriteIconForBosses(pix: maze.player));
+    sprites.add(getAnimatedSpriteIconForBosses(pix: maze.minotaur));
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return ListView(
+      //mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Column(
           children: <Widget>[
@@ -548,15 +434,7 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                if (gameIsOver) return;
-                                if (movePixie(maze.player, Directions.up)) {
-                                  setState(() {
-                                    print('player moved up');
-                                  });
-                                } else {
-                                  maze.player.movesLeft = 0;
-                                }
-                                if (maze.player.movesLeft <= 0) {
+                                if (movePlayer(direction: Directions.up) <= 0) {
                                   computerMove();
                                 }
                               },
@@ -575,17 +453,9 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                if (gameIsOver == false) {
-                                  if (movePixie(maze.player, Directions.left)) {
-                                    setState(() {
-                                      print('player moved left');
-                                    });
-                                  } else {
-                                    maze.player.movesLeft = 0;
-                                  }
-                                  if (maze.player.movesLeft <= 0) {
-                                    computerMove();
-                                  }
+                                if (movePlayer(direction: Directions.left) <=
+                                    0) {
+                                  computerMove();
                                 }
                               },
                               icon: Icon(Icons.arrow_back),
@@ -618,18 +488,9 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                if (gameIsOver == false) {
-                                  if (movePixie(
-                                      maze.player, Directions.right)) {
-                                    setState(() {
-                                      print('player moved right');
-                                    });
-                                  } else {
-                                    maze.player.movesLeft = 0;
-                                  }
-                                  if (maze.player.movesLeft <= 0) {
-                                    computerMove();
-                                  }
+                                if (movePlayer(direction: Directions.right) <=
+                                    0) {
+                                  computerMove();
                                 }
                               },
                               icon: Icon(Icons.arrow_forward),
@@ -647,17 +508,9 @@ class _MazeAreaState extends State<MazeArea>
                             ),
                             child: IconButton(
                               onPressed: () {
-                                if (gameIsOver == false) {
-                                  if (movePixie(maze.player, Directions.down)) {
-                                    setState(() {
-                                      print('player moved down');
-                                    });
-                                  } else {
-                                    maze.player.movesLeft = 0;
-                                  }
-                                  if (maze.player.movesLeft <= 0) {
-                                    computerMove();
-                                  }
+                                if (movePlayer(direction: Directions.down) <=
+                                    0) {
+                                  computerMove();
                                 }
                               },
                               icon: Icon(Icons.arrow_downward),
@@ -674,6 +527,30 @@ class _MazeAreaState extends State<MazeArea>
         ),
       ],
     );
+  }
+
+  int movePlayer({Directions direction}) {
+    if (gameIsOver) return 0;
+    maze.lambs.forEach((lamb) {
+      if (lamb.condition == Condition.freed) {
+        lamb.location = '';
+        lamb.lastLocation = '';
+      }
+    });
+    if (maze.player.movesLeft <= 0) {
+      maze.player.movesLeft = -1;
+      return 0;
+    }
+
+    if (maze.moveSprite(maze.player, direction)) {
+      setState(() {
+        print('player moved  ' + direction.toString());
+      });
+    } else {
+      maze.player.movesLeft = 0;
+    }
+
+    return maze.player.movesLeft;
   }
 
   void startNewGame() {

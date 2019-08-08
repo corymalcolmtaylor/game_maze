@@ -43,13 +43,16 @@ class Pixie {
   var savedLambs = 0;
   var lostLambs = 0;
   var emoji = '';
-  var newDirection = 0;
+  Directions newDirection;
   var follow = false;
+  Directions direction;
 }
 
 class Maze {
   int _maxRow;
   int _maxCol;
+  bool gameIsOver = false;
+  var rand = Math.Random.secure();
 
   int get maxRow {
     return _maxRow;
@@ -87,6 +90,7 @@ class Maze {
     _maxCol = _maxRow;
     lambs.clear();
     myLabyrinth.clear();
+    gameIsOver = false;
     for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
       for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
         myLabyrinth['b_${xloop}_$yloop'] = new Room();
@@ -97,33 +101,33 @@ class Maze {
     }
   }
 
-  void saveLamb(Pixie lamb) {
-    lamb.location = '';
-    lamb.lastLocation = '';
-    lamb.condition = Condition.dead;
-  }
-
-  bool killLambInRoom(Pixie pix) {
-    var killed = false;
+  bool bossGoHandleAnyLambsAtYourLocation({Pixie boss}) {
+    if (boss.ilk == Ilk.lamb) return false;
+    var handled = false;
     lambs.forEach((el) {
-      if (el.location == pix.location) {
-        //el.location = '';
-        if (pix.ilk == Ilk.minotaur) {
+      if (el.condition != Condition.alive) {
+        return;
+      }
+      if (el.location == boss.location) {
+        if (boss.ilk == Ilk.minotaur) {
           el.condition = Condition.dead;
           player.lostLambs++;
           minotaur.movesLeft = 0;
+          //el.lastLocation = '';
           print('killed a lamb');
-        } else if (pix.ilk == Ilk.player) {
+          handled = true;
+        } else if (boss.ilk == Ilk.player) {
           el.condition = Condition.freed;
           player.savedLambs++;
+          //el.lastLocation = '';
           player.movesLeft = 0;
           print('saved a lamb');
+          handled = true;
         }
-        killed = true;
       }
     });
 
-    return killed;
+    return handled;
   }
 
   bool seeLambInRoom(Room room) {
@@ -138,7 +142,7 @@ class Maze {
 
   bool moveTo(Pixie pix, int x, int y) {
     final newloc = 'b_${x}_$y';
-    if (minotaur.location == newloc) {
+    if (pix.ilk == Ilk.lamb && minotaur.location == newloc) {
       return false;
     }
 
@@ -198,6 +202,189 @@ class Maze {
         }
     }
     return true;
+  }
+
+  bool moveSprite(Pixie pix, Directions direction) {
+    if (movePixie(pix, direction)) {
+      print('pixie ${pix.emoji} moved ${direction} to ${pix.x} ${pix.y}');
+      if (pix.ilk != Ilk.minotaur) {
+        bossGoHandleAnyLambsAtYourLocation(boss: player);
+      } else {
+        bossGoHandleAnyLambsAtYourLocation(boss: pix);
+      }
+      pix.movesLeft--;
+      pix.direction = direction;
+      return true;
+    }
+    print('failed to move ${pix.emoji} ${direction}');
+    return false;
+  }
+
+  bool attemptToMoveToAnAdjacentRoom({Pixie pix, Directions direction}) {
+    bool moved = false;
+    int numberOfMoveTries = 0;
+    if (direction == null) {
+      direction = Directions.values[rand.nextInt(Directions.values.length)];
+    }
+
+    while (numberOfMoveTries < 8 && pix.movesLeft > 0) {
+      moved = moveSprite(pix, direction);
+
+      if (moved) return moved;
+      if (pix.ilk == Ilk.lamb) {
+        direction =
+            Directions.values[(direction.index + 1) % Directions.values.length];
+      } else {
+        return false;
+      }
+      numberOfMoveTries++;
+    }
+    return moved;
+  }
+
+  bool tryToMovePlayerToXY(Pixie pix, int x, int y) {
+    print('try to move from  ${pix.x} ${pix.y} to $x $y');
+
+    if (x == (pix.x + 1) && y == pix.y) {
+      return moveSprite(pix, Directions.right);
+    } else if (x == (pix.x - 1) && y == pix.y) {
+      return moveSprite(pix, Directions.left);
+    } else if (x == (pix.x) && y == (pix.y + 1)) {
+      return moveSprite(pix, Directions.down);
+    } else if (x == (pix.x) && y == (pix.y - 1)) {
+      return moveSprite(pix, Directions.up);
+    }
+
+    return false;
+  }
+
+  ///
+  /// if the boss can see another pixie  return the direction to that pixie,
+  /// else return direction
+  ///
+  Directions changeDirectionFromBossToNearestLamb(
+      {Pixie boss, Directions direction}) {
+    // how far is a lamb on the X
+    Pixie temp;
+    var xlesslambs = lambs.where((lamb) {
+      return (lamb.y == boss.y &&
+          lamb.x < boss.x &&
+          lamb.condition == Condition.alive);
+    });
+    if (xlesslambs.isNotEmpty) {
+      temp = xlesslambs.reduce((curr, next) => curr.x > next.x ? curr : next);
+      print('xlesslambs ${temp?.emoji ?? null}');
+    }
+    var xmorelambs = lambs.where((lamb) {
+      return (lamb.y == boss.y &&
+          lamb.x > boss.x &&
+          lamb.condition == Condition.alive);
+    });
+    if (xmorelambs.isNotEmpty) {
+      temp = xmorelambs.reduce((curr, next) => curr.x < next.x ? curr : next);
+      print('xmorelambs ${temp?.emoji ?? null}');
+    }
+
+    var ylesslambs = lambs.where((lamb) {
+      return (lamb.x == boss.x &&
+          lamb.y < boss.y &&
+          lamb.condition == Condition.alive);
+    });
+    if (ylesslambs.isNotEmpty) {
+      temp = ylesslambs.reduce((curr, next) => curr.y > next.y ? curr : next);
+      print('ylesslambs ${temp?.emoji ?? null}');
+    }
+    var ymorelambs = lambs.where((lamb) {
+      return (lamb.x == boss.x &&
+          lamb.y > boss.y &&
+          lamb.condition == Condition.alive);
+    });
+    if (ymorelambs.isNotEmpty) {
+      temp = ymorelambs.reduce((curr, next) => curr.y < next.y ? curr : next);
+      print('ymorelambs ${temp?.emoji ?? null}');
+    }
+    print('end change direction ${temp?.emoji ?? null}');
+    //  no lamb seen just return
+    return direction;
+  }
+
+  bool moveMinotaur() {
+    // the minotaur moves in one direction until it eats a lamb,
+    // runs into a wall or stops at an intersection of halls
+    // first it charges the nearest pixie it sees (it cannot see around corners or through walls)
+    // if no pixie is targeted it moves at random until it reaches a wall or an intersection
+    // (there is a 50% chance it stops at an intersection unless it can now see a lamb when it will stop)
+
+    if (gameIsOver) {
+      return false;
+    }
+    var minotaurHasMovedAtLeastOnce = false;
+    Directions direction;
+    minotaur.movesLeft = maxRow;
+    while (minotaur.movesLeft > 0) {
+      if (minotaurHasMovedAtLeastOnce == false) {
+        direction = Directions.values[rand.nextInt(Directions.values.length)];
+      }
+      /** at the beginning of mino's turn: 
+       * if mino can see a lamb charge it! endTurn(pix, newDirection, follow).
+       * if there is a  "newDirection" set "dir" == newDirection
+       * if !follow and "dir" leads to last square then randomly reset "dir" 
+       * look in dir direction and if it sees a dead end randomly reset "dir"
+       * MoveInDirection(pix, dir ){ //move one squre in direction "dir"
+       * if mino is on an intersection !follow and can see a lamb in another direction 
+       ** then stop and remember newDirection, set "follow" = true, endTurn(pix, newDirection, follow=true).
+       * else if mino is on an intersection then 
+       ** there is a 50% chance to -- change direction and remember a newDirection and endTurn(pix, newDirection, follow=false).
+       * if hit a wall and can see a lamb endTurn(pix, newDirection, follow=true).
+       * else if hit a wall and cannot see a lamb endTurn(pix, newDirection, follow=false).
+       * else MoveInDirection(pix, dir )
+       * 
+       * }
+      */
+
+      direction = changeDirectionFromBossToNearestLamb(
+          boss: minotaur, direction: direction);
+      if (attemptToMoveToAnAdjacentRoom(pix: minotaur, direction: direction)) {
+        minotaurHasMovedAtLeastOnce = true;
+
+        print('mino moved to ${minotaur.x} ${minotaur.y}');
+      } else {
+        print('failed to move in ' + direction.toString());
+        // if the minotaur moved and then failed to move then it has hit a wall so then end its turn
+        if (minotaurHasMovedAtLeastOnce) {
+          minotaur.movesLeft = 0;
+        }
+      }
+    }
+
+    return minotaurHasMovedAtLeastOnce;
+  }
+
+  bool moveLambs() {
+    if (gameIsOver) return gameIsOver;
+    lambs.forEach((lamb) {
+      if (lamb.condition == Condition.alive) {
+        attemptToMoveToAnAdjacentRoom(pix: lamb);
+        lamb.movesLeft = 1;
+      } else if (lamb.condition == Condition.freed) {
+        lamb.movesLeft = 0;
+      } else {
+        lamb.movesLeft = 0;
+      }
+    });
+    var anyLeftAlive = lambs.any((lamb) => lamb.condition == Condition.alive);
+    if (!anyLeftAlive) {
+      return endGame();
+    }
+    return gameIsOver;
+  }
+
+  bool endGame() {
+    gameIsOver = true;
+
+    print('end game');
+
+    return gameIsOver;
   }
 
   Next aNext(x, y) {
