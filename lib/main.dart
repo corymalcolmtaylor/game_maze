@@ -164,16 +164,13 @@ class _MazeAreaState extends State<MazeArea>
     });
 
     Future.delayed(const Duration(milliseconds: 100), () {
-// Here you can write your code
-
       setState(() {
-        // Here you can write your code for open new view
+        // just force redraw
       });
     });
     gameOver = maze.moveLambs();
 
     Future.delayed(const Duration(milliseconds: animDurationMilliSeconds), () {
-// Here you can write your code
       maze.lambs.forEach((lamb) {
         if (lamb.condition == Condition.dead) {
           lamb.location = '';
@@ -181,7 +178,7 @@ class _MazeAreaState extends State<MazeArea>
         }
       });
       setState(() {
-        // Here you can write your code for open new view
+        // just force redraw
       });
     });
     if (gameOver) {

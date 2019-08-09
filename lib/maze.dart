@@ -109,21 +109,17 @@ class Maze {
         return;
       }
       if (el.location == boss.location) {
+        boss.movesLeft = 0;
         if (boss.ilk == Ilk.minotaur) {
           el.condition = Condition.dead;
           player.lostLambs++;
-          minotaur.movesLeft = 0;
-          //el.lastLocation = '';
           print('killed a lamb');
-          handled = true;
         } else if (boss.ilk == Ilk.player) {
           el.condition = Condition.freed;
           player.savedLambs++;
-          //el.lastLocation = '';
-          player.movesLeft = 0;
-          print('saved a lamb');
-          handled = true;
+          print('freed  a lamb');
         }
+        handled = true;
       }
     });
 
@@ -157,6 +153,7 @@ class Maze {
     pix.x = x;
     pix.y = y;
     pix.location = newloc;
+    pix.movesLeft--;
 
     return true;
   }
@@ -206,17 +203,17 @@ class Maze {
 
   bool moveSprite(Pixie pix, Directions direction) {
     if (movePixie(pix, direction)) {
-      print('pixie ${pix.emoji} moved ${direction} to ${pix.x} ${pix.y}');
       if (pix.ilk != Ilk.minotaur) {
         bossGoHandleAnyLambsAtYourLocation(boss: player);
       } else {
+        print('pixie ${pix.emoji} moved ${direction} to ${pix.x} ${pix.y}');
         bossGoHandleAnyLambsAtYourLocation(boss: pix);
       }
-      pix.movesLeft--;
+
       pix.direction = direction;
       return true;
     }
-    print('failed to move ${pix.emoji} ${direction}');
+    //print('failed to move ${pix.emoji} ${direction}');
     return false;
   }
 
@@ -224,16 +221,15 @@ class Maze {
     bool moved = false;
     int numberOfMoveTries = 0;
     if (direction == null) {
-      direction = Directions.values[rand.nextInt(Directions.values.length)];
+      direction = randomDirection();
     }
 
-    while (numberOfMoveTries < 8 && pix.movesLeft > 0) {
+    while (numberOfMoveTries < 8) {
       moved = moveSprite(pix, direction);
 
       if (moved) return moved;
       if (pix.ilk == Ilk.lamb) {
-        direction =
-            Directions.values[(direction.index + 1) % Directions.values.length];
+        direction = nextDirection(direction);
       } else {
         return false;
       }
@@ -258,14 +254,103 @@ class Maze {
     return false;
   }
 
+  Directions directionFromBossToPixieIs({Pixie boss, Pixie pixie}) {
+    if (boss == null || pixie == null) return null;
+    if (pixie.y == boss.y && pixie.x < boss.x) {
+      return Directions.left;
+    }
+    if (pixie.y == boss.y && pixie.x > boss.x) {
+      return Directions.right;
+    }
+    if (pixie.x == boss.x && pixie.y < boss.y) {
+      return Directions.up;
+    }
+    if (pixie.x == boss.x && pixie.y > boss.y) {
+      return Directions.down;
+    }
+    return null;
+  }
+
+  bool thereExistsADirectPathFromBossToPixie(
+      {Map boss, Map pixie, Directions direction}) {
+    print('boss ${boss}');
+    switch (direction) {
+      case Directions.up:
+        if (boss['y'] == pixie['y']) return true;
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].up) {
+          boss['y'] = boss['y'] - 1;
+          return thereExistsADirectPathFromBossToPixie(
+              boss: boss, pixie: pixie, direction: direction);
+        } else {
+          return false;
+        }
+        break;
+      case Directions.down:
+        if (boss['y'] == pixie['y']) return true;
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].down) {
+          boss['y'] = boss['y'] + 1;
+          return thereExistsADirectPathFromBossToPixie(
+              boss: boss, pixie: pixie, direction: direction);
+        }
+        break;
+      case Directions.left:
+        if (boss['x'] == pixie['x']) return true;
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].left) {
+          boss['x'] = boss['x'] - 1;
+          return thereExistsADirectPathFromBossToPixie(
+              boss: boss, pixie: pixie, direction: direction);
+        }
+        break;
+      case Directions.right:
+        if (boss['x'] == pixie['x']) return true;
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].right) {
+          boss['x'] = boss['x'] + 1;
+          return thereExistsADirectPathFromBossToPixie(
+              boss: boss, pixie: pixie, direction: direction);
+        }
+        break;
+      default:
+        break;
+    }
+    return false;
+  }
+
+  bool noWallsFromBossToPixie({Pixie boss, Pixie pixie, Directions direction}) {
+    if (direction == null) {
+      direction = directionFromBossToPixieIs(boss: boss, pixie: pixie);
+    }
+    print('noWallsFromBossToPixie 1');
+    return thereExistsADirectPathFromBossToPixie(
+        boss: {'x': boss.x, 'y': boss.y},
+        pixie: {'x': pixie.x, 'y': pixie.y},
+        direction: direction);
+  }
+
+  Directions whichDirectionTheBossCanLookToSeeThePixie(
+      {Pixie boss, Pixie pixie}) {
+    if (boss == null || pixie == null) return null;
+    Directions direction = directionFromBossToPixieIs(boss: boss, pixie: pixie);
+    print('whichDirectionTheBossCanLookToSeeThePixie 1  ${direction}');
+    if (direction == null) return null;
+    print('whichDirectionTheBossCanLookToSeeThePixie 1b');
+    if (noWallsFromBossToPixie(
+        boss: boss, pixie: pixie, direction: direction)) {
+      print('whichDirectionTheBossCanLookToSeeThePixie 2  ${direction}');
+      return direction;
+    }
+    return null;
+  }
+
   ///
   /// if the boss can see another pixie  return the direction to that pixie,
   /// else return direction
   ///
   Directions changeDirectionFromBossToNearestLamb(
       {Pixie boss, Directions direction}) {
-    // how far is a lamb on the X
     Pixie temp;
+
+    var seenPixies = <Pixie>[];
+
     var xlesslambs = lambs.where((lamb) {
       return (lamb.y == boss.y &&
           lamb.x < boss.x &&
@@ -274,7 +359,16 @@ class Maze {
     if (xlesslambs.isNotEmpty) {
       temp = xlesslambs.reduce((curr, next) => curr.x > next.x ? curr : next);
       print('xlesslambs ${temp?.emoji ?? null}');
+      if (temp != null &&
+          whichDirectionTheBossCanLookToSeeThePixie(
+                  boss: minotaur, pixie: temp) !=
+              null) {
+        print('add a pixie');
+        seenPixies.add(temp);
+      }
     }
+
+    temp = null;
     var xmorelambs = lambs.where((lamb) {
       return (lamb.y == boss.y &&
           lamb.x > boss.x &&
@@ -283,8 +377,15 @@ class Maze {
     if (xmorelambs.isNotEmpty) {
       temp = xmorelambs.reduce((curr, next) => curr.x < next.x ? curr : next);
       print('xmorelambs ${temp?.emoji ?? null}');
+      if (temp != null &&
+          whichDirectionTheBossCanLookToSeeThePixie(
+                  boss: minotaur, pixie: temp) !=
+              null) {
+        print('add a pixie');
+        seenPixies.add(temp);
+      }
     }
-
+    temp = null;
     var ylesslambs = lambs.where((lamb) {
       return (lamb.x == boss.x &&
           lamb.y < boss.y &&
@@ -293,7 +394,15 @@ class Maze {
     if (ylesslambs.isNotEmpty) {
       temp = ylesslambs.reduce((curr, next) => curr.y > next.y ? curr : next);
       print('ylesslambs ${temp?.emoji ?? null}');
+      if (temp != null &&
+          whichDirectionTheBossCanLookToSeeThePixie(
+                  boss: minotaur, pixie: temp) !=
+              null) {
+        print('add a pixie');
+        seenPixies.add(temp);
+      }
     }
+    temp = null;
     var ymorelambs = lambs.where((lamb) {
       return (lamb.x == boss.x &&
           lamb.y > boss.y &&
@@ -302,13 +411,50 @@ class Maze {
     if (ymorelambs.isNotEmpty) {
       temp = ymorelambs.reduce((curr, next) => curr.y < next.y ? curr : next);
       print('ymorelambs ${temp?.emoji ?? null}');
+      if (temp != null &&
+          whichDirectionTheBossCanLookToSeeThePixie(
+                  boss: minotaur, pixie: temp) !=
+              null) {
+        print('add a pixie');
+        seenPixies.add(temp);
+      }
     }
-    print('end change direction ${temp?.emoji ?? null}');
+    if (seenPixies.isNotEmpty) {
+      direction = whichDirectionTheBossCanLookToSeeThePixie(
+          boss: minotaur, pixie: seenPixies.first);
+      print('end change direction ${seenPixies.first ?? null}');
+    }
     //  no lamb seen just return
     return direction;
   }
 
+  bool bossJustCameFromThatDirection({Pixie boss, Directions direction}) {
+    switch (direction) {
+      case Directions.up:
+        return boss.lastLocation == 'b_${boss.x}_${boss.y - 1}';
+        break;
+      case Directions.down:
+        return boss.lastLocation == 'b_${boss.x}_${boss.y + 1}';
+        break;
+      case Directions.left:
+        return boss.lastLocation == 'b_${boss.x - 1}_${boss.y}';
+        break;
+      case Directions.right:
+        return boss.lastLocation == 'b_${boss.x + 1}_${boss.y}';
+        break;
+      default:
+        break;
+    }
+  }
+
   bool moveMinotaur() {
+    bool minotaurHasNotMovedAtLeastOnceThisTurn() {
+      return minotaur.movesLeft == maxRow;
+    }
+
+    bool minotaurHasMovedAtLeastOnceThisTurn() {
+      return minotaur.movesLeft < maxRow;
+    }
     // the minotaur moves in one direction until it eats a lamb,
     // runs into a wall or stops at an intersection of halls
     // first it charges the nearest pixie it sees (it cannot see around corners or through walls)
@@ -318,13 +464,32 @@ class Maze {
     if (gameIsOver) {
       return false;
     }
-    var minotaurHasMovedAtLeastOnce = false;
+    bool bossCannotSeeALamb = true;
     Directions direction;
+    print('mino dir  ${direction}');
+    direction = changeDirectionFromBossToNearestLamb(
+        boss: minotaur, direction: direction);
+    if (direction != null) {
+      bossCannotSeeALamb = false;
+      print('mino can see lamb and dir changed to  ${direction}');
+    } else {
+      print('mino cannot see lamb ');
+    }
+
     minotaur.movesLeft = maxRow;
     while (minotaur.movesLeft > 0) {
-      if (minotaurHasMovedAtLeastOnce == false) {
-        direction = Directions.values[rand.nextInt(Directions.values.length)];
+      if (bossCannotSeeALamb) {
+        if (minotaurHasNotMovedAtLeastOnceThisTurn()) {
+          if (direction == null) {
+            direction = randomDirection();
+            print('mino got random dir');
+          } else {
+            direction = nextDirection(direction);
+            print('mino got next  dir');
+          }
+        }
       }
+
       /** at the beginning of mino's turn: 
        * if mino can see a lamb charge it! endTurn(pix, newDirection, follow).
        * if there is a  "newDirection" set "dir" == newDirection
@@ -341,23 +506,30 @@ class Maze {
        * 
        * }
       */
-
-      direction = changeDirectionFromBossToNearestLamb(
-          boss: minotaur, direction: direction);
+      if (bossJustCameFromThatDirection(boss: minotaur, direction: direction)) {
+        minotaur.lastLocation = '';
+        continue;
+      }
       if (attemptToMoveToAnAdjacentRoom(pix: minotaur, direction: direction)) {
-        minotaurHasMovedAtLeastOnce = true;
-
         print('mino moved to ${minotaur.x} ${minotaur.y}');
       } else {
         print('failed to move in ' + direction.toString());
         // if the minotaur moved and then failed to move then it has hit a wall so then end its turn
-        if (minotaurHasMovedAtLeastOnce) {
+        if (minotaurHasMovedAtLeastOnceThisTurn()) {
           minotaur.movesLeft = 0;
         }
       }
     }
 
-    return minotaurHasMovedAtLeastOnce;
+    return minotaurHasMovedAtLeastOnceThisTurn();
+  }
+
+  Directions randomDirection() {
+    return Directions.values[rand.nextInt(Directions.values.length)];
+  }
+
+  Directions nextDirection(Directions direction) {
+    return Directions.values[(direction.index + 1) % Directions.values.length];
   }
 
   bool moveLambs() {
