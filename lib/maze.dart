@@ -462,6 +462,8 @@ class Maze {
     return walls < 2;
   }
 
+  bool pixieSeesADeadEndHall({Pixie pixie, Directions direction}) {}
+
   bool pixieSeesADeadEnd({Pixie pixie, Directions direction}) {
     switch (direction) {
       case Directions.up:
@@ -583,7 +585,7 @@ class Maze {
         continue;
       }
       if (bossCannotSeeALamb &&
-          pixieSeesADeadEnd(pixie: minotaur, direction: direction)) {
+          pixieSeesADeadEndHall(pixie: minotaur, direction: direction)) {
         print('sees a deadend ${direction}');
         if (minotaurHasMovedAtLeastOnceThisTurn()) {
           minotaur.movesLeft = 0;
