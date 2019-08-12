@@ -166,6 +166,50 @@ class Maze {
     return true;
   }
 
+  bool aPixieCanMoveDirectionFromLocation(
+      {String location, Directions direction}) {
+    switch (direction) {
+      case Directions.down:
+        {
+          //is south wall up?
+          if (!myLabyrinth[location].down) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        break;
+      case Directions.up:
+        {
+          //is north wall up?
+          if (!myLabyrinth[location].up) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        break;
+      case Directions.right:
+        {
+          if (!myLabyrinth[location].right) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        break;
+      case Directions.left:
+        {
+          if (!myLabyrinth[location].left) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+    }
+    return true;
+  }
+
   bool movePixie(Pixie pix, Directions dir) {
     switch (dir) {
       case Directions.down:
@@ -454,43 +498,84 @@ class Maze {
   }
 
   bool roomIsAnIntersection({String room}) {
-    var walls = 0;
-    if (myLabyrinth[room].up) walls++;
-    if (myLabyrinth[room].down) walls++;
-    if (myLabyrinth[room].left) walls++;
-    if (myLabyrinth[room].right) walls++;
-    return walls < 2;
+    if ((!myLabyrinth[room].left || !myLabyrinth[room].right) &&
+        (!myLabyrinth[room].up || !myLabyrinth[room].down)) {
+      print(
+          '$room is an intersection  ${myLabyrinth[room].up} ${myLabyrinth[room].down} ${myLabyrinth[room].left} ${myLabyrinth[room].right}');
+      return true;
+    }
+
+    return false;
   }
 
-  bool pixieSeesADeadEndHall({Pixie pixie, Directions direction}) {}
+  bool thereIsADeadEndFromLocationInDirection(
+      {Map location, Directions direction}) {
+    if (!aPixieCanMoveDirectionFromLocation(
+        location: 'b_${location['x']}_${location['y']}',
+        direction: direction)) {
+      return true;
+    }
 
-  bool pixieSeesADeadEnd({Pixie pixie, Directions direction}) {
     switch (direction) {
       case Directions.up:
-        var y = pixie.y - 1;
+        location['y'] = location['y'] - 1;
+        break;
+      case Directions.down:
+        location['y'] = location['y'] + 1;
+        break;
+      case Directions.left:
+        location['x'] = location['x'] - 1;
+        break;
+      case Directions.right:
+        location['x'] = location['x'] + 1;
+        break;
+      default:
+        break;
+    }
+    if (roomIsAnIntersection(room: 'b_${location['x']}_${location['y']}')) {
+      print('found an intersection at b_${location['x']}_${location['y']}');
+      return false;
+    }
+    if (roomIsADeadEnd(room: 'b_${location['x']}_${location['y']}')) {
+      print('dead end at b_${location['x']}_${location['y']}');
+      return true;
+    }
+    return thereIsADeadEndFromLocationInDirection(
+        location: {'x': location['x'], 'y': location['y']},
+        direction: direction);
+  }
+
+  bool pixieSeesADeadEnd({Map pixie, Directions direction}) {
+    switch (direction) {
+      case Directions.up:
+        var y = pixie['y']; // - 1;
         if (y == 0) return false;
-        if (roomIsADeadEnd(room: 'b_${pixie.x}_${y}')) {
+        if (roomIsADeadEnd(room: 'b_${pixie['x']}_${y}')) {
+          print('dead end found at up  _${pixie['x']}_${y}');
           return true;
         }
         break;
       case Directions.down:
-        var y = pixie.y + 1;
+        var y = pixie['y']; // + 1;
         if (y == maxCol + 1) return false;
-        if (roomIsADeadEnd(room: 'b_${pixie.x}_${y}')) {
+        if (roomIsADeadEnd(room: 'b_${pixie['x']}_${y}')) {
+          print('dead end found at down  _${pixie['x']}_${y}');
           return true;
         }
         break;
       case Directions.left:
-        var x = pixie.x - 1;
+        var x = pixie['x']; // - 1;
         if (x == 0) return false;
-        if (roomIsADeadEnd(room: 'b_${x}_${pixie.y}')) {
+        if (roomIsADeadEnd(room: 'b_${x}_${pixie['y']}')) {
+          print('dead end found at left  b_${x}_${pixie['y']}');
           return true;
         }
         break;
       case Directions.right:
-        var x = pixie.x + 1;
+        var x = pixie['x']; // + 1;
         if (x == maxRow + 1) return false;
-        if (roomIsADeadEnd(room: 'b_${x}_${pixie.y}')) {
+        if (roomIsADeadEnd(room: 'b_${x}_${pixie['y']}')) {
+          print('dead end found at right  b_${x}_${pixie['y']}');
           return true;
         }
         break;
@@ -548,18 +633,34 @@ class Maze {
       print('mino can see lamb and dir changed to  ${direction}');
     } else {
       print('mino cannot see lamb ');
+      direction = randomDirection();
     }
 
     minotaur.movesLeft = maxRow;
+    int tries = 0;
     while (minotaur.movesLeft > 0) {
+      if (tries++ > 100) {
+        print('Stuck in loop $tries');
+        break;
+      }
       if (bossCannotSeeALamb) {
         if (minotaurHasNotMovedAtLeastOnceThisTurn()) {
-          if (direction == null) {
-            direction = randomDirection();
-            print('mino got random dir');
-          } else {
+          {
             direction = nextDirection(direction);
-            print('mino got next  dir');
+            print('mino got next  dir $direction');
+          }
+          if (bossJustCameFromThatDirection(
+              boss: minotaur, direction: direction)) {
+            minotaur.lastLocation = '';
+            continue; //try another direction
+          }
+
+          if (thereIsADeadEndFromLocationInDirection(
+              location: {'x': minotaur.x, 'y': minotaur.y},
+              direction: direction)) {
+            print(
+                'cannot move or sees a deadend from ${minotaur.location} $direction');
+            continue; //try another direction
           }
         }
       }
@@ -580,29 +681,28 @@ class Maze {
        * 
        * }
       */
-      if (bossJustCameFromThatDirection(boss: minotaur, direction: direction)) {
-        minotaur.lastLocation = '';
-        continue;
-      }
+
       if (bossCannotSeeALamb &&
-          pixieSeesADeadEndHall(pixie: minotaur, direction: direction)) {
-        print('sees a deadend ${direction}');
-        if (minotaurHasMovedAtLeastOnceThisTurn()) {
-          minotaur.movesLeft = 0;
-        }
-        continue;
+          thereIsADeadEndFromLocationInDirection(
+              location: {'x': minotaur.x, 'y': minotaur.y},
+              direction: direction)) {
+        print(
+            'cannot see lamb and sees a deadend from ${minotaur.location} $direction');
+        minotaur.movesLeft = 0;
+        continue; //try another direction
       }
-      //if not chasing a pixie, 50% chance to stop on any intersection
-      if (bossCannotSeeALamb && minotaurHasMovedAtLeastOnceThisTurn()) {
-        if (roomIsAnIntersection(room: 'b_${minotaur.x}_${minotaur.y}')) {
-          if (rand.nextInt(2) == 0) {
-            minotaur.movesLeft = 0;
-            continue;
-          }
-        }
-      }
+
       if (attemptToMoveToAnAdjacentRoom(pix: minotaur, direction: direction)) {
         print('mino moved to ${minotaur.x} ${minotaur.y}');
+        // 50% chance to stop on any intersection
+        if (bossCannotSeeALamb && minotaurHasMovedAtLeastOnceThisTurn()) {
+          if (roomIsAnIntersection(room: minotaur.location)) {
+            if (rand.nextInt(2) == 0) {
+              minotaur.movesLeft = 0;
+              continue;
+            }
+          }
+        }
       } else {
         print('failed to move in ' + direction.toString());
         // if the minotaur moved and then failed to move then it has hit a wall so then end its turn
