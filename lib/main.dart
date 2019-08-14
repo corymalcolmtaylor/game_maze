@@ -183,10 +183,19 @@ class _MazeAreaState extends State<MazeArea>
     });
     if (gameOver) {
       Text message;
+      String str =
+          'Friends Freed: ${maze.player.savedLambs}\nFriends Lost: ${maze.player.lostLambs}\n';
+      if (maze.player.condition == Condition.dead) {
+        str = str + 'The Goblin got Alice, you lost!';
+      } else if (maze.player.savedLambs > maze.player.lostLambs) {
+        str = str + 'You WIN!';
+      } else if (maze.player.savedLambs == maze.player.lostLambs) {
+        str = str + 'You Draw!';
+      } else if (maze.player.savedLambs < maze.player.lostLambs) {
+        str = str + 'You Lost!';
+      }
 
-      message = Text(
-          'Friends Freed: ${maze.player.savedLambs}\nFriends Lost: ${maze.player.lostLambs}',
-          style: TextStyle(fontSize: 22, color: Colors.cyan));
+      message = Text(str, style: TextStyle(fontSize: 22, color: Colors.cyan));
 
       showGameOverMessage(message);
     } else {
@@ -308,7 +317,7 @@ class _MazeAreaState extends State<MazeArea>
           ),
           actions: <Widget>[
             FlatButton(
-              child: Text('OK',
+              child: Text('OK, start new Game',
                   style: TextStyle(fontSize: 24, color: Colors.cyan)),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -392,12 +401,6 @@ class _MazeAreaState extends State<MazeArea>
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Center(
-                    child: Text('Size of Maze'),
-                  ),
-                ),
                 Center(
                   child: Container(
                     decoration: ShapeDecoration(
@@ -409,21 +412,31 @@ class _MazeAreaState extends State<MazeArea>
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       ),
                     ),
-                    child: DropdownButton<String>(
-                      style: TextStyle(color: Colors.black, fontSize: 16),
-                      value: numRows.toString(),
-                      onChanged: (String newValue) {
-                        setState(() {
-                          numRows = int.parse(newValue);
-                        });
-                      },
-                      items: <String>['8', '10', '12', '14']
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
+                    child: Row(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Center(
+                            child: Text('Maze Width'),
+                          ),
+                        ),
+                        DropdownButton<String>(
+                          style: TextStyle(color: Colors.black, fontSize: 16),
+                          value: numRows.toString(),
+                          onChanged: (String newValue) {
+                            setState(() {
+                              numRows = int.parse(newValue);
+                            });
+                          },
+                          items: <String>['8', '10', '12', '14']
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -453,14 +466,26 @@ class _MazeAreaState extends State<MazeArea>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text('Friends Lost:'),
+                  Text(
+                    'Friends Lost:',
+                    style: TextStyle(fontSize: 22),
+                  ),
                   Padding(
                       padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                      child: Text(maze.player.lostLambs.toString())),
-                  Text('Friends Saved:'),
+                      child: Text(
+                        maze.player.lostLambs.toString(),
+                        style: TextStyle(fontSize: 22),
+                      )),
+                  Text(
+                    'Friends Saved:',
+                    style: TextStyle(fontSize: 22),
+                  ),
                   Padding(
                       padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                      child: Text(maze.player.savedLambs.toString())),
+                      child: Text(
+                        maze.player.savedLambs.toString(),
+                        style: TextStyle(fontSize: 22),
+                      )),
                 ],
               ),
             ),

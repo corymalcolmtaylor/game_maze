@@ -79,6 +79,7 @@ class Maze {
   var firstedge = '';
   var minotaur = Pixie(Ilk.minotaur);
   var player = Pixie(Ilk.player);
+
   var lambs = <Pixie>[];
 
   // create and initialize the labyrinth
@@ -110,6 +111,7 @@ class Maze {
     //if minotaur on player location then gameover
     if (minotaur.location == player.location) {
       boss.movesLeft = 0;
+      player.condition = Condition.dead;
       return endGame();
     }
     lambs.forEach((el) {
