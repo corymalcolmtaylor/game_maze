@@ -240,11 +240,11 @@ class _MazeAreaState extends State<MazeArea>
             ),
           ),
           child: SizedBox(
-              width: roomLength,
-              height: roomLength,
-              child: Text('${room.minotaursPath}')
-              // child: getRoomPixieIcon(room),
-              ),
+            width: roomLength,
+            height: roomLength,
+            //child: Text('${room.minotaursPath}')
+            // child: getRoomPixieIcon(room),
+          ),
         ),
       ),
     );
