@@ -250,6 +250,46 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
+  Future<void> showRules() async {
+    Text message = Text(
+        'Use the arrow buttons to move Alice 👧🏼 around the maze.\n' +
+            'Avoid the goblin 👺 but rescue the others by getting Alice to them.\n' +
+            'If the goblin likewise gets Alice you lose.\n' +
+            'Once all the animals are gone if there are more that you have saved' +
+            ' than have been eaten by the goblin you win, otherwise you lose.',
+        style: TextStyle(fontSize: 22, color: Colors.cyan));
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          title: Text(
+            'Game Play Rules',
+            style: TextStyle(fontSize: 24, color: Colors.cyan),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[message],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK',
+                  style: TextStyle(fontSize: 24, color: Colors.cyan)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  print('OK showed rules');
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> showGameOverMessage(Text msg) async {
     return showDialog<void>(
       context: context,
@@ -334,7 +374,26 @@ class _MazeAreaState extends State<MazeArea>
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                    child: Container(
+                      child: OutlineButton(
+                        color: Colors.amber,
+                        shape: new RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(30.0),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            showRules();
+                          });
+                        },
+                        child: Text('Show Game Rules'),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(4.0),
                   child: Center(
                     child: Text('Size of Maze'),
                   ),
@@ -369,7 +428,7 @@ class _MazeAreaState extends State<MazeArea>
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(4.0),
                   child: Center(
                     child: Container(
                       child: OutlineButton(
