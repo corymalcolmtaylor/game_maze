@@ -185,10 +185,10 @@ class _MazeAreaState extends State<MazeArea>
       Text message;
 
       message = Text(
-          'Friends freed: ${maze.player.savedLambs}\nFriends lost: ${maze.player.lostLambs}');
+          'Friends Freed: ${maze.player.savedLambs}\nFriends Lost: ${maze.player.lostLambs}',
+          style: TextStyle(fontSize: 22, color: Colors.cyan));
 
       showGameOverMessage(message);
-      print('after show dialog');
     } else {
       maze.player.movesLeft = maze.playerMoves;
     }
@@ -205,7 +205,6 @@ class _MazeAreaState extends State<MazeArea>
     return Container(
       child: GestureDetector(
         onTap: () {
-          print('_MazeRoomState   b_${room.x}_${room.y} tapped');
           if (maze.player.movesLeft <= 0) {
             return;
           }
@@ -222,7 +221,6 @@ class _MazeAreaState extends State<MazeArea>
               });
 
               if (maze.player.movesLeft == 0) {
-                print('now computer to move ');
                 computerMove();
               }
             } else {
@@ -242,23 +240,27 @@ class _MazeAreaState extends State<MazeArea>
             ),
           ),
           child: SizedBox(
-            width: roomLength,
-            height: roomLength,
-            // child: getRoomPixieIcon(room),
-          ),
+              width: roomLength,
+              height: roomLength,
+              child: Text('${room.minotaursPath}')
+              // child: getRoomPixieIcon(room),
+              ),
         ),
       ),
     );
   }
 
   Future<void> showGameOverMessage(Text msg) async {
-    print('ere show dialog');
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Game Over'),
+          backgroundColor: Colors.transparent,
+          title: Text(
+            'Game Over',
+            style: TextStyle(fontSize: 24, color: Colors.cyan),
+          ),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[msg],
@@ -266,11 +268,11 @@ class _MazeAreaState extends State<MazeArea>
           ),
           actions: <Widget>[
             FlatButton(
-              child: Text('OK'),
+              child: Text('OK',
+                  style: TextStyle(fontSize: 24, color: Colors.cyan)),
               onPressed: () {
                 Navigator.of(context).pop();
                 setState(() {
-                  print('new game pressed');
                   startNewGame();
                 });
               },
@@ -377,7 +379,6 @@ class _MazeAreaState extends State<MazeArea>
                         ),
                         onPressed: () {
                           setState(() {
-                            print('new game pressed');
                             startNewGame();
                           });
                         },
@@ -467,11 +468,9 @@ class _MazeAreaState extends State<MazeArea>
                               ),
                               child: IconButton(
                                 onPressed: () {
-                                  print('stay  pressed');
                                   if (gameIsOver == false) {
                                     maze.player.movesLeft = 0;
                                     computerMove();
-                                    print('end turn ');
                                   }
                                 },
                                 icon: Icon(Icons.pause),

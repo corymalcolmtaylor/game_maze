@@ -11,6 +11,7 @@ class Next {
 }
 
 class Room {
+  static var badGuyHasMovedThisManyTimes = 0;
   var x = 0;
   var y = 0;
   var left = true;
@@ -21,6 +22,7 @@ class Room {
   var visited = false;
   var setid = 0;
   bool spUsed = false;
+  var minotaursPath = 0;
 }
 
 enum Ilk { player, minotaur, lamb }
@@ -91,6 +93,7 @@ class Maze {
     lambs.clear();
     myLabyrinth.clear();
     gameIsOver = false;
+    Room.badGuyHasMovedThisManyTimes = 0;
     for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
       for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
         myLabyrinth['b_${xloop}_$yloop'] = new Room();
@@ -118,11 +121,9 @@ class Maze {
         if (boss.ilk == Ilk.minotaur) {
           el.condition = Condition.dead;
           player.lostLambs++;
-          print('killed a lamb');
         } else if (boss.ilk == Ilk.player) {
           el.condition = Condition.freed;
           player.savedLambs++;
-          print('freed  a lamb');
         }
         handled = true;
       }
@@ -164,6 +165,21 @@ class Maze {
     pix.movesLeft--;
 
     return true;
+  }
+
+  String whatIsTheLoactionAfterMovingFromLocationInDirection(
+      {Pixie pixie, Directions direction}) {
+    switch (direction) {
+      case Directions.down:
+        return 'b_${pixie.x}_${pixie.y + 1}';
+      case Directions.up:
+        return 'b_${pixie.x}_${pixie.y - 1}';
+      case Directions.right:
+        return 'b_${pixie.x + 1}_${pixie.y}';
+      case Directions.left:
+        return 'b_${pixie.x - 1}_${pixie.y}';
+    }
+    return pixie.location;
   }
 
   bool aPixieCanMoveDirectionFromLocation(
@@ -258,14 +274,13 @@ class Maze {
       if (pix.ilk != Ilk.minotaur) {
         bossGoHandleAnyLambsAtYourLocation(boss: player);
       } else {
-        print('pixie ${pix.emoji} moved ${direction} to ${pix.x} ${pix.y}');
         bossGoHandleAnyLambsAtYourLocation(boss: pix);
       }
 
       pix.direction = direction;
       return true;
     }
-    //print('failed to move ${pix.emoji} ${direction}');
+
     return false;
   }
 
@@ -273,7 +288,7 @@ class Maze {
     bool moved = false;
     int numberOfMoveTries = 0;
     if (direction == null) {
-      direction = randomDirection();
+      direction = randomDirection(location: pix.location);
     }
 
     while (numberOfMoveTries < 8) {
@@ -291,8 +306,6 @@ class Maze {
   }
 
   bool tryToMovePlayerToXY(Pixie pix, int x, int y) {
-    print('try to move from  ${pix.x} ${pix.y} to $x $y');
-
     if (x == (pix.x + 1) && y == pix.y) {
       return moveSprite(pix, Directions.right);
     } else if (x == (pix.x - 1) && y == pix.y) {
@@ -325,7 +338,6 @@ class Maze {
 
   bool thereExistsADirectPathFromBossToPixie(
       {Map boss, Map pixie, Directions direction}) {
-    print('boss ${boss}');
     switch (direction) {
       case Directions.up:
         if (boss['y'] == pixie['y']) return true;
@@ -371,7 +383,7 @@ class Maze {
     if (direction == null) {
       direction = directionFromBossToPixieIs(boss: boss, pixie: pixie);
     }
-    print('noWallsFromBossToPixie 1');
+
     return thereExistsADirectPathFromBossToPixie(
         boss: {'x': boss.x, 'y': boss.y},
         pixie: {'x': pixie.x, 'y': pixie.y},
@@ -382,12 +394,11 @@ class Maze {
       {Pixie boss, Pixie pixie}) {
     if (boss == null || pixie == null) return null;
     Directions direction = directionFromBossToPixieIs(boss: boss, pixie: pixie);
-    print('whichDirectionTheBossCanLookToSeeThePixie 1  ${direction}');
+
     if (direction == null) return null;
-    print('whichDirectionTheBossCanLookToSeeThePixie 1b');
+
     if (noWallsFromBossToPixie(
         boss: boss, pixie: pixie, direction: direction)) {
-      print('whichDirectionTheBossCanLookToSeeThePixie 2  ${direction}');
       return direction;
     }
     return null;
@@ -407,7 +418,6 @@ class Maze {
     var playerDirection = whichDirectionTheBossCanLookToSeeThePixie(
         boss: minotaur, pixie: player);
     if (playerDirection != null) {
-      print('spotted player');
       return playerDirection;
     }
 
@@ -418,12 +428,11 @@ class Maze {
     });
     if (xlesslambs.isNotEmpty) {
       temp = xlesslambs.reduce((curr, next) => curr.x > next.x ? curr : next);
-      print('xlesslambs ${temp?.emoji ?? null}');
+
       if (temp != null &&
           whichDirectionTheBossCanLookToSeeThePixie(
                   boss: minotaur, pixie: temp) !=
               null) {
-        print('add a pixie');
         seenPixies.add(temp);
       }
     }
@@ -436,12 +445,11 @@ class Maze {
     });
     if (xmorelambs.isNotEmpty) {
       temp = xmorelambs.reduce((curr, next) => curr.x < next.x ? curr : next);
-      print('xmorelambs ${temp?.emoji ?? null}');
+
       if (temp != null &&
           whichDirectionTheBossCanLookToSeeThePixie(
                   boss: minotaur, pixie: temp) !=
               null) {
-        print('add a pixie');
         seenPixies.add(temp);
       }
     }
@@ -453,12 +461,11 @@ class Maze {
     });
     if (ylesslambs.isNotEmpty) {
       temp = ylesslambs.reduce((curr, next) => curr.y > next.y ? curr : next);
-      print('ylesslambs ${temp?.emoji ?? null}');
+
       if (temp != null &&
           whichDirectionTheBossCanLookToSeeThePixie(
                   boss: minotaur, pixie: temp) !=
               null) {
-        print('add a pixie');
         seenPixies.add(temp);
       }
     }
@@ -470,19 +477,17 @@ class Maze {
     });
     if (ymorelambs.isNotEmpty) {
       temp = ymorelambs.reduce((curr, next) => curr.y < next.y ? curr : next);
-      print('ymorelambs ${temp?.emoji ?? null}');
+
       if (temp != null &&
           whichDirectionTheBossCanLookToSeeThePixie(
                   boss: minotaur, pixie: temp) !=
               null) {
-        print('add a pixie');
         seenPixies.add(temp);
       }
     }
     if (seenPixies.isNotEmpty) {
       direction = whichDirectionTheBossCanLookToSeeThePixie(
           boss: minotaur, pixie: seenPixies.first);
-      print('end change direction ${seenPixies.first ?? null}');
     }
     //  no lamb seen just return
     return direction;
@@ -500,8 +505,6 @@ class Maze {
   bool roomIsAnIntersection({String room}) {
     if ((!myLabyrinth[room].left || !myLabyrinth[room].right) &&
         (!myLabyrinth[room].up || !myLabyrinth[room].down)) {
-      print(
-          '$room is an intersection  ${myLabyrinth[room].up} ${myLabyrinth[room].down} ${myLabyrinth[room].left} ${myLabyrinth[room].right}');
       return true;
     }
 
@@ -533,11 +536,9 @@ class Maze {
         break;
     }
     if (roomIsAnIntersection(room: 'b_${location['x']}_${location['y']}')) {
-      print('found an intersection at b_${location['x']}_${location['y']}');
       return false;
     }
     if (roomIsADeadEnd(room: 'b_${location['x']}_${location['y']}')) {
-      print('dead end at b_${location['x']}_${location['y']}');
       return true;
     }
     return thereIsADeadEndFromLocationInDirection(
@@ -550,16 +551,14 @@ class Maze {
       case Directions.up:
         var y = pixie['y']; // - 1;
         if (y == 0) return false;
-        if (roomIsADeadEnd(room: 'b_${pixie['x']}_${y}')) {
-          print('dead end found at up  _${pixie['x']}_${y}');
+        if (roomIsADeadEnd(room: 'b_${pixie['x']}_$y')) {
           return true;
         }
         break;
       case Directions.down:
         var y = pixie['y']; // + 1;
         if (y == maxCol + 1) return false;
-        if (roomIsADeadEnd(room: 'b_${pixie['x']}_${y}')) {
-          print('dead end found at down  _${pixie['x']}_${y}');
+        if (roomIsADeadEnd(room: 'b_${pixie['x']}_$y')) {
           return true;
         }
         break;
@@ -567,7 +566,6 @@ class Maze {
         var x = pixie['x']; // - 1;
         if (x == 0) return false;
         if (roomIsADeadEnd(room: 'b_${x}_${pixie['y']}')) {
-          print('dead end found at left  b_${x}_${pixie['y']}');
           return true;
         }
         break;
@@ -575,14 +573,10 @@ class Maze {
         var x = pixie['x']; // + 1;
         if (x == maxRow + 1) return false;
         if (roomIsADeadEnd(room: 'b_${x}_${pixie['y']}')) {
-          print('dead end found at right  b_${x}_${pixie['y']}');
           return true;
         }
         break;
-      default:
-        break;
     }
-
     return false;
   }
 
@@ -606,6 +600,11 @@ class Maze {
     return false;
   }
 
+  int markMinotaursPath({String location}) {
+    myLabyrinth[location].minotaursPath = ++Room.badGuyHasMovedThisManyTimes;
+    return myLabyrinth[location].minotaursPath;
+  }
+
   bool moveMinotaur() {
     bool minotaurHasNotMovedAtLeastOnceThisTurn() {
       return minotaur.movesLeft == maxRow;
@@ -625,41 +624,39 @@ class Maze {
     }
     bool bossCannotSeeALamb = true;
     Directions direction;
-    print('mino dir  ${direction}');
+
     direction = changeDirectionFromBossToNearestLamb(
         boss: minotaur, direction: direction);
     if (direction != null) {
       bossCannotSeeALamb = false;
-      print('mino can see lamb and dir changed to  ${direction}');
     } else {
-      print('mino cannot see lamb ');
-      direction = randomDirection();
+      direction = randomDirection(location: minotaur.location);
     }
 
     minotaur.movesLeft = maxRow;
     int tries = 0;
+    bool triedFirst = false;
     while (minotaur.movesLeft > 0) {
       if (tries++ > 100) {
-        print('Stuck in loop $tries');
         break;
       }
       if (bossCannotSeeALamb) {
         if (minotaurHasNotMovedAtLeastOnceThisTurn()) {
-          {
+          if (triedFirst) {
             direction = nextDirection(direction);
-            print('mino got next  dir $direction');
+          } else {
+            triedFirst = true;
           }
           if (bossJustCameFromThatDirection(
               boss: minotaur, direction: direction)) {
             minotaur.lastLocation = '';
+
             continue; //try another direction
           }
 
           if (thereIsADeadEndFromLocationInDirection(
               location: {'x': minotaur.x, 'y': minotaur.y},
               direction: direction)) {
-            print(
-                'cannot move or sees a deadend from ${minotaur.location} $direction');
             continue; //try another direction
           }
         }
@@ -686,14 +683,12 @@ class Maze {
           thereIsADeadEndFromLocationInDirection(
               location: {'x': minotaur.x, 'y': minotaur.y},
               direction: direction)) {
-        print(
-            'cannot see lamb and sees a deadend from ${minotaur.location} $direction');
         minotaur.movesLeft = 0;
         continue; //try another direction
       }
 
       if (attemptToMoveToAnAdjacentRoom(pix: minotaur, direction: direction)) {
-        print('mino moved to ${minotaur.x} ${minotaur.y}');
+        markMinotaursPath(location: minotaur.location);
         // 50% chance to stop on any intersection
         if (bossCannotSeeALamb && minotaurHasMovedAtLeastOnceThisTurn()) {
           if (roomIsAnIntersection(room: minotaur.location)) {
@@ -701,10 +696,19 @@ class Maze {
               minotaur.movesLeft = 0;
               continue;
             }
+            //check to see if a lamb can be seen from here
+            if (direction !=
+                changeDirectionFromBossToNearestLamb(
+                    boss: minotaur, direction: direction)) {
+              minotaur.movesLeft = 0;
+
+              ///remember the dir the lamb was seen and use it on next turn
+              ///to chase the lamb -- or not, that might make to game too hard
+              continue;
+            }
           }
         }
       } else {
-        print('failed to move in ' + direction.toString());
         // if the minotaur moved and then failed to move then it has hit a wall so then end its turn
         if (minotaurHasMovedAtLeastOnceThisTurn()) {
           minotaur.movesLeft = 0;
@@ -715,8 +719,39 @@ class Maze {
     return minotaurHasMovedAtLeastOnceThisTurn();
   }
 
-  Directions randomDirection() {
-    return Directions.values[rand.nextInt(Directions.values.length)];
+  Directions randomDirection({String location}) {
+    //find the dir of the accessible rooms with the lowest minotaurPath
+    var index = rand.nextInt(Directions.values.length);
+    var finalDir = Directions.values[index]; //just a default direction
+
+    if (location != minotaur.location) {
+      // non-minotaurs do not need to check MinotaurPath
+      return finalDir;
+    }
+    var least = Room.badGuyHasMovedThisManyTimes;
+
+    var dirs = <Directions>[];
+    Directions.values.forEach((dir) {
+      dirs.add(Directions.values[index]);
+      index = (index + 1) % Directions.values.length;
+    });
+
+    dirs.forEach((dirx) {
+      print('1 least $least $dirx');
+      if (aPixieCanMoveDirectionFromLocation(
+          direction: dirx, location: location)) {
+        var newLoaction = whatIsTheLoactionAfterMovingFromLocationInDirection(
+            direction: dirx, pixie: minotaur);
+        print('2 least $least $dirx');
+        if (myLabyrinth[newLoaction].minotaursPath < least) {
+          least = myLabyrinth[newLoaction].minotaursPath;
+          finalDir = dirx;
+          print('3 least $least $dirx');
+        }
+      }
+    });
+    print('end least $least $finalDir');
+    return finalDir;
   }
 
   Directions nextDirection(Directions direction) {
@@ -744,8 +779,6 @@ class Maze {
 
   bool endGame() {
     gameIsOver = true;
-
-    print('end game');
 
     return gameIsOver;
   }
