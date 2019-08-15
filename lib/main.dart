@@ -46,7 +46,7 @@ class _MazeAreaState extends State<MazeArea>
   Maze maze;
   int numRows = 8;
   final maximumMoveAttempts = 8;
-  static const animDurationMilliSeconds = 900;
+  static const animDurationMilliSeconds = 700;
 
   var sprites = <Widget>[];
   final wallThickness = 2.0;
@@ -155,22 +155,26 @@ class _MazeAreaState extends State<MazeArea>
     return icons;
   }
 
-  void computerMove() {
-    var gameOver = false;
+  void computerMove({bool delayMove}) async {
+    if (!maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
+      handleEndOfGame();
+      return;
+    }
 
-    maze.moveMinotaur();
-    setState(() {
-      print('moved minotaur');
-    });
-
-    Future.delayed(const Duration(milliseconds: 100), () {
+    int delay = 0;
+    if (delayMove) {
+      delay = animDurationMilliSeconds;
+    }
+    Future.delayed(Duration(milliseconds: delay), () {
+      maze.moveMinotaur();
       setState(() {
         // just force redraw
       });
     });
-    gameOver = maze.moveLambs();
 
-    Future.delayed(const Duration(milliseconds: animDurationMilliSeconds), () {
+    Future.delayed(Duration(milliseconds: delay + animDurationMilliSeconds),
+        () {
+      var gameOver = maze.moveLambs();
       maze.lambs.forEach((lamb) {
         if (lamb.condition == Condition.dead) {
           lamb.location = '';
@@ -180,27 +184,37 @@ class _MazeAreaState extends State<MazeArea>
       setState(() {
         // just force redraw
       });
-    });
-    if (gameOver) {
-      Text message;
-      String str =
-          'Friends Freed: ${maze.player.savedLambs}\nFriends Lost: ${maze.player.lostLambs}\n';
-      if (maze.player.condition == Condition.dead) {
-        str = str + 'The Goblin got Alice, you lost!';
-      } else if (maze.player.savedLambs > maze.player.lostLambs) {
-        str = str + 'You WIN!';
-      } else if (maze.player.savedLambs == maze.player.lostLambs) {
-        str = str + 'You Draw!';
-      } else if (maze.player.savedLambs < maze.player.lostLambs) {
-        str = str + 'You Lost!';
+
+      if (gameOver) {
+        handleEndOfGame();
+      } else {
+        preparePlayerForATurn();
       }
+    });
+  }
 
-      message = Text(str, style: TextStyle(fontSize: 22, color: Colors.cyan));
-
-      showGameOverMessage(message);
-    } else {
-      maze.player.movesLeft = maze.playerMoves;
+  void handleEndOfGame() {
+    Text message;
+    String str =
+        'Friends Freed: ${maze.player.savedLambs}\nFriends Lost: ${maze.player.lostLambs}\n';
+    if (maze.player.condition == Condition.dead) {
+      str = str + 'The Goblin got Alice, you lost!';
+    } else if (maze.player.savedLambs > maze.player.lostLambs) {
+      str = str + 'You WIN!';
+    } else if (maze.player.savedLambs == maze.player.lostLambs) {
+      str = str + 'You Draw!';
+    } else if (maze.player.savedLambs < maze.player.lostLambs) {
+      str = str + 'You Lost!';
     }
+
+    message = Text(str, style: TextStyle(fontSize: 22, color: Colors.cyan));
+
+    showGameOverMessage(message);
+  }
+
+  void preparePlayerForATurn() {
+    maze.player.movesLeft = maze.playerMoves;
+    maze.player.delayComputerMove = true;
   }
 
   Widget makeRoom(Room room) {
@@ -230,7 +244,7 @@ class _MazeAreaState extends State<MazeArea>
               });
 
               if (maze.player.movesLeft == 0) {
-                computerMove();
+                computerMove(delayMove: maze.player.delayComputerMove);
               }
             } else {
               print('cannot move there');
@@ -396,47 +410,34 @@ class _MazeAreaState extends State<MazeArea>
                             showRules();
                           });
                         },
-                        child: Text('Show Game Rules'),
+                        child: Text(
+                          'Show Game Rules',
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                   ),
                 ),
                 Center(
                   child: Container(
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                            color: Colors.grey,
-                            width: 1.0,
-                            style: BorderStyle.solid),
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DropdownButton<String>(
+                        style: TextStyle(color: Colors.black, fontSize: 16),
+                        value: numRows.toString(),
+                        onChanged: (String newValue) {
+                          setState(() {
+                            numRows = int.parse(newValue);
+                          });
+                        },
+                        items: <String>['8', '10', '12', '14']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text('Rows ' + value),
+                          );
+                        }).toList(),
                       ),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Center(
-                            child: Text('Maze Width'),
-                          ),
-                        ),
-                        DropdownButton<String>(
-                          style: TextStyle(color: Colors.black, fontSize: 16),
-                          value: numRows.toString(),
-                          onChanged: (String newValue) {
-                            setState(() {
-                              numRows = int.parse(newValue);
-                            });
-                          },
-                          items: <String>['8', '10', '12', '14']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                      ],
                     ),
                   ),
                 ),
@@ -454,7 +455,10 @@ class _MazeAreaState extends State<MazeArea>
                             startNewGame();
                           });
                         },
-                        child: Text('New Game'),
+                        child: Text(
+                          'New Game',
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                     ),
                   ),
@@ -492,12 +496,9 @@ class _MazeAreaState extends State<MazeArea>
             SizedBox(
               width: maxWidth,
               height: maxWidth,
-              child: Stack(overflow: Overflow.visible, children: [
-                Column(children: trs),
-
-                // add pixies
-                ...sprites
-              ]),
+              child: Stack(
+                  overflow: Overflow.visible,
+                  children: [Column(children: trs), ...sprites]),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -517,7 +518,8 @@ class _MazeAreaState extends State<MazeArea>
                             child: IconButton(
                               onPressed: () {
                                 if (movePlayer(direction: Directions.up) <= 0) {
-                                  computerMove();
+                                  computerMove(
+                                      delayMove: maze.player.delayComputerMove);
                                 }
                               },
                               icon: Icon(Icons.arrow_upward),
@@ -537,7 +539,8 @@ class _MazeAreaState extends State<MazeArea>
                               onPressed: () {
                                 if (movePlayer(direction: Directions.left) <=
                                     0) {
-                                  computerMove();
+                                  computerMove(
+                                      delayMove: maze.player.delayComputerMove);
                                 }
                               },
                               icon: Icon(Icons.arrow_back),
@@ -554,7 +557,9 @@ class _MazeAreaState extends State<MazeArea>
                                 onPressed: () {
                                   if (gameIsOver == false) {
                                     maze.player.movesLeft = 0;
-                                    computerMove();
+                                    computerMove(
+                                        delayMove:
+                                            maze.player.delayComputerMove);
                                   }
                                 },
                                 icon: Icon(Icons.pause),
@@ -570,7 +575,8 @@ class _MazeAreaState extends State<MazeArea>
                               onPressed: () {
                                 if (movePlayer(direction: Directions.right) <=
                                     0) {
-                                  computerMove();
+                                  computerMove(
+                                      delayMove: maze.player.delayComputerMove);
                                 }
                               },
                               icon: Icon(Icons.arrow_forward),
@@ -590,7 +596,8 @@ class _MazeAreaState extends State<MazeArea>
                               onPressed: () {
                                 if (movePlayer(direction: Directions.down) <=
                                     0) {
-                                  computerMove();
+                                  computerMove(
+                                      delayMove: maze.player.delayComputerMove);
                                 }
                               },
                               icon: Icon(Icons.arrow_downward),
@@ -622,7 +629,7 @@ class _MazeAreaState extends State<MazeArea>
       return 0;
     }
 
-    if (maze.moveSprite(maze.player, direction)) {
+    if (maze.moveThisSpriteInThisDirection(maze.player, direction)) {
       setState(() {
         print('player moved  ' + direction.toString());
       });

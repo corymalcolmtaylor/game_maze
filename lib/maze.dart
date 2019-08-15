@@ -35,6 +35,7 @@ class Pixie {
   var location = '';
   var lastLocation = '';
   var movesLeft = 1;
+  var delayComputerMove = true;
   var x = 0;
   var y = 0;
   var lastX = 0;
@@ -147,29 +148,29 @@ class Maze {
     return seen;
   }
 
-  bool moveTo(Pixie pix, int x, int y) {
+  bool movePixieToXY(Pixie pixie, int x, int y) {
     final newloc = 'b_${x}_$y';
-    if (pix.ilk == Ilk.lamb && minotaur.location == newloc) {
+    if (pixie.ilk == Ilk.lamb && minotaur.location == newloc) {
       return false;
     }
 
-    if ((pix.ilk == Ilk.lamb || pix.ilk == Ilk.minotaur) &&
-        pix.lastLocation == newloc) {
-      pix.lastLocation = '';
+    if ((pixie.ilk == Ilk.lamb || pixie.ilk == Ilk.minotaur) &&
+        pixie.lastLocation == newloc) {
+      pixie.lastLocation = '';
       return false;
     }
-    pix.lastLocation = 'b_${pix.x}_${pix.y}';
-    pix.lastX = pix.x;
-    pix.lastY = pix.y;
-    pix.x = x;
-    pix.y = y;
-    pix.location = newloc;
-    pix.movesLeft--;
+    pixie.lastLocation = 'b_${pixie.x}_${pixie.y}';
+    pixie.lastX = pixie.x;
+    pixie.lastY = pixie.y;
+    pixie.x = x;
+    pixie.y = y;
+    pixie.location = newloc;
+    pixie.movesLeft--;
 
     return true;
   }
 
-  String whatIsTheLoactionAfterMovingFromLocationInDirection(
+  String whatLocationIsFoundByMovingInThisDirectionFromThisPixiesLocation(
       {Pixie pixie, Directions direction}) {
     switch (direction) {
       case Directions.down:
@@ -228,13 +229,13 @@ class Maze {
     return true;
   }
 
-  bool movePixie(Pixie pix, Directions dir) {
-    switch (dir) {
+  bool moveThisPixieInThisDirection(Pixie pixie, Directions direction) {
+    switch (direction) {
       case Directions.down:
         {
           //is south wall up?
-          if (!myLabyrinth[pix.location].down) {
-            return moveTo(pix, pix.x, pix.y + 1);
+          if (!myLabyrinth[pixie.location].down) {
+            return movePixieToXY(pixie, pixie.x, pixie.y + 1);
           } else {
             return false;
           }
@@ -243,8 +244,8 @@ class Maze {
       case Directions.up:
         {
           //is north wall up?
-          if (!myLabyrinth[pix.location].up) {
-            return moveTo(pix, pix.x, pix.y - 1);
+          if (!myLabyrinth[pixie.location].up) {
+            return movePixieToXY(pixie, pixie.x, pixie.y - 1);
           } else {
             return false;
           }
@@ -252,8 +253,8 @@ class Maze {
         break;
       case Directions.right:
         {
-          if (!myLabyrinth[pix.location].right) {
-            return moveTo(pix, pix.x + 1, pix.y);
+          if (!myLabyrinth[pixie.location].right) {
+            return movePixieToXY(pixie, pixie.x + 1, pixie.y);
           } else {
             return false;
           }
@@ -261,8 +262,8 @@ class Maze {
         break;
       case Directions.left:
         {
-          if (!myLabyrinth[pix.location].left) {
-            return moveTo(pix, pix.x - 1, pix.y);
+          if (!myLabyrinth[pixie.location].left) {
+            return movePixieToXY(pixie, pixie.x - 1, pixie.y);
           } else {
             return false;
           }
@@ -271,22 +272,28 @@ class Maze {
     return true;
   }
 
-  bool moveSprite(Pixie pix, Directions direction) {
-    if (movePixie(pix, direction)) {
-      if (pix.ilk != Ilk.minotaur) {
+  bool moveThisSpriteInThisDirection(Pixie sprite, Directions direction) {
+    if (moveThisPixieInThisDirection(sprite, direction)) {
+      if (sprite.ilk != Ilk.minotaur) {
         bossGoHandleAnyLambsAtYourLocation(boss: player);
       } else {
-        bossGoHandleAnyLambsAtYourLocation(boss: pix);
+        bossGoHandleAnyLambsAtYourLocation(boss: sprite);
       }
 
-      pix.direction = direction;
+      sprite.direction = direction;
       return true;
+    } else {
+      if (sprite.ilk == Ilk.player) {
+        //must have hit a wall
+        player.delayComputerMove = false;
+      }
     }
 
     return false;
   }
 
-  bool attemptToMoveToAnAdjacentRoom({Pixie pix, Directions direction}) {
+  bool attemptToMoveThisPixieToAnAdjacentRoom(
+      {Pixie pix, Directions direction}) {
     bool moved = false;
     int numberOfMoveTries = 0;
     if (direction == null) {
@@ -294,7 +301,7 @@ class Maze {
     }
 
     while (numberOfMoveTries < 8) {
-      moved = moveSprite(pix, direction);
+      moved = moveThisSpriteInThisDirection(pix, direction);
 
       if (moved) return moved;
       if (pix.ilk == Ilk.lamb) {
@@ -309,13 +316,13 @@ class Maze {
 
   bool tryToMovePlayerToXY(Pixie pix, int x, int y) {
     if (x == (pix.x + 1) && y == pix.y) {
-      return moveSprite(pix, Directions.right);
+      return moveThisSpriteInThisDirection(pix, Directions.right);
     } else if (x == (pix.x - 1) && y == pix.y) {
-      return moveSprite(pix, Directions.left);
+      return moveThisSpriteInThisDirection(pix, Directions.left);
     } else if (x == (pix.x) && y == (pix.y + 1)) {
-      return moveSprite(pix, Directions.down);
+      return moveThisSpriteInThisDirection(pix, Directions.down);
     } else if (x == (pix.x) && y == (pix.y - 1)) {
-      return moveSprite(pix, Directions.up);
+      return moveThisSpriteInThisDirection(pix, Directions.up);
     }
 
     return false;
@@ -689,7 +696,8 @@ class Maze {
         continue; //try another direction
       }
 
-      if (attemptToMoveToAnAdjacentRoom(pix: minotaur, direction: direction)) {
+      if (attemptToMoveThisPixieToAnAdjacentRoom(
+          pix: minotaur, direction: direction)) {
         markMinotaursPath(location: minotaur.location);
         // 50% chance to stop on any intersection
         if (bossCannotSeeALamb && minotaurHasMovedAtLeastOnceThisTurn()) {
@@ -742,8 +750,9 @@ class Maze {
       print('1 least $least $dirx');
       if (aPixieCanMoveDirectionFromLocation(
           direction: dirx, location: location)) {
-        var newLoaction = whatIsTheLoactionAfterMovingFromLocationInDirection(
-            direction: dirx, pixie: minotaur);
+        var newLoaction =
+            whatLocationIsFoundByMovingInThisDirectionFromThisPixiesLocation(
+                direction: dirx, pixie: minotaur);
         print('2 least $least $dirx');
         if (myLabyrinth[newLoaction].minotaursPath < least) {
           least = myLabyrinth[newLoaction].minotaursPath;
@@ -764,7 +773,7 @@ class Maze {
     if (gameIsOver) return gameIsOver;
     lambs.forEach((lamb) {
       if (lamb.condition == Condition.alive) {
-        attemptToMoveToAnAdjacentRoom(pix: lamb);
+        attemptToMoveThisPixieToAnAdjacentRoom(pix: lamb);
         lamb.movesLeft = 1;
       } else if (lamb.condition == Condition.freed) {
         lamb.movesLeft = 0;
