@@ -156,7 +156,8 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void computerMove({bool delayMove}) async {
-    if (!maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
+    if (maze.gameIsOver ||
+        !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
       handleEndOfGame();
       return;
     }
