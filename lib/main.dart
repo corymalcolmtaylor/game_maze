@@ -625,6 +625,7 @@ class _MazeAreaState extends State<MazeArea>
             ),
             Container(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   defineTopRow(),
                   defineScoreRow(),
