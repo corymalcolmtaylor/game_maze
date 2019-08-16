@@ -357,10 +357,230 @@ class _MazeAreaState extends State<MazeArea>
             .floorToDouble();
   }
 
+  Widget defineTopRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Center(
+            child: Container(
+              child: OutlineButton(
+                color: Colors.amber,
+                shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(30.0),
+                ),
+                onPressed: () {
+                  setState(() {
+                    showRules();
+                  });
+                },
+                child: Text(
+                  'Show Game Rules',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Center(
+          child: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButton<String>(
+                style: TextStyle(color: Colors.black, fontSize: 16),
+                value: numRows.toString(),
+                onChanged: (String newValue) {
+                  setState(() {
+                    numRows = int.parse(newValue);
+                  });
+                },
+                items: <String>['8', '10', '12', '14']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text('Rows ' + value),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Center(
+            child: Container(
+              child: OutlineButton(
+                color: Colors.amber,
+                shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(30.0),
+                ),
+                onPressed: () {
+                  setState(() {
+                    startNewGame();
+                  });
+                },
+                child: Text(
+                  'New Game',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget defineScoreRow() {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Friends Lost:',
+            style: TextStyle(fontSize: 22),
+          ),
+          Padding(
+              padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+              child: Text(
+                maze.player.lostLambs.toString(),
+                style: TextStyle(fontSize: 22),
+              )),
+          Text(
+            'Friends Saved:',
+            style: TextStyle(fontSize: 22),
+          ),
+          Padding(
+              padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+              child: Text(
+                maze.player.savedLambs.toString(),
+                style: TextStyle(fontSize: 22),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget defineControlsPanel() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Ink(
+                    decoration: ShapeDecoration(
+                      color: Colors.green,
+                      shape: CircleBorder(),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        if (movePlayer(direction: Directions.up) <= 0) {
+                          computerMove(
+                              delayMove: maze.player.delayComputerMove);
+                        }
+                      },
+                      icon: Icon(Icons.arrow_upward),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Ink(
+                    decoration: ShapeDecoration(
+                      color: Colors.green,
+                      shape: CircleBorder(),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        if (movePlayer(direction: Directions.left) <= 0) {
+                          computerMove(
+                              delayMove: maze.player.delayComputerMove);
+                        }
+                      },
+                      icon: Icon(Icons.arrow_back),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Ink(
+                      decoration: ShapeDecoration(
+                        color: Colors.orange,
+                        shape: CircleBorder(),
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          if (gameIsOver == false) {
+                            maze.player.movesLeft = 0;
+                            computerMove(
+                                delayMove: maze.player.delayComputerMove);
+                          }
+                        },
+                        icon: Icon(Icons.pause),
+                      ),
+                    ),
+                  ),
+                  Ink(
+                    decoration: ShapeDecoration(
+                      color: Colors.green,
+                      shape: CircleBorder(),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        if (movePlayer(direction: Directions.right) <= 0) {
+                          computerMove(
+                              delayMove: maze.player.delayComputerMove);
+                        }
+                      },
+                      icon: Icon(Icons.arrow_forward),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Ink(
+                    decoration: ShapeDecoration(
+                      color: Colors.green,
+                      shape: CircleBorder(),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        if (movePlayer(direction: Directions.down) <= 0) {
+                          computerMove(
+                              delayMove: maze.player.delayComputerMove);
+                        }
+                      },
+                      icon: Icon(Icons.arrow_downward),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     setSizes();
     var trs = <Row>[];
+    if (MediaQuery.of(context).orientation == Orientation.landscape) {
+      print('build in landscape');
+    } else {
+      print('build in portrait');
+    }
 
     for (int i = 1; i <= maze.maxRow; i++) {
       trs.add(
@@ -389,111 +609,13 @@ class _MazeAreaState extends State<MazeArea>
     sprites.add(getAnimatedSpriteIconForBosses(pix: maze.player));
     sprites.add(getAnimatedSpriteIconForBosses(pix: maze.minotaur));
 
-    return ListView(
-      //mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Column(
+    if (MediaQuery.of(context).orientation == Orientation.landscape) {
+      print('build in landscape');
+      return Center(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Center(
-                    child: Container(
-                      child: OutlineButton(
-                        color: Colors.amber,
-                        shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            showRules();
-                          });
-                        },
-                        child: Text(
-                          'Show Game Rules',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: Container(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DropdownButton<String>(
-                        style: TextStyle(color: Colors.black, fontSize: 16),
-                        value: numRows.toString(),
-                        onChanged: (String newValue) {
-                          setState(() {
-                            numRows = int.parse(newValue);
-                          });
-                        },
-                        items: <String>['8', '10', '12', '14']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text('Rows ' + value),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Center(
-                    child: Container(
-                      child: OutlineButton(
-                        color: Colors.amber,
-                        shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            startNewGame();
-                          });
-                        },
-                        child: Text(
-                          'New Game',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    'Friends Lost:',
-                    style: TextStyle(fontSize: 22),
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                      child: Text(
-                        maze.player.lostLambs.toString(),
-                        style: TextStyle(fontSize: 22),
-                      )),
-                  Text(
-                    'Friends Saved:',
-                    style: TextStyle(fontSize: 22),
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                      child: Text(
-                        maze.player.savedLambs.toString(),
-                        style: TextStyle(fontSize: 22),
-                      )),
-                ],
-              ),
-            ),
             SizedBox(
               width: maxWidth,
               height: maxWidth,
@@ -501,120 +623,41 @@ class _MazeAreaState extends State<MazeArea>
                   overflow: Overflow.visible,
                   children: [Column(children: trs), ...sprites]),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Ink(
-                            decoration: ShapeDecoration(
-                              color: Colors.green,
-                              shape: CircleBorder(),
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                if (movePlayer(direction: Directions.up) <= 0) {
-                                  computerMove(
-                                      delayMove: maze.player.delayComputerMove);
-                                }
-                              },
-                              icon: Icon(Icons.arrow_upward),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Ink(
-                            decoration: ShapeDecoration(
-                              color: Colors.green,
-                              shape: CircleBorder(),
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                if (movePlayer(direction: Directions.left) <=
-                                    0) {
-                                  computerMove(
-                                      delayMove: maze.player.delayComputerMove);
-                                }
-                              },
-                              icon: Icon(Icons.arrow_back),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                            child: Ink(
-                              decoration: ShapeDecoration(
-                                color: Colors.orange,
-                                shape: CircleBorder(),
-                              ),
-                              child: IconButton(
-                                onPressed: () {
-                                  if (gameIsOver == false) {
-                                    maze.player.movesLeft = 0;
-                                    computerMove(
-                                        delayMove:
-                                            maze.player.delayComputerMove);
-                                  }
-                                },
-                                icon: Icon(Icons.pause),
-                              ),
-                            ),
-                          ),
-                          Ink(
-                            decoration: ShapeDecoration(
-                              color: Colors.green,
-                              shape: CircleBorder(),
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                if (movePlayer(direction: Directions.right) <=
-                                    0) {
-                                  computerMove(
-                                      delayMove: maze.player.delayComputerMove);
-                                }
-                              },
-                              icon: Icon(Icons.arrow_forward),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Ink(
-                            decoration: ShapeDecoration(
-                              color: Colors.green,
-                              shape: CircleBorder(),
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                if (movePlayer(direction: Directions.down) <=
-                                    0) {
-                                  computerMove(
-                                      delayMove: maze.player.delayComputerMove);
-                                }
-                              },
-                              icon: Icon(Icons.arrow_downward),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            Container(
+              child: Column(
+                children: <Widget>[
+                  defineTopRow(),
+                  defineScoreRow(),
+                  defineControlsPanel(),
+                ],
+              ),
+            )
           ],
         ),
-      ],
-    );
+      );
+    } else {
+      print('build in portrait');
+
+      return ListView(
+        //mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              defineTopRow(),
+              defineScoreRow(),
+              SizedBox(
+                width: maxWidth,
+                height: maxWidth,
+                child: Stack(
+                    overflow: Overflow.visible,
+                    children: [Column(children: trs), ...sprites]),
+              ),
+              defineControlsPanel(),
+            ],
+          ),
+        ],
+      );
+    }
   }
 
   int movePlayer({Directions direction}) {
