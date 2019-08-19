@@ -65,35 +65,36 @@ class _MazeAreaState extends State<MazeArea>
   AnimatedPositioned getAnimatedSpriteIconForBosses({@required Pixie pix}) {
     var endTop = 0.0;
     var endLeft = 0.0;
-    endTop = ((pix.y - 1) * roomLength) + (2 * pix.y) - 4;
-    endLeft = ((pix.x - 1) * roomLength) + (2 * pix.x);
 
-    if (pix.ilk == Ilk.minotaur) {
-      return AnimatedPositioned(
-        key: Key(maze.minotaur.key),
-        left: endLeft,
-        top: endTop,
-        curve: Curves.linear,
-        duration: Duration(milliseconds: animDurationMilliSeconds),
-        child: Text(
-          maze.minotaur.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 8),
-        ),
-      );
+    print('maxwidth $maxWidth ');
+    /*
+    if ( maxWidth ) {
+      endTop = endTop - pix.y;
     }
+    */
 
-    if (pix.ilk == Ilk.player) {
-      return AnimatedPositioned(
-        key: Key(maze.player.key),
-        left: endLeft,
-        top: endTop,
-        duration: Duration(milliseconds: animDurationMilliSeconds),
-        child: Text(
-          maze.player.emoji,
-          style: TextStyle(color: Colors.black, fontSize: roomLength - 6),
-        ),
-      );
-    }
+    var shrinkEmoji = roomLength / 10;
+
+    endLeft = ((pix.x - 1) * roomLength) +
+        (wallThickness * pix.x) +
+        (shrinkEmoji / 2);
+    endTop = ((pix.y - 1) * roomLength) +
+        (wallThickness * pix.y) -
+        (shrinkEmoji / 2) -
+        4;
+    return AnimatedPositioned(
+      key: Key(pix.key),
+      left: endLeft,
+      top: endTop,
+      curve: Curves.linear,
+      duration: Duration(milliseconds: animDurationMilliSeconds),
+      child: Text(
+        pix.emoji,
+        style:
+            TextStyle(color: Colors.black, fontSize: roomLength - shrinkEmoji),
+      ),
+    );
+
     return null;
   }
 
@@ -101,14 +102,18 @@ class _MazeAreaState extends State<MazeArea>
     var endTop = 0.0;
     var endLeft = 0.0;
     List<AnimatedPositioned> icons = [];
+    var shrinkEmoji = roomLength / 6;
 
     var lambs = maze.lambs.where(
       (el) => el.location == 'b_${room.x}_${room.y}',
     );
 
     lambs.forEach((lamb) {
-      endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y);
-      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x);
+      endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y) + (0);
+      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x) + (shrinkEmoji / 2);
+      if (MediaQuery.of(context).orientation == Orientation.landscape) {
+        // endTop = endTop - (2 * lamb.y);
+      }
       if (lamb.condition == Condition.dead) {
         lamb.emoji = '☠️';
         icons.add(
@@ -119,7 +124,8 @@ class _MazeAreaState extends State<MazeArea>
             duration: Duration(milliseconds: animDurationMilliSeconds),
             child: Text(
               lamb.emoji,
-              style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+              style: TextStyle(
+                  color: Colors.black, fontSize: roomLength - shrinkEmoji),
             ),
           ),
         );
@@ -132,7 +138,8 @@ class _MazeAreaState extends State<MazeArea>
             duration: Duration(milliseconds: animDurationMilliSeconds),
             child: Text(
               lamb.emoji,
-              style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+              style: TextStyle(
+                  color: Colors.black, fontSize: roomLength - shrinkEmoji),
             ),
           ),
         );
@@ -145,7 +152,8 @@ class _MazeAreaState extends State<MazeArea>
             duration: Duration(milliseconds: animDurationMilliSeconds),
             child: Text(
               lamb.emoji,
-              style: TextStyle(color: Colors.black, fontSize: roomLength - 12),
+              style: TextStyle(
+                  color: Colors.black, fontSize: roomLength - shrinkEmoji),
             ),
           ),
         );
@@ -279,8 +287,8 @@ class _MazeAreaState extends State<MazeArea>
         'Use the arrow buttons to move Alice 👧🏼 around the maze.\n' +
             'Avoid the goblin 👺 but rescue the others by getting Alice to them.\n' +
             'If the goblin likewise gets Alice you lose.\n' +
-            'Once all the animals are gone if there are more that you have saved' +
-            ' than have been eaten by the goblin you win, otherwise you lose.',
+            'Once all the animals are gone then if there are more that you have saved' +
+            ' than have been eaten by the goblin you win, otherwise you draw if the number is equal otherwise you lose.',
         style: TextStyle(fontSize: 22, color: Colors.cyan));
     return showDialog<void>(
       context: context,
@@ -349,8 +357,14 @@ class _MazeAreaState extends State<MazeArea>
 
   void setSizes() {
     maxWidth = MediaQuery.of(context).size.width;
+    var maxHieght = MediaQuery.of(context).size.height;
+    print('setsizes wid = $maxWidth hit = $maxHieght ${maxWidth / maxHieght}');
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       maxWidth = MediaQuery.of(context).size.height * 0.75;
+    } else {
+      if (maxWidth / maxHieght > 0.66) {
+        maxWidth = maxWidth * 0.85;
+      }
     }
     roomLength =
         ((maxWidth.floor() - (wallThickness * (maze.maxRow + 1))) / maze.maxRow)

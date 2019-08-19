@@ -1054,6 +1054,9 @@ class Maze {
     minotaur = loc;
     minotaur.emoji = '👺';
     minotaur.movesLeft = maxRow;
+    minotaur.x = 8;
+    minotaur.y = 8;
+    minotaur.location = 'b_${minotaur.x}_${minotaur.y}';
   }
 
   void placePlayer() {
@@ -1067,6 +1070,10 @@ class Maze {
     player.movesLeft = playerMoves;
     player.lostLambs = 0;
     player.savedLambs = 0;
+
+    player.x = 1;
+    player.y = 1;
+    player.location = 'b_${player.x}_${player.y}';
   }
 
   bool closeToMinotaur(Pixie pix) {
