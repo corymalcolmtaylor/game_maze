@@ -49,6 +49,7 @@ class Pixie {
   Directions newDirection;
   var follow = false;
   Directions direction;
+  var facing = Directions.left;
 }
 
 class Maze {
@@ -135,22 +136,24 @@ class Maze {
     return handled;
   }
 
-  bool seeLambInRoom(Room room) {
+  bool thisLocationIsOccupiedByALamb({String location}) {
     var seen = false;
     lambs.forEach((el) {
-      if (el.location == 'b_${room.x}_${room.y}') {
+      if (el.location == location) {
         seen = true;
       }
     });
-    if (player.location == 'b_${room.x}_${room.y}') {
-      seen = true;
-    }
     return seen;
   }
 
   bool movePixieToXY(Pixie pixie, int x, int y) {
     final newloc = 'b_${x}_$y';
     if (pixie.ilk == Ilk.lamb && minotaur.location == newloc) {
+      return false;
+    }
+    /* do not let lambs wak on each other */
+    if (pixie.ilk == Ilk.lamb &&
+        thisLocationIsOccupiedByALamb(location: newloc)) {
       return false;
     }
 
@@ -1040,8 +1043,11 @@ class Maze {
     }
     var p = Pixie(Ilk.lamb);
     p.location = 'b_${x}_$y';
+    p.lastLocation = 'b_${x}_$y';
     p.x = x;
     p.y = y;
+    p.lastX = x;
+    p.lastY = y;
     return p;
   }
 

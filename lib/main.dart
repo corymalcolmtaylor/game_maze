@@ -62,40 +62,46 @@ class _MazeAreaState extends State<MazeArea>
     maze.carveLabyrinth();
   }
 
-  AnimatedPositioned getAnimatedSpriteIconForBosses({@required Pixie pix}) {
+  AnimatedPositioned getAnimatedSpriteIconForBosses({@required Pixie pixie}) {
     var endTop = 0.0;
     var endLeft = 0.0;
 
     print('maxwidth $maxWidth ');
-    /*
-    if ( maxWidth ) {
-      endTop = endTop - pix.y;
-    }
-    */
 
     var shrinkEmoji = roomLength / 10;
 
-    endLeft = ((pix.x - 1) * roomLength) +
-        (wallThickness * pix.x) +
+    endLeft = ((pixie.x - 1) * roomLength) +
+        (wallThickness * pixie.x) +
         (shrinkEmoji / 2);
-    endTop = ((pix.y - 1) * roomLength) +
-        (wallThickness * pix.y) -
+    endTop = ((pixie.y - 1) * roomLength) +
+        (wallThickness * pixie.y) -
         (shrinkEmoji / 2) -
         4;
+
+    var radians = 0.0;
+    if (pixie.lastX > 0 && pixie.x < pixie.lastX) {
+      radians = 3.0;
+    }
     return AnimatedPositioned(
-      key: Key(pix.key),
+      key: Key(pixie.key),
       left: endLeft,
       top: endTop,
       curve: Curves.linear,
       duration: Duration(milliseconds: animDurationMilliSeconds),
-      child: Text(
-        pix.emoji,
-        style:
-            TextStyle(color: Colors.black, fontSize: roomLength - shrinkEmoji),
+      child: Transform(
+        // Transform widget
+        transform: Matrix4.identity()
+          ..setEntry(1, 1, 1) // perspective
+          ..rotateX(0)
+          ..rotateY(radians),
+        alignment: FractionalOffset.center,
+        child: Text(
+          pixie.emoji,
+          style: TextStyle(
+              color: Colors.black, fontSize: roomLength - shrinkEmoji),
+        ), // <<< set your widget here
       ),
     );
-
-    return null;
   }
 
   List<AnimatedPositioned> getAnimatedSpriteIconsForLambs(Room room) {
@@ -109,11 +115,25 @@ class _MazeAreaState extends State<MazeArea>
     );
 
     lambs.forEach((lamb) {
+      var xRadians = 0.0;
+      if (lamb.x != lamb.lastX) {
+        if (lamb.x > lamb.lastX) {
+          xRadians = 3.0;
+          lamb.facing = Directions.right;
+
+          print(
+              'set right radians == 3 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
+        } else {
+          xRadians = 6.0;
+          lamb.facing = Directions.left;
+
+          print(
+              'set left radians == 6 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
+        }
+      }
       endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y) + (0);
       endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x) + (shrinkEmoji / 2);
-      if (MediaQuery.of(context).orientation == Orientation.landscape) {
-        // endTop = endTop - (2 * lamb.y);
-      }
+
       if (lamb.condition == Condition.dead) {
         lamb.emoji = '☠️';
         icons.add(
@@ -146,16 +166,29 @@ class _MazeAreaState extends State<MazeArea>
       } else {
         icons.add(
           AnimatedPositioned(
-            key: Key(lamb.key),
-            left: endLeft,
-            top: endTop,
-            duration: Duration(milliseconds: animDurationMilliSeconds),
-            child: Text(
+              key: Key(lamb.key),
+              left: endLeft,
+              top: endTop,
+              duration: Duration(milliseconds: animDurationMilliSeconds),
+              child: Transform(
+                // Transform widget
+                transform: Matrix4.identity()
+                  ..setEntry(1, 1, 1) // perspective
+                  ..rotateX(0)
+                  ..rotateY(xRadians),
+                alignment: FractionalOffset.center,
+                child: Text(
+                  lamb.emoji,
+                  style: TextStyle(
+                      color: Colors.black, fontSize: roomLength - shrinkEmoji),
+                ), // <<< set your widget here
+              )
+              /* child: Text(
               lamb.emoji,
               style: TextStyle(
                   color: Colors.black, fontSize: roomLength - shrinkEmoji),
-            ),
-          ),
+            ),*/
+              ),
         );
       }
     });
@@ -620,8 +653,8 @@ class _MazeAreaState extends State<MazeArea>
     llsprites.forEach((ll) {
       sprites.addAll(ll);
     });
-    sprites.add(getAnimatedSpriteIconForBosses(pix: maze.player));
-    sprites.add(getAnimatedSpriteIconForBosses(pix: maze.minotaur));
+    sprites.add(getAnimatedSpriteIconForBosses(pixie: maze.player));
+    sprites.add(getAnimatedSpriteIconForBosses(pixie: maze.minotaur));
 
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       print('build in landscape');
