@@ -11,7 +11,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Alice In The Hedge Maze</string>
+	<string>AliceInTheHedgeMaze</string>
+	<key>CFBundleDisplayName</key>
+	<string>Alice&#x2007;In&#x2007;The&#x2007;Hedge&#x2007;Maze</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 
 import 'maze.dart';
 
@@ -82,6 +83,11 @@ class _MazeAreaState extends State<MazeArea>
     if (pixie.lastX > 0 && pixie.x < pixie.lastX) {
       radians = 3.0;
     }
+
+    if (Platform.isAndroid) {
+      endLeft -= shrinkEmoji;
+      endTop += shrinkEmoji;
+    }
     return AnimatedPositioned(
       key: Key(pixie.key),
       left: endLeft,
@@ -133,6 +139,11 @@ class _MazeAreaState extends State<MazeArea>
       }
       endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y) + (0);
       endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x) + (shrinkEmoji / 2);
+
+      if (Platform.isAndroid) {
+        endLeft -= shrinkEmoji / 2;
+        endTop -= shrinkEmoji / 2;
+      }
 
       if (lamb.condition == Condition.dead) {
         lamb.emoji = '☠️';
@@ -384,8 +395,10 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget defineTopRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Wrap(
+      //mainAxisAlignment: MainAxisAlignment.end,
+      alignment: WrapAlignment.end,
+      direction: Axis.horizontal,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(4.0),
@@ -461,8 +474,10 @@ class _MazeAreaState extends State<MazeArea>
   Widget defineScoreRow() {
     return Padding(
       padding: const EdgeInsets.all(12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Wrap(
+        direction: Axis.horizontal,
+        alignment: WrapAlignment.end,
+        //mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
             'Friends Lost:',
@@ -666,7 +681,7 @@ class _MazeAreaState extends State<MazeArea>
             ),
             Container(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   defineTopRow(),
                   defineScoreRow(),
