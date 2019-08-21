@@ -56,6 +56,7 @@ class Maze {
   int _maxRow;
   int _maxCol;
   bool gameIsOver = false;
+  Ilk whosTurnIsIt = Ilk.player;
   var rand = Math.Random.secure();
 
   int get maxRow {
@@ -96,6 +97,7 @@ class Maze {
     lambs.clear();
     myLabyrinth.clear();
     gameIsOver = false;
+    whosTurnIsIt = Ilk.player;
     Room.badGuyHasMovedThisManyTimes = 0;
     for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
       for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
@@ -1060,9 +1062,9 @@ class Maze {
     minotaur = loc;
     minotaur.emoji = '👺';
     minotaur.movesLeft = maxRow;
-    minotaur.x = 8;
-    minotaur.y = 8;
-    minotaur.location = 'b_${minotaur.x}_${minotaur.y}';
+    // minotaur.x = 8;
+    //minotaur.y = 8;
+    //minotaur.location = 'b_${minotaur.x}_${minotaur.y}';
   }
 
   void placePlayer() {
@@ -1077,9 +1079,9 @@ class Maze {
     player.lostLambs = 0;
     player.savedLambs = 0;
 
-    player.x = 1;
-    player.y = 1;
-    player.location = 'b_${player.x}_${player.y}';
+    //player.x = 1;
+    //player.y = 1;
+    //player.location = 'b_${player.x}_${player.y}';
   }
 
   bool closeToMinotaur(Pixie pix) {

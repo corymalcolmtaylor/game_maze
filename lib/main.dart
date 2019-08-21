@@ -203,19 +203,23 @@ class _MazeAreaState extends State<MazeArea>
       return;
     }
 
-    int delay = 0;
+    int minoDelay = 0;
     if (delayMove) {
-      delay = animDurationMilliSeconds;
+      minoDelay = animDurationMilliSeconds;
     }
-    Future.delayed(Duration(milliseconds: delay), () {
-      maze.moveMinotaur();
-      setState(() {
-        // just force redraw
+    var lambDelay = 0;
+    if (maze.whosTurnIsIt == Ilk.minotaur) {
+      lambDelay = animDurationMilliSeconds;
+      Future.delayed(Duration(milliseconds: minoDelay), () {
+        maze.moveMinotaur();
+        maze.whosTurnIsIt = Ilk.lamb;
+        setState(() {
+          // just force redraw
+        });
       });
-    });
+    }
 
-    Future.delayed(Duration(milliseconds: delay + animDurationMilliSeconds),
-        () {
+    Future.delayed(Duration(milliseconds: minoDelay + lambDelay), () {
       var gameOver = maze.moveLambs();
       maze.lambs.forEach((lamb) {
         if (lamb.condition == Condition.dead) {
@@ -257,6 +261,7 @@ class _MazeAreaState extends State<MazeArea>
   void preparePlayerForATurn() {
     maze.player.movesLeft = maze.playerMoves;
     maze.player.delayComputerMove = true;
+    maze.whosTurnIsIt = Ilk.player;
   }
 
   Widget makeRoom(Room room) {
@@ -268,48 +273,22 @@ class _MazeAreaState extends State<MazeArea>
     var eastColor = (room.right == true) ? Colors.green : floorColor;
 
     return Container(
-      child: GestureDetector(
-        onTap: () {
-          if (maze.player.movesLeft <= 0) {
-            return;
-          }
-          if (gameIsOver == false) {
-            maze.lambs.forEach((lamb) {
-              if (lamb.condition != Condition.alive && lamb.location != '') {
-                lamb.location = '';
-                lamb.lastLocation = '';
-              }
-            });
-            if (maze.tryToMovePlayerToXY(maze.player, room.x, room.y)) {
-              setState(() {
-                print('player moved to  b_${room.x}_${room.y}');
-              });
-
-              if (maze.player.movesLeft == 0) {
-                computerMove(delayMove: maze.player.delayComputerMove);
-              }
-            } else {
-              print('cannot move there');
-            }
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: floorColor,
-            border: Border(
-              bottom: BorderSide(color: southColor),
-              top: BorderSide(color: northColor),
-              right: BorderSide(color: eastColor),
-              left: BorderSide(color: westColor),
-            ),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: floorColor,
+          border: Border(
+            bottom: BorderSide(color: southColor),
+            top: BorderSide(color: northColor),
+            right: BorderSide(color: eastColor),
+            left: BorderSide(color: westColor),
           ),
-          child: SizedBox(
-            width: roomLength,
-            height: roomLength,
-            //child: Text('${room.minotaursPath}')
-            // child: getRoomPixieIcon(room),
-          ),
+        ),
+        child: SizedBox(
+          width: roomLength,
+          height: roomLength,
+          //child: Text('${room.minotaursPath}')
+          // child: getRoomPixieIcon(room),
         ),
       ),
     );
@@ -528,9 +507,15 @@ class _MazeAreaState extends State<MazeArea>
                     ),
                     child: IconButton(
                       onPressed: () {
-                        if (movePlayer(direction: Directions.up) <= 0) {
-                          computerMove(
-                              delayMove: maze.player.delayComputerMove);
+                        print('up pressed');
+                        if (movePlayer(direction: Directions.up)) {
+                          print('player moved');
+                          if (maze.whosTurnIsIt == Ilk.minotaur) {
+                            computerMove(
+                                delayMove: maze.player.delayComputerMove);
+                          }
+                        } else {
+                          print('plyaer not moved');
                         }
                       },
                       icon: Icon(Icons.arrow_upward),
@@ -548,9 +533,11 @@ class _MazeAreaState extends State<MazeArea>
                     ),
                     child: IconButton(
                       onPressed: () {
-                        if (movePlayer(direction: Directions.left) <= 0) {
-                          computerMove(
-                              delayMove: maze.player.delayComputerMove);
+                        if (movePlayer(direction: Directions.left)) {
+                          if (maze.whosTurnIsIt == Ilk.minotaur) {
+                            computerMove(
+                                delayMove: maze.player.delayComputerMove);
+                          }
                         }
                       },
                       icon: Icon(Icons.arrow_back),
@@ -567,6 +554,9 @@ class _MazeAreaState extends State<MazeArea>
                         onPressed: () {
                           if (gameIsOver == false) {
                             maze.player.movesLeft = 0;
+
+                            maze.whosTurnIsIt = Ilk.minotaur;
+
                             computerMove(
                                 delayMove: maze.player.delayComputerMove);
                           }
@@ -582,9 +572,11 @@ class _MazeAreaState extends State<MazeArea>
                     ),
                     child: IconButton(
                       onPressed: () {
-                        if (movePlayer(direction: Directions.right) <= 0) {
-                          computerMove(
-                              delayMove: maze.player.delayComputerMove);
+                        if (movePlayer(direction: Directions.right)) {
+                          if (maze.whosTurnIsIt == Ilk.minotaur) {
+                            computerMove(
+                                delayMove: maze.player.delayComputerMove);
+                          }
                         }
                       },
                       icon: Icon(Icons.arrow_forward),
@@ -602,9 +594,11 @@ class _MazeAreaState extends State<MazeArea>
                     ),
                     child: IconButton(
                       onPressed: () {
-                        if (movePlayer(direction: Directions.down) <= 0) {
-                          computerMove(
-                              delayMove: maze.player.delayComputerMove);
+                        if (movePlayer(direction: Directions.down)) {
+                          if (maze.whosTurnIsIt == Ilk.minotaur) {
+                            computerMove(
+                                delayMove: maze.player.delayComputerMove);
+                          }
                         }
                       },
                       icon: Icon(Icons.arrow_downward),
@@ -708,28 +702,39 @@ class _MazeAreaState extends State<MazeArea>
     }
   }
 
-  int movePlayer({Directions direction}) {
-    if (gameIsOver) return 0;
+  /*return true if the minotaur should move next, otherwise false */
+  bool movePlayer({Directions direction}) {
+    print('movePlayer 1');
+    if (gameIsOver) return false;
+    print('movePlayer 2 ${maze.whosTurnIsIt}');
+    if (maze.whosTurnIsIt != Ilk.player) return false;
+    print('movePlayer 3');
+    if (maze.player.movesLeft <= 0) return true;
+    print('movePlayer 4');
+
     maze.lambs.forEach((lamb) {
       if (lamb.condition == Condition.freed) {
         lamb.location = '';
         lamb.lastLocation = '';
       }
     });
-    if (maze.player.movesLeft <= 0) {
-      maze.player.movesLeft = -1;
-      return 0;
-    }
 
     if (maze.moveThisSpriteInThisDirection(maze.player, direction)) {
       setState(() {
         print('player moved  ' + direction.toString());
       });
     } else {
-      maze.player.movesLeft = 0;
+      handlePlayerHitAWall();
     }
+    if (maze.player.movesLeft <= 0) {
+      maze.whosTurnIsIt = Ilk.minotaur;
+    }
+    if (maze.whosTurnIsIt == Ilk.minotaur) return true;
+    return false;
+  }
 
-    return maze.player.movesLeft;
+  void handlePlayerHitAWall() {
+    maze.player.movesLeft = 0;
   }
 
   void startNewGame() {
