@@ -1113,10 +1113,10 @@ class Maze {
         lamb.emoji = '🐁';
         break;
       case 3:
-        lamb.emoji = '🐷';
+        lamb.emoji = '🐖';
         break;
       case 4:
-        lamb.emoji = '😸';
+        lamb.emoji = '🐍';
         break;
       case 5:
         lamb.emoji = '🦔';
@@ -1128,7 +1128,7 @@ class Maze {
         lamb.emoji = '🐢';
         break;
       case 8:
-        lamb.emoji = '🦋';
+        lamb.emoji = '🐈';
         break;
       case 9:
         lamb.emoji = '🐿';
@@ -1143,16 +1143,16 @@ class Maze {
         lamb.emoji = '🐓';
         break;
       case 13:
-        lamb.emoji = '🦀';
+        lamb.emoji = '🦍';
         break;
       case 14:
-        lamb.emoji = '🐌';
+        lamb.emoji = '🐒';
         break;
       case 15:
-        lamb.emoji = '🦉';
+        lamb.emoji = '🦛';
         break;
       default:
-        lamb.emoji = '🐛';
+        lamb.emoji = '🦇';
     }
   }
 
