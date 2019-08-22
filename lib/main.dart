@@ -253,7 +253,7 @@ class _MazeAreaState extends State<MazeArea>
   void handleEndOfGame() {
     Text message;
     String str =
-        'Friends Freed: ${maze.player.savedLambs}\nFriends Lost: ${maze.player.lostLambs}\n';
+        'Friends Freed: ${maze.player.savedLambs}\nFriends Taken: ${maze.player.lostLambs}\n';
     if (maze.player.condition == Condition.dead) {
       str = str + 'The Goblin got Alice, you lost!';
     } else if (maze.player.savedLambs > maze.player.lostLambs) {
@@ -261,7 +261,7 @@ class _MazeAreaState extends State<MazeArea>
     } else if (maze.player.savedLambs == maze.player.lostLambs) {
       str = str + 'You Draw!';
     } else if (maze.player.savedLambs < maze.player.lostLambs) {
-      str = str + 'You Lost!';
+      str = str + 'You lost!';
     }
 
     message = Text(str, style: TextStyle(fontSize: 22, color: Colors.cyan));
@@ -395,74 +395,79 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget defineTopRow() {
-    return Wrap(
-      //mainAxisAlignment: MainAxisAlignment.end,
-      alignment: WrapAlignment.end,
-      direction: Axis.horizontal,
+    return Column(
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Center(
-            child: Container(
-              child: OutlineButton(
-                color: Colors.amber,
-                shape: new RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(30.0),
-                ),
-                onPressed: () {
-                  setState(() {
-                    showRules();
-                  });
-                },
-                child: Text(
-                  'Show Game Rules',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Center(
+          padding: const EdgeInsets.all(2.0),
           child: Container(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: DropdownButton<String>(
-                style: TextStyle(color: Colors.black, fontSize: 16),
-                value: numRows.toString(),
-                onChanged: (String newValue) {
-                  setState(() {
-                    numRows = int.parse(newValue);
-                  });
-                },
-                items: <String>['8', '10', '12', '14']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text('Rows ' + value),
-                  );
-                }).toList(),
+            child: OutlineButton(
+              shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(30.0),
+              ),
+              onPressed: () {
+                setState(() {
+                  showRules();
+                });
+              },
+              child: Text(
+                'Show Game Rules',
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Center(
-            child: Container(
-              child: OutlineButton(
-                color: Colors.amber,
-                shape: new RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(30.0),
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            decoration: new BoxDecoration(
+              border: new Border.all(
+                  color: Colors.grey[300],
+                  width: 1.0,
+                  style: BorderStyle.solid),
+              borderRadius: new BorderRadius.all(new Radius.circular(20.0)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isDense: true,
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  value: numRows.toString(),
+                  onChanged: (String newValue) {
+                    setState(() {
+                      numRows = int.parse(newValue);
+                    });
+                  },
+                  items: <String>['8', '10', '12', '14']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        ' Rows ' + value,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                onPressed: () {
-                  setState(() {
-                    startNewGame();
-                  });
-                },
-                child: Text(
-                  'New Game',
-                  style: TextStyle(fontSize: 16),
-                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            child: OutlineButton(
+              shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(30.0),
+              ),
+              onPressed: () {
+                setState(() {
+                  startNewGame();
+                });
+              },
+              child: Text(
+                'New Game',
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ),
@@ -473,32 +478,41 @@ class _MazeAreaState extends State<MazeArea>
 
   Widget defineScoreRow() {
     return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Wrap(
-        direction: Axis.horizontal,
-        alignment: WrapAlignment.end,
-        //mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Friends Lost:',
-            style: TextStyle(fontSize: 22),
-          ),
-          Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-              child: Text(
-                maze.player.lostLambs.toString(),
+      padding: const EdgeInsets.all(2.0),
+      child: Column(
+        //direction: Axis.horizontal,
+        //alignment: WrapAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: <Widget>[
+              Text(
+                'Friends Taken:',
                 style: TextStyle(fontSize: 22),
-              )),
-          Text(
-            'Friends Saved:',
-            style: TextStyle(fontSize: 22),
+              ),
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                  child: Text(
+                    maze.player.lostLambs.toString(),
+                    style: TextStyle(fontSize: 22),
+                  )),
+            ],
           ),
-          Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-              child: Text(
-                maze.player.savedLambs.toString(),
+          Row(
+            children: <Widget>[
+              Text(
+                'Friends Saved:',
                 style: TextStyle(fontSize: 22),
-              )),
+              ),
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                  child: Text(
+                    maze.player.savedLambs.toString(),
+                    style: TextStyle(fontSize: 22),
+                  )),
+            ],
+          ),
         ],
       ),
     );
@@ -506,11 +520,14 @@ class _MazeAreaState extends State<MazeArea>
 
   Widget defineControlsPanel() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -668,9 +685,11 @@ class _MazeAreaState extends State<MazeArea>
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       print('build in landscape');
       return Center(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          //mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             SizedBox(
               width: maxWidth,
@@ -685,10 +704,10 @@ class _MazeAreaState extends State<MazeArea>
                 children: <Widget>[
                   defineTopRow(),
                   defineScoreRow(),
-                  defineControlsPanel(),
                 ],
               ),
-            )
+            ),
+            Center(child: defineControlsPanel()),
           ],
         ),
       );
@@ -700,8 +719,6 @@ class _MazeAreaState extends State<MazeArea>
         children: <Widget>[
           Column(
             children: <Widget>[
-              defineTopRow(),
-              defineScoreRow(),
               SizedBox(
                 width: maxWidth,
                 height: maxWidth,
@@ -709,7 +726,19 @@ class _MazeAreaState extends State<MazeArea>
                     overflow: Overflow.visible,
                     children: [Column(children: trs), ...sprites]),
               ),
-              defineControlsPanel(),
+              Row(
+                children: <Widget>[
+                  Container(
+                    child: Column(
+                      children: <Widget>[
+                        defineTopRow(),
+                        defineScoreRow(),
+                      ],
+                    ),
+                  ),
+                  defineControlsPanel(),
+                ],
+              ),
             ],
           ),
         ],
