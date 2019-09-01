@@ -307,11 +307,12 @@ class _MazeAreaState extends State<MazeArea>
 
   Future<void> showRules() async {
     Text message = Text(
-        'Use the arrow buttons to move Alice 👧🏼 around the maze.\n' +
-            'Avoid the goblin 👺 but rescue the others by getting Alice to them.\n' +
-            'If the goblin likewise gets Alice you lose.\n' +
-            'Once all the animals are gone then if there are more that you have saved' +
-            ' than have been eaten by the goblin you win, otherwise you draw if the number is equal otherwise you lose.',
+        'Swipe the maze to move Alice 👧🏼 around the maze one step at a time.\n' +
+            'She gets three moves per turn.\n' +
+            'End her turn early by moving into a wall or double tapping.\n' +
+            'Rescue the animals by getting Alice to them before they get captured by the goblin 👺.\n' +
+            'If the goblin captures Alice you lose but otherwise ' +
+            'if she saves more animals than get captured you win.',
         style: TextStyle(fontSize: 22, color: Colors.cyan));
     return showDialog<void>(
       context: context,
@@ -346,15 +347,24 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Future<void> showGameOverMessage(Text msg) async {
+    var title = 'Game Over';
+    var options =
+        Text('Maze size ', style: TextStyle(fontSize: 22, color: Colors.cyan));
+    if (!maze.gameIsOver) {
+      title = 'New Game';
+      msg = Text('', style: TextStyle(fontSize: 22, color: Colors.cyan));
+    }
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.transparent,
-          title: Text(
-            'Game Over',
-            style: TextStyle(fontSize: 24, color: Colors.cyan),
+          title: Center(
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 24, color: Colors.cyan),
+            ),
           ),
           content: SingleChildScrollView(
             child: ListBody(
@@ -362,15 +372,84 @@ class _MazeAreaState extends State<MazeArea>
             ),
           ),
           actions: <Widget>[
-            FlatButton(
-              child: Text('OK, start new Game',
-                  style: TextStyle(fontSize: 24, color: Colors.cyan)),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  startNewGame();
-                });
-              },
+            Column(
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    options,
+                    Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Container(
+                        decoration: new BoxDecoration(
+                          border: new Border.all(
+                              color: Colors.cyan,
+                              width: 1.0,
+                              style: BorderStyle.solid),
+                          borderRadius:
+                              new BorderRadius.all(new Radius.circular(20.0)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isDense: true,
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 16),
+                              value: numRows.toString(),
+                              onChanged: (String newValue) {
+                                setState(() {
+                                  numRows = int.parse(newValue);
+                                });
+                              },
+                              items: <String>[
+                                '8',
+                                '10',
+                                '12',
+                                '14'
+                              ].map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text('${value}x${value}',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.cyan)),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                FlatButton(
+                  child: Text('Start Game',
+                      style: TextStyle(fontSize: 24, color: Colors.cyan)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {
+                      startNewGame();
+                    });
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Container(
+                    child: OutlineButton(
+                      shape: new RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(30.0),
+                      ),
+                      color: Colors.cyan,
+                      onPressed: () {
+                        setState(() {
+                          showRules();
+                        });
+                      },
+                      child: Text('Show Game Rules',
+                          style: TextStyle(fontSize: 24, color: Colors.cyan)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -406,63 +485,8 @@ class _MazeAreaState extends State<MazeArea>
               ),
               onPressed: () {
                 setState(() {
-                  showRules();
-                });
-              },
-              child: Text(
-                'Show Game Rules',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: Container(
-            decoration: new BoxDecoration(
-              border: new Border.all(
-                  color: Colors.grey[300],
-                  width: 1.0,
-                  style: BorderStyle.solid),
-              borderRadius: new BorderRadius.all(new Radius.circular(20.0)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  isDense: true,
-                  style: TextStyle(color: Colors.black, fontSize: 16),
-                  value: numRows.toString(),
-                  onChanged: (String newValue) {
-                    setState(() {
-                      numRows = int.parse(newValue);
-                    });
-                  },
-                  items: <String>['8', '10', '12', '14']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        ' Rows ' + value,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: Container(
-            child: OutlineButton(
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0),
-              ),
-              onPressed: () {
-                setState(() {
-                  startNewGame();
+                  handleEndOfGame();
+                  //startNewGame();
                 });
               },
               child: Text(
@@ -488,7 +512,7 @@ class _MazeAreaState extends State<MazeArea>
           Row(
             children: <Widget>[
               Text(
-                'Friends Taken:',
+                'Goblin Captured:',
                 style: TextStyle(fontSize: 22),
               ),
               Padding(
@@ -502,7 +526,7 @@ class _MazeAreaState extends State<MazeArea>
           Row(
             children: <Widget>[
               Text(
-                'Friends Saved:',
+                'Alice Saved:',
                 style: TextStyle(fontSize: 22),
               ),
               Padding(
@@ -518,133 +542,7 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  Widget defineControlsPanel() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Ink(
-                    decoration: ShapeDecoration(
-                      color: Colors.green,
-                      shape: CircleBorder(),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        print('up pressed');
-                        if (movePlayer(direction: Directions.up)) {
-                          print('player moved');
-                          if (maze.whosTurnIsIt == Ilk.minotaur) {
-                            computerMove(
-                                delayMove: maze.player.delayComputerMove);
-                          }
-                        } else {
-                          print('plyaer not moved');
-                        }
-                      },
-                      icon: Icon(Icons.arrow_upward),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Ink(
-                    decoration: ShapeDecoration(
-                      color: Colors.green,
-                      shape: CircleBorder(),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        if (movePlayer(direction: Directions.left)) {
-                          if (maze.whosTurnIsIt == Ilk.minotaur) {
-                            computerMove(
-                                delayMove: maze.player.delayComputerMove);
-                          }
-                        }
-                      },
-                      icon: Icon(Icons.arrow_back),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Ink(
-                      decoration: ShapeDecoration(
-                        color: Colors.orange,
-                        shape: CircleBorder(),
-                      ),
-                      child: IconButton(
-                        onPressed: () {
-                          if (gameIsOver == false) {
-                            maze.player.movesLeft = 0;
-
-                            maze.whosTurnIsIt = Ilk.minotaur;
-
-                            computerMove(
-                                delayMove: maze.player.delayComputerMove);
-                          }
-                        },
-                        icon: Icon(Icons.pause),
-                      ),
-                    ),
-                  ),
-                  Ink(
-                    decoration: ShapeDecoration(
-                      color: Colors.green,
-                      shape: CircleBorder(),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        if (movePlayer(direction: Directions.right)) {
-                          if (maze.whosTurnIsIt == Ilk.minotaur) {
-                            computerMove(
-                                delayMove: maze.player.delayComputerMove);
-                          }
-                        }
-                      },
-                      icon: Icon(Icons.arrow_forward),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Ink(
-                    decoration: ShapeDecoration(
-                      color: Colors.green,
-                      shape: CircleBorder(),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        if (movePlayer(direction: Directions.down)) {
-                          if (maze.whosTurnIsIt == Ilk.minotaur) {
-                            computerMove(
-                                delayMove: maze.player.delayComputerMove);
-                          }
-                        }
-                      },
-                      icon: Icon(Icons.arrow_downward),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
+  Directions dir;
   @override
   Widget build(BuildContext context) {
     setSizes();
@@ -658,6 +556,8 @@ class _MazeAreaState extends State<MazeArea>
     for (int i = 1; i <= maze.maxRow; i++) {
       trs.add(
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: List.from(
             maze.myLabyrinth.entries
                 .where((elroom) => elroom.value.y == i)
@@ -685,65 +585,145 @@ class _MazeAreaState extends State<MazeArea>
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       print('build in landscape');
       return Center(
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          //mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(
-              width: maxWidth,
-              height: maxWidth,
-              child: Stack(
-                  overflow: Overflow.visible,
-                  children: [Column(children: trs), ...sprites]),
-            ),
             Container(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  defineTopRow(),
                   defineScoreRow(),
+                  defineTopRow(),
                 ],
               ),
             ),
-            Center(child: defineControlsPanel()),
-          ],
-        ),
-      );
-    } else {
-      print('build in portrait');
-
-      return ListView(
-        //mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              SizedBox(
+            GestureDetector(
+              onHorizontalDragEnd: (deets) {
+                moveThePlayer(direction: dir);
+              },
+              onVerticalDragEnd: (deets) {
+                moveThePlayer(direction: dir);
+              },
+              onVerticalDragUpdate: (deets) {
+                vertaicalDragUpdate(deets);
+              },
+              onHorizontalDragUpdate: (deets) {
+                horizontalDragUpdate(deets);
+              },
+              onDoubleTap: () {
+                print('onDoubleTap   ');
+                handlePlayerHitAWall();
+                maze.whosTurnIsIt = Ilk.minotaur;
+                computerMove(delayMove: maze.player.delayComputerMove);
+              },
+              child: SizedBox(
                 width: maxWidth,
                 height: maxWidth,
                 child: Stack(
                     overflow: Overflow.visible,
                     children: [Column(children: trs), ...sprites]),
               ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      print('build in portrait');
+
+      return Center(
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 5),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Container(
-                    child: Column(
-                      children: <Widget>[
-                        defineTopRow(),
-                        defineScoreRow(),
-                      ],
-                    ),
+                  Column(
+                    children: <Widget>[
+                      defineScoreRow(),
+                      defineTopRow(),
+                    ],
                   ),
-                  defineControlsPanel(),
                 ],
+              ),
+              GestureDetector(
+                onHorizontalDragEnd: (deets) {
+                  moveThePlayer(direction: dir);
+                },
+                onVerticalDragEnd: (deets) {
+                  moveThePlayer(direction: dir);
+                },
+                onVerticalDragUpdate: (deets) {
+                  vertaicalDragUpdate(deets);
+                },
+                onHorizontalDragUpdate: (deets) {
+                  horizontalDragUpdate(deets);
+                },
+                onDoubleTap: () {
+                  print('onDoubleTap   ');
+                  handlePlayerHitAWall();
+                  maze.whosTurnIsIt = Ilk.minotaur;
+                  computerMove(delayMove: maze.player.delayComputerMove);
+                },
+                child: SizedBox(
+                  width: maxWidth,
+                  height: maxWidth,
+                  child: Stack(
+                      overflow: Overflow.visible,
+                      children: [Column(children: trs), ...sprites]),
+                ),
               ),
             ],
           ),
-        ],
+        ),
       );
     }
+  }
+
+  void moveThePlayer({Directions direction}) {
+    print('moveThePlayer   ');
+
+    if (movePlayer(direction: direction)) {
+      print('player moved');
+      if (maze.whosTurnIsIt == Ilk.minotaur) {
+        computerMove(delayMove: maze.player.delayComputerMove);
+      }
+    } else {
+      print('player not moved');
+    }
+  }
+
+  void horizontalDragUpdate(DragUpdateDetails deets) {
+    print('onHorizontalDragUpdate  ');
+    if (deets.primaryDelta > 0) {
+      print('right pressed');
+      dir = Directions.right;
+    } else {
+      if (deets.primaryDelta < 0) {
+        print('left pressed');
+        dir = Directions.left;
+      }
+    }
+  }
+
+  void vertaicalDragUpdate(DragUpdateDetails deets) {
+    print('onVerticalDragUpdate  ');
+    if (deets.primaryDelta > 0) {
+      print('down pressed');
+      dir = Directions.down;
+    } else if (deets.primaryDelta < 0) {
+      print('up pressed');
+      dir = Directions.up;
+    }
+  }
+
+  void verticalDragMove(DragEndDetails deets) {
+    print('vert drag');
+    print(deets.toString());
   }
 
   /*return true if the minotaur should move next, otherwise false */
