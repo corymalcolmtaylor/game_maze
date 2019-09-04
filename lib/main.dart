@@ -378,102 +378,151 @@ class _MazeAreaState extends State<MazeArea>
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.transparent,
-          title: Center(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 24, color: Colors.cyan),
+      builder: (context) {
+        var numRowsInner = numRows;
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.transparent,
+            title: Center(
+              child: Text(
+                title,
+                style: TextStyle(fontSize: 24, color: Colors.cyan),
+              ),
             ),
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[msg],
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[msg],
+              ),
             ),
-          ),
-          actions: <Widget>[
-            Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    options,
-                    Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: Container(
-                        decoration: new BoxDecoration(
-                          border: new Border.all(
-                              color: Colors.cyan,
-                              width: 1.0,
-                              style: BorderStyle.solid),
-                          borderRadius:
-                              new BorderRadius.all(new Radius.circular(20.0)),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isDense: true,
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 16),
-                              value: numRows.toString(),
-                              onChanged: (String newValue) {
-                                setState(() {
-                                  numRows = int.parse(newValue);
-                                });
-                              },
-                              items: <String>[
-                                '8',
-                                '10',
-                                '12',
-                                '14'
-                              ].map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text('${value}x${value}',
-                                      style: TextStyle(
-                                          fontSize: 16, color: Colors.cyan)),
-                                );
-                              }).toList(),
+            actions: <Widget>[
+              Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      options,
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Container(
+                          decoration: new BoxDecoration(
+                            border: new Border.all(
+                                color: Colors.cyan,
+                                width: 1.0,
+                                style: BorderStyle.solid),
+                            borderRadius:
+                                new BorderRadius.all(new Radius.circular(20.0)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                isDense: true,
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 16),
+                                value: numRowsInner.toString(),
+                                onChanged: (String newValue) {
+                                  numRowsInner = int.parse(newValue);
+                                  numRows = numRowsInner;
+                                  setState(() {
+                                    print('new val == $numRowsInner');
+                                  });
+                                },
+                                items: <String>[
+                                  '8',
+                                  '10',
+                                  '12',
+                                  '14'
+                                ].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text('${value}x${value}',
+                                        style: TextStyle(
+                                            fontSize: 16, color: Colors.cyan)),
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                FlatButton(
-                  child: Text('Start Game',
-                      style: TextStyle(fontSize: 24, color: Colors.cyan)),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    setState(() {
-                      startNewGame();
-                    });
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: Container(
-                    child: OutlineButton(
-                      shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(30.0),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Container(
+                          child: OutlineButton(
+                            shape: new RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(30.0),
+                            ),
+                            color: Colors.cyan,
+                            borderSide: BorderSide(
+                                color: Colors.cyan,
+                                style: BorderStyle.solid,
+                                width: 1),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              setState(() {
+                                startNewGame();
+                              });
+                            },
+                            child: Text('Start Game',
+                                style: TextStyle(
+                                    fontSize: 24, color: Colors.cyan)),
+                          ),
+                        ),
                       ),
-                      color: Colors.cyan,
-                      onPressed: () {
-                        setState(() {
-                          showRules();
-                        });
-                      },
-                      child: Text('Show Game Rules',
-                          style: TextStyle(fontSize: 24, color: Colors.cyan)),
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Container(
+                          child: OutlineButton(
+                            shape: new RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(30.0),
+                            ),
+                            color: Colors.cyan,
+                            borderSide: BorderSide(
+                                color: Colors.cyan,
+                                style: BorderStyle.solid,
+                                width: 1),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              setState(() {});
+                            },
+                            child: Text('Go Back',
+                                style: TextStyle(
+                                    fontSize: 24, color: Colors.cyan)),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Container(
+                      child: OutlineButton(
+                        shape: new RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(30.0),
+                        ),
+                        color: Colors.cyan,
+                        borderSide: BorderSide(
+                            color: Colors.cyan,
+                            style: BorderStyle.solid,
+                            width: 1),
+                        onPressed: () {
+                          setState(() {
+                            showRules();
+                          });
+                        },
+                        child: Text('Show Game Rules',
+                            style: TextStyle(fontSize: 24, color: Colors.cyan)),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        );
+                ],
+              ),
+            ],
+          );
+        });
       },
     );
   }
@@ -511,7 +560,7 @@ class _MazeAreaState extends State<MazeArea>
                 });
               },
               child: Text(
-                'New Game',
+                'Game Options',
                 style: TextStyle(fontSize: 16),
               ),
             ),
@@ -789,5 +838,6 @@ class _MazeAreaState extends State<MazeArea>
     maze.initMaze();
     maze.carveLabyrinth();
     gameIsOver = false;
+    setState(() {});
   }
 }
