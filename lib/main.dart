@@ -85,17 +85,24 @@ class _MazeAreaState extends State<MazeArea>
     }
 
     if (Platform.isAndroid) {
+      print('shrink $shrinkEmoji');
       endLeft -= shrinkEmoji;
+      endTop += shrinkEmoji;
+    } else {
+      print('not android $shrinkEmoji');
+      endLeft += shrinkEmoji;
       endTop += shrinkEmoji;
     }
     return AnimatedPositioned(
       key: Key(pixie.key),
       left: endLeft,
       top: endTop,
+      height: roomLength,
       curve: Curves.linear,
       duration: Duration(milliseconds: animDurationMilliSeconds),
       child: Transform(
         // Transform widget
+
         transform: Matrix4.identity()
           ..setEntry(1, 1, 1) // perspective
           ..rotateX(0)
@@ -103,8 +110,12 @@ class _MazeAreaState extends State<MazeArea>
         alignment: FractionalOffset.center,
         child: Text(
           pixie.emoji,
+          overflow: TextOverflow.visible,
+          textAlign: TextAlign.center,
           style: TextStyle(
-              color: Colors.black, fontSize: roomLength - shrinkEmoji),
+              height: 1.15,
+              color: Colors.black,
+              fontSize: roomLength - shrinkEmoji),
         ), // <<< set your widget here
       ),
     );
@@ -126,23 +137,26 @@ class _MazeAreaState extends State<MazeArea>
         if (lamb.x > lamb.lastX) {
           xRadians = 3.0;
           lamb.facing = Directions.right;
-
-          print(
-              'set right radians == 3 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
+          //print('set right radians == 3 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
         } else {
           xRadians = 6.0;
           lamb.facing = Directions.left;
 
-          print(
-              'set left radians == 6 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
+          //print('set left radians == 6 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
         }
       }
-      endTop = ((lamb.y - 1) * roomLength) + (2 * lamb.y) + (0);
-      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x) + (shrinkEmoji / 2);
+      endTop = ((lamb.y - 1) * roomLength) + (1.0 * lamb.y) + (0);
+      print('endtop1 == $endTop');
+      endTop = ((lamb.y - 1) * roomLength) + (2 * (lamb.y - 1)) + (0);
+      print('endtop2 == $endTop');
+      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x) + (shrinkEmoji);
 
       if (Platform.isAndroid) {
-        endLeft -= shrinkEmoji / 2;
-        endTop -= shrinkEmoji / 2;
+        //endLeft -= shrinkEmoji / 2;
+        //endTop -= shrinkEmoji / 2;
+      } else {
+        //endLeft += shrinkEmoji;
+        //endTop += shrinkEmoji / 2;
       }
 
       if (lamb.condition == Condition.dead) {
@@ -156,7 +170,9 @@ class _MazeAreaState extends State<MazeArea>
             child: Text(
               lamb.emoji,
               style: TextStyle(
-                  color: Colors.black, fontSize: roomLength - shrinkEmoji),
+                  height: 1.15,
+                  color: Colors.black,
+                  fontSize: roomLength - shrinkEmoji),
             ),
           ),
         );
@@ -166,11 +182,14 @@ class _MazeAreaState extends State<MazeArea>
             key: Key(lamb.key),
             left: endLeft,
             top: endTop,
+            height: roomLength - shrinkEmoji,
             duration: Duration(milliseconds: animDurationMilliSeconds),
             child: Text(
               lamb.emoji,
               style: TextStyle(
-                  color: Colors.black, fontSize: roomLength - shrinkEmoji),
+                  height: 1.15,
+                  color: Colors.black,
+                  fontSize: roomLength - shrinkEmoji),
             ),
           ),
         );
@@ -191,7 +210,9 @@ class _MazeAreaState extends State<MazeArea>
                 child: Text(
                   lamb.emoji,
                   style: TextStyle(
-                      color: Colors.black, fontSize: roomLength - shrinkEmoji),
+                      height: 1.15,
+                      color: Colors.black,
+                      fontSize: roomLength - shrinkEmoji),
                 ), // <<< set your widget here
               )
               /* child: Text(
