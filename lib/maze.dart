@@ -127,9 +127,11 @@ class Maze {
         if (boss.ilk == Ilk.minotaur) {
           el.condition = Condition.dead;
           player.lostLambs++;
+          print('lost lamb ${el.emoji}');
         } else if (boss.ilk == Ilk.player) {
           el.condition = Condition.freed;
           player.savedLambs++;
+          print('saved lamb ${el.emoji}');
         }
         handled = true;
       }
@@ -1074,7 +1076,7 @@ class Maze {
     }
     loc.ilk = Ilk.player;
     player = loc;
-    player.emoji = '👧🏼';
+    player.emoji = '👧';
     player.movesLeft = playerMoves;
     player.lostLambs = 0;
     player.savedLambs = 0;
@@ -1119,10 +1121,10 @@ class Maze {
         lamb.emoji = '🐍';
         break;
       case 5:
-        lamb.emoji = '🦔';
+        lamb.emoji = '🐞';
         break;
       case 6:
-        lamb.emoji = '🦆';
+        lamb.emoji = '🐧';
         break;
       case 7:
         lamb.emoji = '🐢';
@@ -1131,19 +1133,19 @@ class Maze {
         lamb.emoji = '🐈';
         break;
       case 9:
-        lamb.emoji = '🐿';
+        lamb.emoji = '🐴'; //
         break;
       case 10:
         lamb.emoji = '🐒';
         break;
       case 11:
-        lamb.emoji = '🦇';
+        lamb.emoji = '🐑'; //
         break;
       case 12:
         lamb.emoji = '🐓';
         break;
       case 13:
-        lamb.emoji = '🦍';
+        lamb.emoji = '🐘'; //
         break;
       default:
         lamb.emoji = '🦛';

@@ -63,36 +63,18 @@ class _MazeAreaState extends State<MazeArea>
     maze.carveLabyrinth();
   }
 
-  AnimatedPositioned getAnimatedSpriteIconForBosses({@required Pixie pixie}) {
+  AnimatedPositioned getAnimatedSpriteIconThisPixie({@required Pixie pixie}) {
     var endTop = 0.0;
     var endLeft = 0.0;
 
-    print('maxwidth $maxWidth ');
-
-    var shrinkEmoji = roomLength / 10;
-
-    endLeft = ((pixie.x - 1) * roomLength) +
-        (wallThickness * pixie.x) +
-        (shrinkEmoji / 2);
-    endTop = ((pixie.y - 1) * roomLength) +
-        (wallThickness * pixie.y) -
-        (shrinkEmoji / 2) -
-        4;
+    endLeft = whatIsTheLeftOffsetOfThisPixie(pixie: pixie);
+    endTop = whatIsTheTopOffsetOfThisPixie(pixie: pixie);
 
     var radians = 0.0;
     if (pixie.lastX > 0 && pixie.x < pixie.lastX) {
       radians = 3.0;
     }
 
-    if (Platform.isAndroid) {
-      print('shrink $shrinkEmoji');
-      endLeft -= shrinkEmoji;
-      endTop += shrinkEmoji;
-    } else {
-      print('not android $shrinkEmoji');
-      endLeft += shrinkEmoji;
-      endTop += shrinkEmoji;
-    }
     return AnimatedPositioned(
       key: Key(pixie.key),
       left: endLeft,
@@ -115,7 +97,7 @@ class _MazeAreaState extends State<MazeArea>
           style: TextStyle(
               height: 1.15,
               color: Colors.black,
-              fontSize: roomLength - shrinkEmoji),
+              fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
         ), // <<< set your widget here
       ),
     );
@@ -125,7 +107,6 @@ class _MazeAreaState extends State<MazeArea>
     var endTop = 0.0;
     var endLeft = 0.0;
     List<AnimatedPositioned> icons = [];
-    var shrinkEmoji = roomLength / 6;
 
     var lambs = maze.lambs.where(
       (el) => el.location == 'b_${room.x}_${room.y}',
@@ -136,28 +117,17 @@ class _MazeAreaState extends State<MazeArea>
       if (lamb.x != lamb.lastX) {
         if (lamb.x > lamb.lastX) {
           xRadians = 3.0;
+          print('set rad to 3 for ${lamb.emoji} ${lamb.x} > ${lamb.lastX}');
           lamb.facing = Directions.right;
-          //print('set right radians == 3 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
         } else {
           xRadians = 6.0;
+          print('set rad to 6 for ${lamb.emoji}  ${lamb.x} > ${lamb.lastX}');
           lamb.facing = Directions.left;
-
-          //print('set left radians == 6 for ${lamb.emoji}  ${lamb.x} != ${lamb.lastX}  ');
         }
       }
-      endTop = ((lamb.y - 1) * roomLength) + (1.0 * lamb.y) + (0);
-      print('endtop1 == $endTop');
-      endTop = ((lamb.y - 1) * roomLength) + (2 * (lamb.y - 1)) + (0);
-      print('endtop2 == $endTop');
-      endLeft = ((lamb.x - 1) * roomLength) + (2 * lamb.x) + (shrinkEmoji);
 
-      if (Platform.isAndroid) {
-        //endLeft -= shrinkEmoji / 2;
-        //endTop -= shrinkEmoji / 2;
-      } else {
-        //endLeft += shrinkEmoji;
-        //endTop += shrinkEmoji / 2;
-      }
+      endLeft = whatIsTheLeftOffsetOfThisPixie(pixie: lamb);
+      endTop = whatIsTheTopOffsetOfThisPixie(pixie: lamb);
 
       if (lamb.condition == Condition.dead) {
         lamb.emoji = '☠️';
@@ -166,30 +136,46 @@ class _MazeAreaState extends State<MazeArea>
             key: Key(lamb.key),
             left: endLeft,
             top: endTop,
+            height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
             duration: Duration(milliseconds: animDurationMilliSeconds),
-            child: Text(
-              lamb.emoji,
-              style: TextStyle(
-                  height: 1.15,
-                  color: Colors.black,
-                  fontSize: roomLength - shrinkEmoji),
+            child: Transform(
+              transform: Matrix4.identity()
+                ..setEntry(1, 1, 1) // perspective
+                ..rotateX(0)
+                ..rotateY(xRadians),
+              alignment: FractionalOffset.center,
+              child: Text(
+                lamb.emoji,
+                style: TextStyle(
+                    height: 1.15,
+                    color: Colors.black,
+                    fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
+              ),
             ),
           ),
         );
       } else if (lamb.condition == Condition.freed) {
+        //print('${lamb.emoji} is free');
         icons.add(
           AnimatedPositioned(
             key: Key(lamb.key),
             left: endLeft,
             top: endTop,
-            height: roomLength - shrinkEmoji,
+            height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
             duration: Duration(milliseconds: animDurationMilliSeconds),
-            child: Text(
-              lamb.emoji,
-              style: TextStyle(
-                  height: 1.15,
-                  color: Colors.black,
-                  fontSize: roomLength - shrinkEmoji),
+            child: Transform(
+              transform: Matrix4.identity()
+                ..setEntry(1, 1, 1) // perspective
+                ..rotateX(0)
+                ..rotateY(xRadians),
+              alignment: FractionalOffset.center,
+              child: Text(
+                lamb.emoji,
+                style: TextStyle(
+                    height: 1.15,
+                    color: Colors.black,
+                    fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
+              ),
             ),
           ),
         );
@@ -199,9 +185,9 @@ class _MazeAreaState extends State<MazeArea>
               key: Key(lamb.key),
               left: endLeft,
               top: endTop,
+              height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
               duration: Duration(milliseconds: animDurationMilliSeconds),
               child: Transform(
-                // Transform widget
                 transform: Matrix4.identity()
                   ..setEntry(1, 1, 1) // perspective
                   ..rotateX(0)
@@ -212,20 +198,38 @@ class _MazeAreaState extends State<MazeArea>
                   style: TextStyle(
                       height: 1.15,
                       color: Colors.black,
-                      fontSize: roomLength - shrinkEmoji),
-                ), // <<< set your widget here
-              )
-              /* child: Text(
-              lamb.emoji,
-              style: TextStyle(
-                  color: Colors.black, fontSize: roomLength - shrinkEmoji),
-            ),*/
-              ),
+                      fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
+                ),
+              )),
         );
       }
     });
-
+    //print('end getAnimatedSpriteIconsForLambs');
     return icons;
+  }
+
+  double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
+    if (pixie.ilk == Ilk.lamb) return roomLength - (roomLength / 6);
+    return roomLength - (roomLength / 10);
+  }
+
+  double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
+    var retval = ((pixie.y - 1) * roomLength) + (wallThickness * (pixie.y - 1));
+    if (pixie.ilk == Ilk.lamb) {
+      retval += 2;
+    }
+    return retval;
+  }
+
+  double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
+    var retval = ((pixie.x - 1) * roomLength) + (wallThickness * (pixie.x - 1));
+    if (pixie.ilk == Ilk.lamb) {
+      retval += 2;
+    }
+
+    return retval + (numRows / 2);
+    //8 is gooodd for 14 maze on phone
+    //6 for lambs and 4 for bosses on 8 maze
   }
 
   void computerMove({bool delayMove}) async {
@@ -328,7 +332,7 @@ class _MazeAreaState extends State<MazeArea>
 
   Future<void> showRules() async {
     Text message = Text(
-        'Swipe the maze to move Alice 👧🏼 around the maze one step at a time.\n' +
+        'Swipe the maze to move Alice 👧 around the maze one step at a time.\n' +
             'She gets three moves per turn.\n' +
             'End her turn early by moving into a wall or double tapping.\n' +
             'Rescue the animals by getting Alice to them before they get captured by the goblin 👺.\n' +
@@ -434,7 +438,7 @@ class _MazeAreaState extends State<MazeArea>
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
-                                    child: Text('${value}x${value}',
+                                    child: Text('${value}x$value',
                                         style: TextStyle(
                                             fontSize: 16, color: Colors.cyan)),
                                   );
@@ -488,7 +492,7 @@ class _MazeAreaState extends State<MazeArea>
                               Navigator.of(context).pop();
                               setState(() {});
                             },
-                            child: Text('Go Back',
+                            child: Text('Back',
                                 style: TextStyle(
                                     fontSize: 24, color: Colors.cyan)),
                           ),
@@ -649,8 +653,8 @@ class _MazeAreaState extends State<MazeArea>
     llsprites.forEach((ll) {
       sprites.addAll(ll);
     });
-    sprites.add(getAnimatedSpriteIconForBosses(pixie: maze.player));
-    sprites.add(getAnimatedSpriteIconForBosses(pixie: maze.minotaur));
+    sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.player));
+    sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.minotaur));
 
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       print('build in landscape');
@@ -755,56 +759,56 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void moveThePlayer({Directions direction}) {
-    print('moveThePlayer   ');
+    //print('moveThePlayer   ');
 
     if (movePlayer(direction: direction)) {
-      print('player moved');
+      //print('player moved');
       if (maze.whosTurnIsIt == Ilk.minotaur) {
         computerMove(delayMove: maze.player.delayComputerMove);
       }
     } else {
-      print('player not moved');
+      //print('player not moved');
     }
   }
 
   void horizontalDragUpdate(DragUpdateDetails deets) {
-    print('onHorizontalDragUpdate  ');
+    //print('onHorizontalDragUpdate  ');
     if (deets.primaryDelta > 0) {
-      print('right pressed');
+      //print('right pressed');
       dir = Directions.right;
     } else {
       if (deets.primaryDelta < 0) {
-        print('left pressed');
+        //print('left pressed');
         dir = Directions.left;
       }
     }
   }
 
   void vertaicalDragUpdate(DragUpdateDetails deets) {
-    print('onVerticalDragUpdate  ');
+    //print('onVerticalDragUpdate  ');
     if (deets.primaryDelta > 0) {
-      print('down pressed');
+      //print('down pressed');
       dir = Directions.down;
     } else if (deets.primaryDelta < 0) {
-      print('up pressed');
+      //print('up pressed');
       dir = Directions.up;
     }
   }
 
   void verticalDragMove(DragEndDetails deets) {
-    print('vert drag');
-    print(deets.toString());
+    //print('vert drag');
+    //print(deets.toString());
   }
 
   /*return true if the minotaur should move next, otherwise false */
   bool movePlayer({Directions direction}) {
-    print('movePlayer 1');
+    //print('movePlayer 1');
     if (gameIsOver) return false;
-    print('movePlayer 2 ${maze.whosTurnIsIt}');
+    //print('movePlayer 2 ${maze.whosTurnIsIt}');
     if (maze.whosTurnIsIt != Ilk.player) return false;
-    print('movePlayer 3');
+    //print('movePlayer 3');
     if (maze.player.movesLeft <= 0) return true;
-    print('movePlayer 4');
+    //print('movePlayer 4');
 
     maze.lambs.forEach((lamb) {
       if (lamb.condition == Condition.freed) {
@@ -815,7 +819,7 @@ class _MazeAreaState extends State<MazeArea>
 
     if (maze.moveThisSpriteInThisDirection(maze.player, direction)) {
       setState(() {
-        print('player moved  ' + direction.toString());
+        //print('player moved  ' + direction.toString());
       });
     } else {
       handlePlayerHitAWall();
