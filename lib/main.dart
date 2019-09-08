@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'dart:io' show Platform;
 
 import 'maze.dart';
+import 'w_StartNewGame.dart';
+import 'w_MazeBackButton.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,22 +12,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final title = 'Alice in The Hedge Maze';
+    final title = 'Alice in the Hedge Maze';
 
     return MaterialApp(
       title: title,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blueGrey,
-      ),
+          brightness: Brightness.dark,
+          //primaryColor: Colors.lightGreen[800],
+          //accentColor: Colors.cyan[600],
+          textTheme: TextTheme(
+              title: TextStyle(color: Colors.cyanAccent),
+              body1: TextStyle(color: Colors.cyanAccent))),
       home: Scaffold(
         appBar: AppBar(
           title: Text(title),
@@ -63,6 +61,13 @@ class _MazeAreaState extends State<MazeArea>
     maze.carveLabyrinth();
   }
 
+  startNewGameAndSetState() {
+    startNewGame();
+    setState(() {
+      print('started new game');
+    });
+  }
+
   AnimatedPositioned getAnimatedSpriteIconThisPixie({@required Pixie pixie}) {
     var endTop = 0.0;
     var endLeft = 0.0;
@@ -94,6 +99,7 @@ class _MazeAreaState extends State<MazeArea>
           pixie.emoji,
           overflow: TextOverflow.visible,
           textAlign: TextAlign.center,
+          textScaleFactor: 1.0,
           style: TextStyle(
               height: 1.15,
               color: Colors.black,
@@ -146,6 +152,7 @@ class _MazeAreaState extends State<MazeArea>
               alignment: FractionalOffset.center,
               child: Text(
                 lamb.emoji,
+                textScaleFactor: 1.0,
                 style: TextStyle(
                     height: 1.15,
                     color: Colors.black,
@@ -155,7 +162,6 @@ class _MazeAreaState extends State<MazeArea>
           ),
         );
       } else if (lamb.condition == Condition.freed) {
-        //print('${lamb.emoji} is free');
         icons.add(
           AnimatedPositioned(
             key: Key(lamb.key),
@@ -171,6 +177,7 @@ class _MazeAreaState extends State<MazeArea>
               alignment: FractionalOffset.center,
               child: Text(
                 lamb.emoji,
+                textScaleFactor: 1.0,
                 style: TextStyle(
                     height: 1.15,
                     color: Colors.black,
@@ -195,6 +202,7 @@ class _MazeAreaState extends State<MazeArea>
                 alignment: FractionalOffset.center,
                 child: Text(
                   lamb.emoji,
+                  textScaleFactor: 1.0,
                   style: TextStyle(
                       height: 1.15,
                       color: Colors.black,
@@ -204,7 +212,6 @@ class _MazeAreaState extends State<MazeArea>
         );
       }
     });
-    //print('end getAnimatedSpriteIconsForLambs');
     return icons;
   }
 
@@ -218,6 +225,11 @@ class _MazeAreaState extends State<MazeArea>
     if (pixie.ilk == Ilk.lamb) {
       retval += 2;
     }
+    if (Platform.isAndroid) {
+      if (pixie.ilk != Ilk.lamb) {
+        return retval - 2;
+      }
+    }
     return retval;
   }
 
@@ -228,8 +240,6 @@ class _MazeAreaState extends State<MazeArea>
     }
 
     return retval + (numRows / 2);
-    //8 is gooodd for 14 maze on phone
-    //6 for lambs and 4 for bosses on 8 maze
   }
 
   void computerMove({bool delayMove}) async {
@@ -276,22 +286,20 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void handleEndOfGame() {
-    Text message;
-    String str =
-        'Friends Freed: ${maze.player.savedLambs}\nFriends Taken: ${maze.player.lostLambs}\n';
+    String str = '';
     if (maze.player.condition == Condition.dead) {
-      str = str + 'The Goblin got Alice, you lost!';
-    } else if (maze.player.savedLambs > maze.player.lostLambs) {
-      str = str + 'You WIN!';
-    } else if (maze.player.savedLambs == maze.player.lostLambs) {
-      str = str + 'You Draw!';
-    } else if (maze.player.savedLambs < maze.player.lostLambs) {
-      str = str + 'You lost!';
+      str = 'The Goblin got Alice!\nYou lost! ☹️';
+    } else {
+      if (maze.player.savedLambs > maze.player.lostLambs) {
+        str = '${maze.player.savedLambs} rescured!\nYou WIN! 🙂';
+      } else if (maze.player.savedLambs == maze.player.lostLambs) {
+        str = '${maze.player.savedLambs} rescured.\nYou draw! 😐';
+      } else {
+        str = '${maze.player.lostLambs} captured.\nYou lost! ☹️';
+      }
     }
-
-    message = Text(str, style: TextStyle(fontSize: 22, color: Colors.cyan));
-
-    showGameOverMessage(message);
+    maze.gameOverMessage = str;
+    showGameOverMessage();
   }
 
   void preparePlayerForATurn() {
@@ -338,16 +346,18 @@ class _MazeAreaState extends State<MazeArea>
             'Rescue the animals by getting Alice to them before they get captured by the goblin 👺.\n' +
             'If the goblin captures Alice you lose but otherwise ' +
             'if she saves more animals than get captured you win.',
-        style: TextStyle(fontSize: 22, color: Colors.cyan));
+        style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.transparent,
-          title: Text(
-            'Game Play Rules',
-            style: TextStyle(fontSize: 24, color: Colors.cyan),
+          title: Center(
+            child: Text(
+              'Rules',
+              style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+            ),
           ),
           content: SingleChildScrollView(
             child: ListBody(
@@ -355,15 +365,22 @@ class _MazeAreaState extends State<MazeArea>
             ),
           ),
           actions: <Widget>[
-            FlatButton(
-              child: Text('OK',
-                  style: TextStyle(fontSize: 24, color: Colors.cyan)),
+            OutlineButton(
+              shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(30.0),
+              ),
+              color: Colors.cyanAccent,
+              borderSide: BorderSide(
+                  color: Colors.cyan, style: BorderStyle.solid, width: 1),
               onPressed: () {
                 Navigator.of(context).pop();
+                showGameOverMessage();
                 setState(() {
                   print('OK showed rules');
                 });
               },
+              child: Text('OK',
+                  style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
             ),
           ],
         );
@@ -371,160 +388,133 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  Future<void> showGameOverMessage(Text msg) async {
-    var title = 'Game Over';
-    var options =
-        Text('Maze size ', style: TextStyle(fontSize: 22, color: Colors.cyan));
+  Future<void> showGameOverMessage() async {
+    const NEWGAME = 'New Game';
+    const GAMEOVER = 'Game Over';
+    var title = GAMEOVER;
+    var msg = maze.gameOverMessage + '\nMaze Dimensions';
+
     if (!maze.gameIsOver) {
-      title = 'New Game';
-      msg = Text('', style: TextStyle(fontSize: 22, color: Colors.cyan));
+      title = NEWGAME;
+      msg = 'Maze Dimensions';
     }
     return showDialog<void>(
       context: context,
+
       barrierDismissible: false, // user must tap button!
       builder: (context) {
         var numRowsInner = numRows;
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
             backgroundColor: Colors.transparent,
-            title: Center(
-              child: Text(
-                title,
-                style: TextStyle(fontSize: 24, color: Colors.cyan),
-              ),
-            ),
             content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[msg],
-              ),
-            ),
-            actions: <Widget>[
-              Column(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Row(
+                  Column(
                     children: <Widget>[
-                      options,
-                      Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Container(
-                          decoration: new BoxDecoration(
-                            border: new Border.all(
-                                color: Colors.cyan,
-                                width: 1.0,
-                                style: BorderStyle.solid),
-                            borderRadius:
-                                new BorderRadius.all(new Radius.circular(20.0)),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                isDense: true,
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 16),
-                                value: numRowsInner.toString(),
-                                onChanged: (String newValue) {
-                                  numRowsInner = int.parse(newValue);
-                                  numRows = numRowsInner;
-                                  setState(() {
-                                    print('new val == $numRowsInner');
-                                  });
-                                },
-                                items: <String>[
-                                  '8',
-                                  '10',
-                                  '12',
-                                  '14'
-                                ].map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text('${value}x$value',
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.cyan)),
-                                  );
-                                }).toList(),
+                      Text(title,
+                          style: TextStyle(
+                              fontSize: 28, color: Colors.cyanAccent)),
+                      Center(
+                        child: Text(
+                          msg,
+                          style:
+                              TextStyle(fontSize: 22, color: Colors.cyanAccent),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Container(
+                              decoration: new BoxDecoration(
+                                border: new Border.all(
+                                    color: Colors.cyanAccent,
+                                    width: 1.0,
+                                    style: BorderStyle.solid),
+                                borderRadius: new BorderRadius.all(
+                                    new Radius.circular(20.0)),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    isDense: true,
+                                    value: numRowsInner.toString(),
+                                    onChanged: (String newValue) {
+                                      numRowsInner = int.parse(newValue);
+                                      numRows = numRowsInner;
+                                      setState(() {
+                                        print('new val == $numRowsInner');
+                                      });
+                                    },
+                                    items: <String>['8', '10', '12', '14']
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          '${value}x$value',
+                                          style: TextStyle(
+                                              fontSize: 22,
+                                              color: Colors.cyanAccent),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+                            child: OutlineButton(
+                              shape: new RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(30.0),
+                              ),
+                              color: Colors.cyanAccent,
+                              borderSide: BorderSide(
+                                  color: Colors.cyan,
+                                  style: BorderStyle.solid,
+                                  width: 1),
+                              onPressed: () {
+                                setState(() {
+                                  Navigator.of(context).pop();
+                                  showRules();
+                                });
+                              },
+                              child: Text(
+                                'Show Rules',
+                                style: TextStyle(
+                                    fontSize: 24, color: Colors.cyanAccent),
+                              ),
+                            ),
+                          ),
+                          if (MediaQuery.of(context).orientation ==
+                              Orientation.landscape)
+                            StartNewGame(
+                              startgame: startNewGameAndSetState,
+                            ),
+                        ],
+                      ),
+                      if (MediaQuery.of(context).orientation ==
+                          Orientation.portrait)
+                        StartNewGame(
+                          startgame: startNewGameAndSetState,
+                        ),
                     ],
                   ),
-                  Row(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Container(
-                          child: OutlineButton(
-                            shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0),
-                            ),
-                            color: Colors.cyan,
-                            borderSide: BorderSide(
-                                color: Colors.cyan,
-                                style: BorderStyle.solid,
-                                width: 1),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              setState(() {
-                                startNewGame();
-                              });
-                            },
-                            child: Text('Start Game',
-                                style: TextStyle(
-                                    fontSize: 24, color: Colors.cyan)),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Container(
-                          child: OutlineButton(
-                            shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(30.0),
-                            ),
-                            color: Colors.cyan,
-                            borderSide: BorderSide(
-                                color: Colors.cyan,
-                                style: BorderStyle.solid,
-                                width: 1),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              setState(() {});
-                            },
-                            child: Text('Back',
-                                style: TextStyle(
-                                    fontSize: 24, color: Colors.cyan)),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      child: OutlineButton(
-                        shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0),
-                        ),
-                        color: Colors.cyan,
-                        borderSide: BorderSide(
-                            color: Colors.cyan,
-                            style: BorderStyle.solid,
-                            width: 1),
-                        onPressed: () {
-                          setState(() {
-                            showRules();
-                          });
-                        },
-                        child: Text('Show Game Rules',
-                            style: TextStyle(fontSize: 24, color: Colors.cyan)),
-                      ),
-                    ),
-                  ),
+                  if (title == NEWGAME) MazeBackButton(setstate: setState),
                 ],
               ),
-            ],
+            ),
           );
         });
       },
@@ -551,12 +541,14 @@ class _MazeAreaState extends State<MazeArea>
     return Column(
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.all(2.0),
+          padding: const EdgeInsets.all(8.0),
           child: Container(
             child: OutlineButton(
               shape: new RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(30.0),
               ),
+              borderSide: BorderSide(
+                  color: Colors.cyan, style: BorderStyle.solid, width: 1),
               onPressed: () {
                 setState(() {
                   handleEndOfGame();
@@ -564,8 +556,9 @@ class _MazeAreaState extends State<MazeArea>
                 });
               },
               child: Text(
-                'Game Options',
-                style: TextStyle(fontSize: 16),
+                'New Game\nOptions and Rules',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 26, color: Colors.cyanAccent),
               ),
             ),
           ),
@@ -580,23 +573,9 @@ class _MazeAreaState extends State<MazeArea>
       child: Column(
         //direction: Axis.horizontal,
         //alignment: WrapAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: <Widget>[
-              Text(
-                'Goblin Captured:',
-                style: TextStyle(fontSize: 22),
-              ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                  child: Text(
-                    maze.player.lostLambs.toString(),
-                    style: TextStyle(fontSize: 22),
-                  )),
-            ],
-          ),
           Row(
             children: <Widget>[
               Text(
@@ -607,6 +586,20 @@ class _MazeAreaState extends State<MazeArea>
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
                     maze.player.savedLambs.toString(),
+                    style: TextStyle(fontSize: 22),
+                  )),
+            ],
+          ),
+          Row(
+            children: <Widget>[
+              Text(
+                'Goblin Captured:',
+                style: TextStyle(fontSize: 22),
+              ),
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                  child: Text(
+                    maze.player.lostLambs.toString(),
                     style: TextStyle(fontSize: 22),
                   )),
             ],
@@ -668,8 +661,8 @@ class _MazeAreaState extends State<MazeArea>
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  defineScoreRow(),
                   defineTopRow(),
+                  defineScoreRow(),
                 ],
               ),
             ),
@@ -718,8 +711,8 @@ class _MazeAreaState extends State<MazeArea>
                 children: <Widget>[
                   Column(
                     children: <Widget>[
-                      defineScoreRow(),
                       defineTopRow(),
+                      defineScoreRow(),
                     ],
                   ),
                 ],

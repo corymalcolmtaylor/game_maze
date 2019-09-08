@@ -56,6 +56,7 @@ class Maze {
   int _maxRow;
   int _maxCol;
   bool gameIsOver = false;
+  String gameOverMessage = '';
   Ilk whosTurnIsIt = Ilk.player;
   var rand = Math.Random.secure();
 
@@ -97,6 +98,7 @@ class Maze {
     lambs.clear();
     myLabyrinth.clear();
     gameIsOver = false;
+    gameOverMessage = '';
     whosTurnIsIt = Ilk.player;
     Room.badGuyHasMovedThisManyTimes = 0;
     for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
