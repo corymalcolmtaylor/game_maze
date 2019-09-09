@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final title = 'Alice in the Hedge Maze';
+    final title = 'Alice and the Hedge Maze';
 
     return MaterialApp(
       title: title,
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
               body1: TextStyle(color: Colors.cyanAccent))),
       home: Scaffold(
         appBar: AppBar(
-          title: Text(title),
+          title: Text(title, style: TextStyle(color: Colors.cyanAccent)),
         ),
         body: MazeArea(),
       ),
@@ -245,6 +245,7 @@ class _MazeAreaState extends State<MazeArea>
   void computerMove({bool delayMove}) async {
     if (maze.gameIsOver ||
         !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
+      maze.gameIsOver = true;
       handleEndOfGame();
       return;
     }
@@ -288,14 +289,14 @@ class _MazeAreaState extends State<MazeArea>
   void handleEndOfGame() {
     String str = '';
     if (maze.player.condition == Condition.dead) {
-      str = 'The Goblin got Alice!\nYou lost! ☹️';
+      str = 'The Goblin got Alice! ☹️\n';
     } else {
       if (maze.player.savedLambs > maze.player.lostLambs) {
         str = '${maze.player.savedLambs} rescured!\nYou WIN! 🙂';
       } else if (maze.player.savedLambs == maze.player.lostLambs) {
         str = '${maze.player.savedLambs} rescured.\nYou draw! 😐';
       } else {
-        str = '${maze.player.lostLambs} captured.\nYou lost! ☹️';
+        str = '${maze.player.lostLambs} captured. ☹️';
       }
     }
     maze.gameOverMessage = str;
@@ -344,7 +345,7 @@ class _MazeAreaState extends State<MazeArea>
             'She gets three moves per turn.\n' +
             'End her turn early by moving into a wall or double tapping.\n' +
             'Rescue the animals by getting Alice to them before they get captured by the goblin 👺.\n' +
-            'If the goblin captures Alice you lose but otherwise ' +
+            'If the goblin captures Alice the game ends but otherwise ' +
             'if she saves more animals than get captured you win.',
         style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
     return showDialog<void>(
