@@ -1,4 +1,4 @@
-package com.example.game_maze;
+package com.thesoftwaretaylor.game_maze;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

@@ -6,7 +6,7 @@ class StartNewGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+      padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
       child: Container(
         child: OutlineButton(
           shape: new RoundedRectangleBorder(

@@ -61,8 +61,14 @@ class _MazeAreaState extends State<MazeArea>
     maze.carveLabyrinth();
   }
 
-  startNewGameAndSetState() {
+  void startNewGameAndSetState() {
     startNewGame();
+    setState(() {
+      print('started new game');
+    });
+  }
+
+  void setMyState() {
     setState(() {
       print('started new game');
     });
@@ -393,11 +399,12 @@ class _MazeAreaState extends State<MazeArea>
     const NEWGAME = 'New Game';
     const GAMEOVER = 'Game Over';
     var title = GAMEOVER;
-    var msg = maze.gameOverMessage + '\nMaze Dimensions';
+    var msg = maze.gameOverMessage;
+    var MAZEDIMENSIONS = 'Maze Dimensions';
 
     if (!maze.gameIsOver) {
       title = NEWGAME;
-      msg = 'Maze Dimensions';
+      msg = '';
     }
     return showDialog<void>(
       context: context,
@@ -413,16 +420,21 @@ class _MazeAreaState extends State<MazeArea>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(title,
                           style: TextStyle(
                               fontSize: 28, color: Colors.cyanAccent)),
-                      Center(
-                        child: Text(
+                      if (msg != '')
+                        Text(
                           msg,
                           style:
                               TextStyle(fontSize: 22, color: Colors.cyanAccent),
                         ),
+                      Text(
+                        MAZEDIMENSIONS,
+                        style:
+                            TextStyle(fontSize: 22, color: Colors.cyanAccent),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -512,7 +524,7 @@ class _MazeAreaState extends State<MazeArea>
                         ),
                     ],
                   ),
-                  if (title == NEWGAME) MazeBackButton(setstate: setState),
+                  if (title == NEWGAME) MazeBackButton(setstate: setMyState),
                 ],
               ),
             ),
