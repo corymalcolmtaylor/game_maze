@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './utils.dart';
 
 class MazeBackButton extends StatelessWidget {
   final Function setstate;
@@ -14,7 +15,9 @@ class MazeBackButton extends StatelessWidget {
             borderRadius: new BorderRadius.circular(30.0),
           ),
           borderSide: BorderSide(
-              color: Colors.cyan, style: BorderStyle.solid, width: 1),
+              color: Colors.cyan,
+              style: BorderStyle.solid,
+              width: Utils.WALLTHICKNESS),
           onPressed: () {
             Navigator.of(context).pop();
             setstate();

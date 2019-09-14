@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 import 'maze.dart';
 import 'w_StartNewGame.dart';
 import 'w_MazeBackButton.dart';
+import './utils.dart';
 
 void main() => runApp(MyApp());
 
@@ -18,8 +19,6 @@ class MyApp extends StatelessWidget {
       title: title,
       theme: ThemeData(
           brightness: Brightness.dark,
-          //primaryColor: Colors.lightGreen[800],
-          //accentColor: Colors.cyan[600],
           textTheme: TextTheme(
               title: TextStyle(color: Colors.cyanAccent),
               body1: TextStyle(color: Colors.cyanAccent))),
@@ -48,7 +47,7 @@ class _MazeAreaState extends State<MazeArea>
   static const animDurationMilliSeconds = 700;
 
   var sprites = <Widget>[];
-  final wallThickness = 2.0;
+  final wallThickness = Utils.WALLTHICKNESS;
   var roomLength = 0.0;
   var maxWidth = 0.0;
 
@@ -95,7 +94,6 @@ class _MazeAreaState extends State<MazeArea>
       duration: Duration(milliseconds: animDurationMilliSeconds),
       child: Transform(
         // Transform widget
-
         transform: Matrix4.identity()
           ..setEntry(1, 1, 1) // perspective
           ..rotateX(0)
@@ -104,13 +102,12 @@ class _MazeAreaState extends State<MazeArea>
         child: Text(
           pixie.emoji,
           overflow: TextOverflow.visible,
-          textAlign: TextAlign.center,
           textScaleFactor: 1.0,
           style: TextStyle(
-              height: 1.15,
+              height: 1.0,
               color: Colors.black,
               fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
-        ), // <<< set your widget here
+        ),
       ),
     );
   }
@@ -143,109 +140,51 @@ class _MazeAreaState extends State<MazeArea>
 
       if (lamb.condition == Condition.dead) {
         lamb.emoji = '☠️';
-        icons.add(
-          AnimatedPositioned(
-            key: Key(lamb.key),
-            left: endLeft,
-            top: endTop,
-            height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
-            duration: Duration(milliseconds: animDurationMilliSeconds),
-            child: Transform(
-              transform: Matrix4.identity()
-                ..setEntry(1, 1, 1) // perspective
-                ..rotateX(0)
-                ..rotateY(xRadians),
-              alignment: FractionalOffset.center,
-              child: Text(
-                lamb.emoji,
-                textScaleFactor: 1.0,
-                style: TextStyle(
-                    height: 1.15,
-                    color: Colors.black,
-                    fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
-              ),
-            ),
-          ),
-        );
-      } else if (lamb.condition == Condition.freed) {
-        icons.add(
-          AnimatedPositioned(
-            key: Key(lamb.key),
-            left: endLeft,
-            top: endTop,
-            height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
-            duration: Duration(milliseconds: animDurationMilliSeconds),
-            child: Transform(
-              transform: Matrix4.identity()
-                ..setEntry(1, 1, 1) // perspective
-                ..rotateX(0)
-                ..rotateY(xRadians),
-              alignment: FractionalOffset.center,
-              child: Text(
-                lamb.emoji,
-                textScaleFactor: 1.0,
-                style: TextStyle(
-                    height: 1.15,
-                    color: Colors.black,
-                    fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
-              ),
-            ),
-          ),
-        );
-      } else {
-        icons.add(
-          AnimatedPositioned(
-              key: Key(lamb.key),
-              left: endLeft,
-              top: endTop,
-              height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
-              duration: Duration(milliseconds: animDurationMilliSeconds),
-              child: Transform(
-                transform: Matrix4.identity()
-                  ..setEntry(1, 1, 1) // perspective
-                  ..rotateX(0)
-                  ..rotateY(xRadians),
-                alignment: FractionalOffset.center,
-                child: Text(
-                  lamb.emoji,
-                  textScaleFactor: 1.0,
-                  style: TextStyle(
-                      height: 1.15,
-                      color: Colors.black,
-                      fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
-                ),
-              )),
-        );
       }
+      icons.add(
+        AnimatedPositioned(
+          key: Key(lamb.key),
+          left: endLeft,
+          top: endTop,
+          height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
+          duration: Duration(milliseconds: animDurationMilliSeconds),
+          child: Transform(
+            transform: Matrix4.identity()
+              ..setEntry(1, 1, 1) // perspective
+              ..rotateX(0)
+              ..rotateY(xRadians),
+            alignment: FractionalOffset.center,
+            child: Text(
+              lamb.emoji,
+              textScaleFactor: 1.0,
+              style: TextStyle(
+                  height: 1.15,
+                  color: Colors.black,
+                  fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
+            ),
+          ),
+        ),
+      );
     });
     return icons;
   }
 
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    if (pixie.ilk == Ilk.lamb) return roomLength - (roomLength / 6);
-    return roomLength - (roomLength / 10);
+    if (pixie.ilk == Ilk.lamb) return roomLength - (3 * wallThickness);
+    return roomLength - (2 * wallThickness);
   }
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
-    var retval = ((pixie.y - 1) * roomLength) + (wallThickness * (pixie.y - 1));
-    if (pixie.ilk == Ilk.lamb) {
-      retval += 2;
+    var retval = ((pixie.y - 1) * roomLength);
+    if (pixie.ilk != Ilk.lamb) {
+      retval += roomLength / 12;
     }
-    if (Platform.isAndroid) {
-      if (pixie.ilk != Ilk.lamb) {
-        return retval - 2;
-      }
-    }
-    return retval;
+    return retval + wallThickness;
   }
 
   double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
-    var retval = ((pixie.x - 1) * roomLength) + (wallThickness * (pixie.x - 1));
-    if (pixie.ilk == Ilk.lamb) {
-      retval += 2;
-    }
-
-    return retval + (numRows / 2);
+    var retval = ((pixie.x - 1) * roomLength);
+    return retval;
   }
 
   void computerMove({bool delayMove}) async {
@@ -323,23 +262,24 @@ class _MazeAreaState extends State<MazeArea>
     var westColor = (room.left == true) ? Colors.green : floorColor;
     var eastColor = (room.right == true) ? Colors.green : floorColor;
 
-    return Container(
+    var endLeft = ((room.x - 1) * roomLength);
+    var endTop = ((room.y - 1) * roomLength);
+
+    return Positioned(
+      key: Key("room${room.x}_${room.y}"),
+      left: endLeft,
+      top: endTop,
       child: Container(
-        alignment: Alignment.center,
+        width: roomLength,
+        height: roomLength,
         decoration: BoxDecoration(
           color: floorColor,
           border: Border(
-            bottom: BorderSide(color: southColor),
-            top: BorderSide(color: northColor),
-            right: BorderSide(color: eastColor),
-            left: BorderSide(color: westColor),
+            bottom: BorderSide(color: southColor, width: wallThickness),
+            top: BorderSide(color: northColor, width: wallThickness),
+            right: BorderSide(color: eastColor, width: wallThickness),
+            left: BorderSide(color: westColor, width: wallThickness),
           ),
-        ),
-        child: SizedBox(
-          width: roomLength,
-          height: roomLength,
-          //child: Text('${room.minotaursPath}')
-          // child: getRoomPixieIcon(room),
         ),
       ),
     );
@@ -378,7 +318,9 @@ class _MazeAreaState extends State<MazeArea>
               ),
               color: Colors.cyanAccent,
               borderSide: BorderSide(
-                  color: Colors.cyan, style: BorderStyle.solid, width: 1),
+                  color: Colors.cyan,
+                  style: BorderStyle.solid,
+                  width: wallThickness),
               onPressed: () {
                 Navigator.of(context).pop();
                 showGameOverMessage();
@@ -400,7 +342,7 @@ class _MazeAreaState extends State<MazeArea>
     const GAMEOVER = 'Game Over';
     var title = GAMEOVER;
     var msg = maze.gameOverMessage;
-    var MAZEDIMENSIONS = 'Maze Dimensions';
+    const MAZEDIMENSIONS = 'Maze Dimensions';
 
     if (!maze.gameIsOver) {
       title = NEWGAME;
@@ -445,7 +387,7 @@ class _MazeAreaState extends State<MazeArea>
                               decoration: new BoxDecoration(
                                 border: new Border.all(
                                     color: Colors.cyanAccent,
-                                    width: 1.0,
+                                    width: Utils.WALLTHICKNESS,
                                     style: BorderStyle.solid),
                                 borderRadius: new BorderRadius.all(
                                     new Radius.circular(20.0)),
@@ -496,7 +438,7 @@ class _MazeAreaState extends State<MazeArea>
                               borderSide: BorderSide(
                                   color: Colors.cyan,
                                   style: BorderStyle.solid,
-                                  width: 1),
+                                  width: wallThickness),
                               onPressed: () {
                                 setState(() {
                                   Navigator.of(context).pop();
@@ -546,7 +488,7 @@ class _MazeAreaState extends State<MazeArea>
       }
     }
     roomLength =
-        ((maxWidth.floor() - (wallThickness * (maze.maxRow + 1))) / maze.maxRow)
+        (((maxWidth.floor() - (wallThickness * (maze.maxRow))) / maze.maxRow))
             .floorToDouble();
   }
 
@@ -561,11 +503,12 @@ class _MazeAreaState extends State<MazeArea>
                 borderRadius: new BorderRadius.circular(30.0),
               ),
               borderSide: BorderSide(
-                  color: Colors.cyan, style: BorderStyle.solid, width: 1),
+                  color: Colors.cyan,
+                  style: BorderStyle.solid,
+                  width: wallThickness),
               onPressed: () {
                 setState(() {
                   handleEndOfGame();
-                  //startNewGame();
                 });
               },
               child: Text(
@@ -584,8 +527,6 @@ class _MazeAreaState extends State<MazeArea>
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: Column(
-        //direction: Axis.horizontal,
-        //alignment: WrapAlignment.end,
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -626,7 +567,7 @@ class _MazeAreaState extends State<MazeArea>
   @override
   Widget build(BuildContext context) {
     setSizes();
-    var trs = <Row>[];
+    var trs = <Widget>[];
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       print('build in landscape');
     } else {
@@ -634,18 +575,14 @@ class _MazeAreaState extends State<MazeArea>
     }
 
     for (int i = 1; i <= maze.maxRow; i++) {
-      trs.add(
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: List.from(
-            maze.myLabyrinth.entries
-                .where((elroom) => elroom.value.y == i)
-                .map(
-                  (el) => makeRoom(el.value),
-                )
-                .toList(),
-          ),
+      trs.addAll(
+        List.from(
+          maze.myLabyrinth.entries
+              .where((elroom) => elroom.value.y == i)
+              .map(
+                (el) => makeRoom(el.value),
+              )
+              .toList(),
         ),
       );
     }
@@ -702,8 +639,7 @@ class _MazeAreaState extends State<MazeArea>
                 width: maxWidth,
                 height: maxWidth,
                 child: Stack(
-                    overflow: Overflow.visible,
-                    children: [Column(children: trs), ...sprites]),
+                    overflow: Overflow.visible, children: [...trs, ...sprites]),
               ),
             ),
           ],
@@ -730,31 +666,33 @@ class _MazeAreaState extends State<MazeArea>
                   ),
                 ],
               ),
-              GestureDetector(
-                onHorizontalDragEnd: (deets) {
-                  moveThePlayer(direction: dir);
-                },
-                onVerticalDragEnd: (deets) {
-                  moveThePlayer(direction: dir);
-                },
-                onVerticalDragUpdate: (deets) {
-                  vertaicalDragUpdate(deets);
-                },
-                onHorizontalDragUpdate: (deets) {
-                  horizontalDragUpdate(deets);
-                },
-                onDoubleTap: () {
-                  print('onDoubleTap   ');
-                  handlePlayerHitAWall();
-                  maze.whosTurnIsIt = Ilk.minotaur;
-                  computerMove(delayMove: maze.player.delayComputerMove);
-                },
-                child: SizedBox(
-                  width: maxWidth,
-                  height: maxWidth,
-                  child: Stack(
-                      overflow: Overflow.visible,
-                      children: [Column(children: trs), ...sprites]),
+              Center(
+                child: GestureDetector(
+                  onHorizontalDragEnd: (deets) {
+                    moveThePlayer(direction: dir);
+                  },
+                  onVerticalDragEnd: (deets) {
+                    moveThePlayer(direction: dir);
+                  },
+                  onVerticalDragUpdate: (deets) {
+                    vertaicalDragUpdate(deets);
+                  },
+                  onHorizontalDragUpdate: (deets) {
+                    horizontalDragUpdate(deets);
+                  },
+                  onDoubleTap: () {
+                    print('onDoubleTap   ');
+                    handlePlayerHitAWall();
+                    maze.whosTurnIsIt = Ilk.minotaur;
+                    computerMove(delayMove: maze.player.delayComputerMove);
+                  },
+                  child: SizedBox(
+                    width: roomLength * numRows,
+                    height: roomLength * numRows,
+                    child: Stack(
+                        overflow: Overflow.visible,
+                        children: [...trs, ...sprites]),
+                  ),
                 ),
               ),
             ],
@@ -765,10 +703,7 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void moveThePlayer({Directions direction}) {
-    //print('moveThePlayer   ');
-
     if (movePlayer(direction: direction)) {
-      //print('player moved');
       if (maze.whosTurnIsIt == Ilk.minotaur) {
         computerMove(delayMove: maze.player.delayComputerMove);
       }
@@ -778,43 +713,28 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void horizontalDragUpdate(DragUpdateDetails deets) {
-    //print('onHorizontalDragUpdate  ');
     if (deets.primaryDelta > 0) {
-      //print('right pressed');
       dir = Directions.right;
     } else {
       if (deets.primaryDelta < 0) {
-        //print('left pressed');
         dir = Directions.left;
       }
     }
   }
 
   void vertaicalDragUpdate(DragUpdateDetails deets) {
-    //print('onVerticalDragUpdate  ');
     if (deets.primaryDelta > 0) {
-      //print('down pressed');
       dir = Directions.down;
     } else if (deets.primaryDelta < 0) {
-      //print('up pressed');
       dir = Directions.up;
     }
   }
 
-  void verticalDragMove(DragEndDetails deets) {
-    //print('vert drag');
-    //print(deets.toString());
-  }
-
   /*return true if the minotaur should move next, otherwise false */
   bool movePlayer({Directions direction}) {
-    //print('movePlayer 1');
     if (gameIsOver) return false;
-    //print('movePlayer 2 ${maze.whosTurnIsIt}');
     if (maze.whosTurnIsIt != Ilk.player) return false;
-    //print('movePlayer 3');
     if (maze.player.movesLeft <= 0) return true;
-    //print('movePlayer 4');
 
     maze.lambs.forEach((lamb) {
       if (lamb.condition == Condition.freed) {

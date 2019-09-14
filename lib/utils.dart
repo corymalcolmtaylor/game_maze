@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'dart:math';
 
 class Utils {
+  static const WALLTHICKNESS = 2.0;
+
   static final Random _random = Random.secure();
 
   static String createCryptoRandomString([int length = 32]) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './utils.dart';
 
 class StartNewGame extends StatelessWidget {
   final Function startgame;
@@ -13,7 +14,9 @@ class StartNewGame extends StatelessWidget {
             borderRadius: new BorderRadius.circular(30.0),
           ),
           borderSide: BorderSide(
-              color: Colors.cyan, style: BorderStyle.solid, width: 1),
+              color: Colors.cyan,
+              style: BorderStyle.solid,
+              width: Utils.WALLTHICKNESS),
           onPressed: () {
             Navigator.of(context).pop();
             startgame();
