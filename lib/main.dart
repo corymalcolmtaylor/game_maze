@@ -169,9 +169,19 @@ class _MazeAreaState extends State<MazeArea>
     return icons;
   }
 
+  double howMuchToReduceTheFontSizeForThisPixie({Pixie pixie}) {
+    var reduceSizeBy = 2.0;
+    if (pixie.ilk == Ilk.lamb) reduceSizeBy += 2;
+    if (Platform.isAndroid) {
+      reduceSizeBy += 4;
+    }
+    return reduceSizeBy * wallThickness;
+  }
+
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    if (pixie.ilk == Ilk.lamb) return roomLength - (3 * wallThickness);
-    return roomLength - (2 * wallThickness);
+    print('whatIsTheEmojiFontSizeOfThisPixie wallThickness  $wallThickness');
+
+    return roomLength - howMuchToReduceTheFontSizeForThisPixie(pixie: pixie);
   }
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
@@ -179,12 +189,22 @@ class _MazeAreaState extends State<MazeArea>
     if (pixie.ilk != Ilk.lamb) {
       retval += roomLength / 12;
     }
+    if (Platform.isAndroid) {
+      return retval +
+          (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 4);
+    }
     return retval + wallThickness;
   }
 
   double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.x - 1) * roomLength);
-    return retval;
+    if (Platform.isIOS) {
+      return retval +
+          (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 2);
+    } else {
+      return retval +
+          (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 4);
+    }
   }
 
   void computerMove({bool delayMove}) async {
