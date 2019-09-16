@@ -84,6 +84,14 @@ class _MazeAreaState extends State<MazeArea>
     if (pixie.lastX > 0 && pixie.x < pixie.lastX) {
       radians = 3.0;
     }
+    //if earlier versions of android the goblin needs to switch direction facing
+    if (Platform.isAndroid && pixie.ilk == Ilk.minotaur) {
+      if (radians == 3) {
+        radians = 0.0;
+      } else {
+        radians = 3.0;
+      }
+    }
 
     return AnimatedPositioned(
       key: Key(pixie.key),
@@ -637,17 +645,17 @@ class _MazeAreaState extends State<MazeArea>
               ),
             ),
             GestureDetector(
-              onHorizontalDragEnd: (deets) {
+              onHorizontalDragEnd: (dragDetails) {
                 moveThePlayer(direction: dir);
               },
-              onVerticalDragEnd: (deets) {
+              onVerticalDragEnd: (dragDetails) {
                 moveThePlayer(direction: dir);
               },
-              onVerticalDragUpdate: (deets) {
-                vertaicalDragUpdate(deets);
+              onVerticalDragUpdate: (dragDetails) {
+                vertaicalDragUpdate(dragDetails);
               },
-              onHorizontalDragUpdate: (deets) {
-                horizontalDragUpdate(deets);
+              onHorizontalDragUpdate: (dragDetails) {
+                horizontalDragUpdate(dragDetails);
               },
               onDoubleTap: () {
                 print('onDoubleTap   ');
@@ -688,17 +696,17 @@ class _MazeAreaState extends State<MazeArea>
               ),
               Center(
                 child: GestureDetector(
-                  onHorizontalDragEnd: (deets) {
+                  onHorizontalDragEnd: (dragDetails) {
                     moveThePlayer(direction: dir);
                   },
-                  onVerticalDragEnd: (deets) {
+                  onVerticalDragEnd: (dragDetails) {
                     moveThePlayer(direction: dir);
                   },
-                  onVerticalDragUpdate: (deets) {
-                    vertaicalDragUpdate(deets);
+                  onVerticalDragUpdate: (dragDetails) {
+                    vertaicalDragUpdate(dragDetails);
                   },
-                  onHorizontalDragUpdate: (deets) {
-                    horizontalDragUpdate(deets);
+                  onHorizontalDragUpdate: (dragDetails) {
+                    horizontalDragUpdate(dragDetails);
                   },
                   onDoubleTap: () {
                     print('onDoubleTap   ');
@@ -732,20 +740,20 @@ class _MazeAreaState extends State<MazeArea>
     }
   }
 
-  void horizontalDragUpdate(DragUpdateDetails deets) {
-    if (deets.primaryDelta > 0) {
+  void horizontalDragUpdate(DragUpdateDetails dragDetails) {
+    if (dragDetails.primaryDelta > 0) {
       dir = Directions.right;
     } else {
-      if (deets.primaryDelta < 0) {
+      if (dragDetails.primaryDelta < 0) {
         dir = Directions.left;
       }
     }
   }
 
-  void vertaicalDragUpdate(DragUpdateDetails deets) {
-    if (deets.primaryDelta > 0) {
+  void vertaicalDragUpdate(DragUpdateDetails dragDetails) {
+    if (dragDetails.primaryDelta > 0) {
       dir = Directions.down;
-    } else if (deets.primaryDelta < 0) {
+    } else if (dragDetails.primaryDelta < 0) {
       dir = Directions.up;
     }
   }
