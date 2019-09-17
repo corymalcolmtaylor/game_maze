@@ -180,9 +180,6 @@ class _MazeAreaState extends State<MazeArea>
   double howMuchToReduceTheFontSizeForThisPixie({Pixie pixie}) {
     var reduceSizeBy = 2.0;
     if (pixie.ilk == Ilk.lamb) reduceSizeBy += 2;
-    if (Platform.isAndroid) {
-      reduceSizeBy += 4;
-    }
     return reduceSizeBy * wallThickness;
   }
 
@@ -506,12 +503,13 @@ class _MazeAreaState extends State<MazeArea>
 
   void setSizes() {
     maxWidth = MediaQuery.of(context).size.width;
-    var maxHieght = MediaQuery.of(context).size.height;
-    print('setsizes wid = $maxWidth hit = $maxHieght ${maxWidth / maxHieght}');
+    var maxHeight = MediaQuery.of(context).size.height;
+    print(
+        'setsizes width = $maxWidth hieght = $maxHeight ${maxWidth / maxHeight}');
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       maxWidth = MediaQuery.of(context).size.height * 0.75;
     } else {
-      if (maxWidth / maxHieght > 0.66) {
+      if (maxWidth / maxHeight > 0.66) {
         maxWidth = maxWidth * 0.85;
       }
     }
