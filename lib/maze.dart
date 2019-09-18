@@ -756,21 +756,19 @@ class Maze {
     });
 
     dirs.forEach((dirx) {
-      print('1 least $least $dirx');
       if (aPixieCanMoveDirectionFromLocation(
           direction: dirx, location: location)) {
         var newLoaction =
             whatLocationIsFoundByMovingInThisDirectionFromThisPixiesLocation(
                 direction: dirx, pixie: minotaur);
-        print('2 least $least $dirx');
+
         if (myLabyrinth[newLoaction].minotaursPath < least) {
           least = myLabyrinth[newLoaction].minotaursPath;
           finalDir = dirx;
-          print('3 least $least $dirx');
         }
       }
     });
-    print('end least $least $finalDir');
+
     return finalDir;
   }
 

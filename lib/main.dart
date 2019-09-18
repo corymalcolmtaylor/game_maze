@@ -134,11 +134,11 @@ class _MazeAreaState extends State<MazeArea>
       if (lamb.x != lamb.lastX) {
         if (lamb.x > lamb.lastX) {
           xRadians = 3.0;
-          print('set rad to 3 for ${lamb.emoji} ${lamb.x} > ${lamb.lastX}');
+          // print('set rad to 3 for ${lamb.emoji} ${lamb.x} > ${lamb.lastX}');
           lamb.facing = Directions.right;
         } else {
           xRadians = 6.0;
-          print('set rad to 6 for ${lamb.emoji}  ${lamb.x} > ${lamb.lastX}');
+          //print('set rad to 6 for ${lamb.emoji}  ${lamb.x} > ${lamb.lastX}');
           lamb.facing = Directions.left;
         }
       }
@@ -147,7 +147,7 @@ class _MazeAreaState extends State<MazeArea>
       endTop = whatIsTheTopOffsetOfThisPixie(pixie: lamb);
 
       if (lamb.condition == Condition.dead) {
-        lamb.emoji = '☠️';
+        lamb.emoji = '💀';
       }
       icons.add(
         AnimatedPositioned(
@@ -184,8 +184,6 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    print('whatIsTheEmojiFontSizeOfThisPixie wallThickness  $wallThickness');
-
     return roomLength - howMuchToReduceTheFontSizeForThisPixie(pixie: pixie);
   }
 
@@ -259,14 +257,14 @@ class _MazeAreaState extends State<MazeArea>
   void handleEndOfGame() {
     String str = '';
     if (maze.player.condition == Condition.dead) {
-      str = 'The Goblin got Alice! ☹️\n';
+      str = 'The Goblin got Alice! ️😞\n';
     } else {
       if (maze.player.savedLambs > maze.player.lostLambs) {
-        str = '${maze.player.savedLambs} rescured!\nYou WIN! 🙂';
+        str = '${maze.player.savedLambs} rescured!\nYou WIN! 😀';
       } else if (maze.player.savedLambs == maze.player.lostLambs) {
         str = '${maze.player.savedLambs} rescured.\nYou draw! 😐';
       } else {
-        str = '${maze.player.lostLambs} captured. ☹️';
+        str = '${maze.player.lostLambs} captured. 😞';
       }
     }
     maze.gameOverMessage = str;
@@ -504,8 +502,8 @@ class _MazeAreaState extends State<MazeArea>
   void setSizes() {
     maxWidth = MediaQuery.of(context).size.width;
     var maxHeight = MediaQuery.of(context).size.height;
-    print(
-        'setsizes width = $maxWidth hieght = $maxHeight ${maxWidth / maxHeight}');
+    // print(
+    //    'setsizes width = $maxWidth hieght = $maxHeight ${maxWidth / maxHeight}');
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       maxWidth = MediaQuery.of(context).size.height * 0.75;
     } else {
@@ -595,9 +593,9 @@ class _MazeAreaState extends State<MazeArea>
     setSizes();
     var trs = <Widget>[];
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      print('build in landscape');
+      //print('build in landscape');
     } else {
-      print('build in portrait');
+      //print('build in portrait');
     }
 
     for (int i = 1; i <= maze.maxRow; i++) {
@@ -626,7 +624,7 @@ class _MazeAreaState extends State<MazeArea>
     sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.minotaur));
 
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      print('build in landscape');
+      //print('build in landscape');
       return Center(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -644,15 +642,19 @@ class _MazeAreaState extends State<MazeArea>
             ),
             GestureDetector(
               onHorizontalDragEnd: (dragDetails) {
+                print('onHorizontalDragEnd   ');
                 moveThePlayer(direction: dir);
               },
               onVerticalDragEnd: (dragDetails) {
+                print('onVerticalDragEnd   ');
                 moveThePlayer(direction: dir);
               },
               onVerticalDragUpdate: (dragDetails) {
+                print('onVerticalDragUpdate   ');
                 vertaicalDragUpdate(dragDetails);
               },
               onHorizontalDragUpdate: (dragDetails) {
+                print('onHorizontalDragUpdate   ');
                 horizontalDragUpdate(dragDetails);
               },
               onDoubleTap: () {
@@ -672,7 +674,7 @@ class _MazeAreaState extends State<MazeArea>
         ),
       );
     } else {
-      print('build in portrait');
+      //print('build in portrait');
 
       return Center(
         child: Container(
@@ -695,15 +697,19 @@ class _MazeAreaState extends State<MazeArea>
               Center(
                 child: GestureDetector(
                   onHorizontalDragEnd: (dragDetails) {
+                    print('onHorizontalDragEnd   ');
                     moveThePlayer(direction: dir);
                   },
                   onVerticalDragEnd: (dragDetails) {
+                    print('onVerticalDragEnd   ');
                     moveThePlayer(direction: dir);
                   },
                   onVerticalDragUpdate: (dragDetails) {
+                    print('onVerticalDragUpdate   ');
                     vertaicalDragUpdate(dragDetails);
                   },
                   onHorizontalDragUpdate: (dragDetails) {
+                    print('onHorizontalDragUpdate   ');
                     horizontalDragUpdate(dragDetails);
                   },
                   onDoubleTap: () {
