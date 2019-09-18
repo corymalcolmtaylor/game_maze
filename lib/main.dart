@@ -51,8 +51,6 @@ class _MazeAreaState extends State<MazeArea>
   var roomLength = 0.0;
   var maxWidth = 0.0;
 
-  var gameIsOver = false;
-
   @override
   void initState() {
     super.initState();
@@ -764,7 +762,7 @@ class _MazeAreaState extends State<MazeArea>
 
   /*return true if the minotaur should move next, otherwise false */
   bool movePlayer({Directions direction}) {
-    if (gameIsOver) return false;
+    if (maze.gameIsOver) return false;
     if (maze.whosTurnIsIt != Ilk.player) return false;
     if (maze.player.movesLeft <= 0) return true;
 
@@ -799,7 +797,7 @@ class _MazeAreaState extends State<MazeArea>
     setSizes();
     maze.initMaze();
     maze.carveLabyrinth();
-    gameIsOver = false;
+    maze.gameIsOver = false;
     setState(() {});
   }
 }
