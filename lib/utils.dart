@@ -7,6 +7,8 @@ import 'dart:math';
 
 class Utils {
   static const WALLTHICKNESS = 2.0;
+  static const EASY = 'Easy';
+  static const HARD = 'Hard';
 
   static final Random _random = Random.secure();
 

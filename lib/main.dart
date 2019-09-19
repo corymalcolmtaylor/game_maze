@@ -43,8 +43,7 @@ class _MazeAreaState extends State<MazeArea>
     with SingleTickerProviderStateMixin {
   Maze maze;
   int numRows = 8;
-  final EASY = 'Easy';
-  final HARD = 'Hard';
+
   final maximumMoveAttempts = 8;
   static const animDurationMilliSeconds = 700;
 
@@ -265,11 +264,12 @@ class _MazeAreaState extends State<MazeArea>
       str = 'The Goblin got Alice! ️😞\n';
     } else {
       if (maze.player.savedLambs > maze.player.lostLambs) {
-        str = '${maze.player.savedLambs} rescured!\nYou WIN! 😀';
+        str = 'Alice ${maze.player.savedLambs} rescued!\nYou WIN! 😀';
       } else if (maze.player.savedLambs == maze.player.lostLambs) {
-        str = '${maze.player.savedLambs} rescured.\nYou draw! 😐';
+        str =
+            '${maze.player.savedLambs} rescued and captured.\nResult is a draw. 😐';
       } else {
-        str = '${maze.player.lostLambs} captured. 😞';
+        str = 'Goblin captured ${maze.player.lostLambs}. 😞';
       }
     }
     maze.gameOverMessage = str;
@@ -320,7 +320,8 @@ class _MazeAreaState extends State<MazeArea>
             'End her turn early by moving into a wall or double tapping.\n' +
             'Rescue the animals by getting Alice to them before they get captured by the goblin 👺.\n' +
             'If the goblin captures Alice the game ends but otherwise ' +
-            'if she saves more animals than get captured you win.',
+            'if she saves more animals than the goblin captures you win.\n' +
+            'Difficulty mode Hard means that you cannot see other characters until Alice can.',
         style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
     return showDialog<void>(
       context: context,
@@ -376,6 +377,7 @@ class _MazeAreaState extends State<MazeArea>
       title = NEWGAME;
       msg = '';
     }
+
     return showDialog<void>(
       context: context,
 
@@ -478,17 +480,17 @@ class _MazeAreaState extends State<MazeArea>
                                   child: DropdownButton<String>(
                                     isDense: true,
                                     value: maze.difficulty == Difficulty.easy
-                                        ? EASY
-                                        : HARD,
+                                        ? Utils.EASY
+                                        : Utils.HARD,
                                     onChanged: (String newValue) {
-                                      maze.difficulty = newValue == EASY
+                                      maze.difficulty = newValue == Utils.EASY
                                           ? Difficulty.easy
                                           : Difficulty.hard;
                                       setState(() {
                                         print(' ');
                                       });
                                     },
-                                    items: <String>[EASY, HARD]
+                                    items: <String>[Utils.EASY, Utils.HARD]
                                         .map<DropdownMenuItem<String>>(
                                             (String value) {
                                       return DropdownMenuItem<String>(
@@ -525,6 +527,7 @@ class _MazeAreaState extends State<MazeArea>
                               onPressed: () {
                                 setState(() {
                                   Navigator.of(context).pop();
+
                                   showRules();
                                 });
                               },
