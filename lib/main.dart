@@ -43,6 +43,8 @@ class _MazeAreaState extends State<MazeArea>
     with SingleTickerProviderStateMixin {
   Maze maze;
   int numRows = 8;
+  final EASY = 'Easy';
+  final HARD = 'Hard';
   final maximumMoveAttempts = 8;
   static const animDurationMilliSeconds = 700;
 
@@ -111,7 +113,9 @@ class _MazeAreaState extends State<MazeArea>
           textScaleFactor: 1.0,
           style: TextStyle(
               height: 1.0,
-              color: pixie.isVisible ? Colors.black : Colors.transparent,
+              color: maze.isEasy() || pixie.isVisible
+                  ? Colors.black
+                  : Colors.transparent,
               fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
         ),
       ),
@@ -166,7 +170,9 @@ class _MazeAreaState extends State<MazeArea>
               textScaleFactor: 1.0,
               style: TextStyle(
                   height: 1.15,
-                  color: lamb.isVisible ? Colors.black : Colors.transparent,
+                  color: maze.isEasy() || lamb.isVisible
+                      ? Colors.black
+                      : Colors.transparent,
                   fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
             ),
           ),
@@ -434,6 +440,61 @@ class _MazeAreaState extends State<MazeArea>
                                         value: value,
                                         child: Text(
                                           '${value}x$value',
+                                          style: TextStyle(
+                                              fontSize: 22,
+                                              color: Colors.cyanAccent),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'Difficulty',
+                        style:
+                            TextStyle(fontSize: 22, color: Colors.cyanAccent),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Container(
+                              decoration: new BoxDecoration(
+                                border: new Border.all(
+                                    color: Colors.cyanAccent,
+                                    width: Utils.WALLTHICKNESS,
+                                    style: BorderStyle.solid),
+                                borderRadius: new BorderRadius.all(
+                                    new Radius.circular(20.0)),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    isDense: true,
+                                    value: maze.difficulty == Difficulty.easy
+                                        ? EASY
+                                        : HARD,
+                                    onChanged: (String newValue) {
+                                      maze.difficulty = newValue == EASY
+                                          ? Difficulty.easy
+                                          : Difficulty.hard;
+                                      setState(() {
+                                        print(' ');
+                                      });
+                                    },
+                                    items: <String>[EASY, HARD]
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
                                           style: TextStyle(
                                               fontSize: 22,
                                               color: Colors.cyanAccent),

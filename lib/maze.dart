@@ -25,6 +25,7 @@ class Room {
   var minotaursPath = 0;
 }
 
+enum Difficulty { easy, hard }
 enum Ilk { player, minotaur, lamb }
 enum Directions { up, down, right, left }
 enum Condition { alive, dead, freed }
@@ -58,8 +59,13 @@ class Maze {
   int _maxCol;
   bool gameIsOver = false;
   String gameOverMessage = '';
+  Difficulty difficulty = Difficulty.easy;
   Ilk whosTurnIsIt = Ilk.player;
   var rand = Math.Random.secure();
+
+  bool isEasy() {
+    return difficulty == Difficulty.easy;
+  }
 
   int get maxRow {
     return _maxRow;
@@ -437,10 +443,12 @@ class Maze {
   }
 
   bool thisPixieIsJustAroundTheCornerFromThisBoss({Pixie boss, Pixie pixie}) {
+    var bossroom = myLabyrinth['b_${boss.x}_${boss.y}'];
+    var pixroom = myLabyrinth['b_${pixie.x}_${pixie.y}'];
     if (boss.x == pixie.x - 1 && boss.y == pixie.y + 1) {
       //boss is to the left of pixie
       if (!myLabyrinth['b_${boss.x}_${boss.y}'].rightWallIsUp &&
-          !myLabyrinth['b_${pixie.x}_${pixie.y}'].downWallIsUp) {
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].upWallIsUp) {
         return true;
       }
       if (!myLabyrinth['b_${boss.x}_${boss.y}'].downWallIsUp &&
