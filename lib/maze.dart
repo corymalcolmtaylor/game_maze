@@ -440,7 +440,7 @@ class Maze {
     if (boss.x == pixie.x - 1 && boss.y == pixie.y + 1) {
       //boss is to the left of pixie
       if (!myLabyrinth['b_${boss.x}_${boss.y}'].rightWallIsUp &&
-          !myLabyrinth['b_${pixie.x}_${pixie.y}'].upWallIsUp) {
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].downWallIsUp) {
         return true;
       }
       if (!myLabyrinth['b_${boss.x}_${boss.y}'].downWallIsUp &&
@@ -450,10 +450,10 @@ class Maze {
     }
     if (boss.x == pixie.x - 1 && boss.y == pixie.y - 1) {
       if (!myLabyrinth['b_${boss.x}_${boss.y}'].rightWallIsUp &&
-          !myLabyrinth['b_${pixie.x}_${pixie.y}'].upWallIsUp) {
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].downWallIsUp) {
         return true;
       }
-      if (!myLabyrinth['b_${boss.x}_${boss.y}'].downWallIsUp &&
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].upWallIsUp &&
           !myLabyrinth['b_${pixie.x}_${pixie.y}'].leftWallIsUp) {
         return true;
       }
