@@ -14,10 +14,10 @@ class Room {
   static var badGuyHasMovedThisManyTimes = 0;
   var x = 0;
   var y = 0;
-  var left = true;
-  var right = true;
-  var down = true;
-  var up = true;
+  var leftWallIsUp = true;
+  var rightWallIsUp = true;
+  var upWallIsUp = true;
+  var downWallIsUp = true;
   var dir = '';
   var visited = false;
   var setid = 0;
@@ -50,6 +50,7 @@ class Pixie {
   var follow = false;
   Directions direction;
   var facing = Directions.left;
+  var isVisible = true;
 }
 
 class Maze {
@@ -200,7 +201,7 @@ class Maze {
       case Directions.down:
         {
           //is south wall up?
-          if (!myLabyrinth[location].down) {
+          if (!myLabyrinth[location].upWallIsUp) {
             return true;
           } else {
             return false;
@@ -210,7 +211,7 @@ class Maze {
       case Directions.up:
         {
           //is north wall up?
-          if (!myLabyrinth[location].up) {
+          if (!myLabyrinth[location].downWallIsUp) {
             return true;
           } else {
             return false;
@@ -219,7 +220,7 @@ class Maze {
         break;
       case Directions.right:
         {
-          if (!myLabyrinth[location].right) {
+          if (!myLabyrinth[location].rightWallIsUp) {
             return true;
           } else {
             return false;
@@ -228,7 +229,7 @@ class Maze {
         break;
       case Directions.left:
         {
-          if (!myLabyrinth[location].left) {
+          if (!myLabyrinth[location].leftWallIsUp) {
             return true;
           } else {
             return false;
@@ -243,7 +244,7 @@ class Maze {
       case Directions.down:
         {
           //is south wall up?
-          if (!myLabyrinth[pixie.location].down) {
+          if (!myLabyrinth[pixie.location].upWallIsUp) {
             return movePixieToXY(pixie, pixie.x, pixie.y + 1);
           } else {
             return false;
@@ -253,7 +254,7 @@ class Maze {
       case Directions.up:
         {
           //is north wall up?
-          if (!myLabyrinth[pixie.location].up) {
+          if (!myLabyrinth[pixie.location].downWallIsUp) {
             return movePixieToXY(pixie, pixie.x, pixie.y - 1);
           } else {
             return false;
@@ -262,7 +263,7 @@ class Maze {
         break;
       case Directions.right:
         {
-          if (!myLabyrinth[pixie.location].right) {
+          if (!myLabyrinth[pixie.location].rightWallIsUp) {
             return movePixieToXY(pixie, pixie.x + 1, pixie.y);
           } else {
             return false;
@@ -271,7 +272,7 @@ class Maze {
         break;
       case Directions.left:
         {
-          if (!myLabyrinth[pixie.location].left) {
+          if (!myLabyrinth[pixie.location].leftWallIsUp) {
             return movePixieToXY(pixie, pixie.x - 1, pixie.y);
           } else {
             return false;
@@ -359,7 +360,7 @@ class Maze {
     switch (direction) {
       case Directions.up:
         if (boss['y'] == pixie['y']) return true;
-        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].up) {
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].downWallIsUp) {
           boss['y'] = boss['y'] - 1;
           return thereExistsADirectPathFromBossToPixie(
               boss: boss, pixie: pixie, direction: direction);
@@ -369,7 +370,7 @@ class Maze {
         break;
       case Directions.down:
         if (boss['y'] == pixie['y']) return true;
-        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].down) {
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].upWallIsUp) {
           boss['y'] = boss['y'] + 1;
           return thereExistsADirectPathFromBossToPixie(
               boss: boss, pixie: pixie, direction: direction);
@@ -377,7 +378,7 @@ class Maze {
         break;
       case Directions.left:
         if (boss['x'] == pixie['x']) return true;
-        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].left) {
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].leftWallIsUp) {
           boss['x'] = boss['x'] - 1;
           return thereExistsADirectPathFromBossToPixie(
               boss: boss, pixie: pixie, direction: direction);
@@ -385,7 +386,7 @@ class Maze {
         break;
       case Directions.right:
         if (boss['x'] == pixie['x']) return true;
-        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].right) {
+        if (!myLabyrinth['b_${boss['x']}_${boss['y']}'].rightWallIsUp) {
           boss['x'] = boss['x'] + 1;
           return thereExistsADirectPathFromBossToPixie(
               boss: boss, pixie: pixie, direction: direction);
@@ -422,9 +423,86 @@ class Maze {
     return null;
   }
 
+  bool canThisBossSeeThisPixie({Pixie boss, Pixie pixie}) {
+    if (boss.x == pixie.x && boss.y == pixie.y) return true;
+    if (whichDirectionTheBossCanLookToSeeThePixie(boss: boss, pixie: pixie) !=
+        null) {
+      return true;
+    }
+    if (thisPixieIsJustAroundTheCornerFromThisBoss(
+        boss: player, pixie: pixie)) {
+      return true;
+    }
+    return false;
+  }
+
+  bool thisPixieIsJustAroundTheCornerFromThisBoss({Pixie boss, Pixie pixie}) {
+    if (boss.x == pixie.x - 1 && boss.y == pixie.y + 1) {
+      //boss is to the left of pixie
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].rightWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].upWallIsUp) {
+        return true;
+      }
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].downWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].leftWallIsUp) {
+        return true;
+      }
+    }
+    if (boss.x == pixie.x - 1 && boss.y == pixie.y - 1) {
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].rightWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].upWallIsUp) {
+        return true;
+      }
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].downWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].leftWallIsUp) {
+        return true;
+      }
+    }
+    //boss is to the right of pixie
+    if (boss.x == pixie.x + 1 && boss.y == pixie.y + 1) {
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].leftWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].upWallIsUp) {
+        return true;
+      }
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].downWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].rightWallIsUp) {
+        return true;
+      }
+    }
+    if (boss.x == pixie.x + 1 && boss.y == pixie.y - 1) {
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].leftWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].downWallIsUp) {
+        return true;
+      }
+      if (!myLabyrinth['b_${boss.x}_${boss.y}'].upWallIsUp &&
+          !myLabyrinth['b_${pixie.x}_${pixie.y}'].rightWallIsUp) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void setPixiesVisibility() {
+    lambs.forEach((el) {
+      if (el.condition == Condition.alive) {
+        if (canThisBossSeeThisPixie(boss: player, pixie: el)) {
+          el.isVisible = true;
+        } else {
+          el.isVisible = false;
+        }
+      }
+    });
+    if (canThisBossSeeThisPixie(boss: player, pixie: minotaur)) {
+      minotaur.isVisible = true;
+    } else {
+      minotaur.isVisible = false;
+    }
+  }
+
   ///
   /// if the boss can see another pixie  return the direction to that pixie,
-  /// else return direction
+  /// else return direction passed in
   ///
   Directions changeDirectionFromBossToNearestLamb(
       {Pixie boss, Directions direction}) {
@@ -513,16 +591,16 @@ class Maze {
 
   bool roomIsADeadEnd({String room}) {
     var walls = 0;
-    if (myLabyrinth[room].up) walls++;
-    if (myLabyrinth[room].down) walls++;
-    if (myLabyrinth[room].left) walls++;
-    if (myLabyrinth[room].right) walls++;
+    if (myLabyrinth[room].downWallIsUp) walls++;
+    if (myLabyrinth[room].upWallIsUp) walls++;
+    if (myLabyrinth[room].leftWallIsUp) walls++;
+    if (myLabyrinth[room].rightWallIsUp) walls++;
     return walls > 2;
   }
 
   bool roomIsAnIntersection({String room}) {
-    if ((!myLabyrinth[room].left || !myLabyrinth[room].right) &&
-        (!myLabyrinth[room].up || !myLabyrinth[room].down)) {
+    if ((!myLabyrinth[room].leftWallIsUp || !myLabyrinth[room].rightWallIsUp) &&
+        (!myLabyrinth[room].downWallIsUp || !myLabyrinth[room].upWallIsUp)) {
       return true;
     }
 
@@ -680,23 +758,6 @@ class Maze {
         }
       }
 
-      /** at the beginning of mino's turn: 
-       * if mino can see a lamb charge it! endTurn(pix, newDirection, follow).
-       * if there is a  "newDirection" set "dir" == newDirection
-       * if !follow and "dir" leads to last square then randomly reset "dir" 
-       * look in dir direction and if it sees a dead end randomly reset "dir"
-       * MoveInDirection(pix, dir ){ //move one squre in direction "dir"
-       * if mino is on an intersection !follow and can see a lamb in another direction 
-       ** then stop and remember newDirection, set "follow" = true, endTurn(pix, newDirection, follow=true).
-       * else if mino is on an intersection then 
-       ** there is a 50% chance to -- change direction and remember a newDirection and endTurn(pix, newDirection, follow=false).
-       * if hit a wall and can see a lamb endTurn(pix, newDirection, follow=true).
-       * else if hit a wall and cannot see a lamb endTurn(pix, newDirection, follow=false).
-       * else MoveInDirection(pix, dir )
-       * 
-       * }
-      */
-
       if (bossCannotSeeALamb &&
           thereIsADeadEndFromLocationInDirection(
               location: {'x': minotaur.x, 'y': minotaur.y},
@@ -837,7 +898,7 @@ class Maze {
     Next aNext = Next();
 
     var dir = '';
-    if ((x - 1) > 0 && (myLabyrinth['b_${x}_$y']?.left != null)) {
+    if ((x - 1) > 0 && (myLabyrinth['b_${x}_$y']?.leftWallIsUp != null)) {
       aNext.one = (myLabyrinth['b_${x}_$y'].setid -
               myLabyrinth['b_${(x - 1)}_$y'].setid)
           .abs()
@@ -847,7 +908,8 @@ class Maze {
       aNext.max = aNext.one;
       dir = 'b_${(x - 1)}_$y';
     }
-    if ((x + 1) <= _maxCol && (myLabyrinth['b_${x}_$y']?.right != null)) {
+    if ((x + 1) <= _maxCol &&
+        (myLabyrinth['b_${x}_$y']?.rightWallIsUp != null)) {
       aNext.two = (myLabyrinth['b_${x}_$y'].setid -
               myLabyrinth['b_${(x + 1)}_$y'].setid)
           .abs()
@@ -857,7 +919,7 @@ class Maze {
       aNext.max = aNext.two;
       dir = 'b_${(x + 1)}_$y';
     }
-    if ((y - 1) > 0 && myLabyrinth['b_${x}_$y']?.up != null) {
+    if ((y - 1) > 0 && myLabyrinth['b_${x}_$y']?.downWallIsUp != null) {
       aNext.three = (myLabyrinth['b_${x}_$y'].setid -
               myLabyrinth['b_${x}_${(y - 1)}'].setid)
           .abs()
@@ -867,7 +929,7 @@ class Maze {
       aNext.max = aNext.three;
       dir = 'b_${x}_${(y - 1)}';
     }
-    if ((y + 1) <= _maxRow && (myLabyrinth['b_${x}_$y']?.down != null)) {
+    if ((y + 1) <= _maxRow && (myLabyrinth['b_${x}_$y']?.upWallIsUp != null)) {
       aNext.four = (myLabyrinth['b_${x}_$y'].setid -
               myLabyrinth['b_${x}_${(y + 1)}'].setid)
           .abs()
@@ -924,23 +986,23 @@ class Maze {
 
   joinRooms(String room1, String room2) {
     if (myLabyrinth[room1].x == myLabyrinth[room2].x - 1) {
-      myLabyrinth[room1].right = false;
-      myLabyrinth[room2].left = false;
+      myLabyrinth[room1].rightWallIsUp = false;
+      myLabyrinth[room2].leftWallIsUp = false;
       myLabyrinth[room2].visited = true;
     }
     if (myLabyrinth[room1].x == myLabyrinth[room2].x + 1) {
-      myLabyrinth[room1].left = false;
-      myLabyrinth[room2].right = false;
+      myLabyrinth[room1].leftWallIsUp = false;
+      myLabyrinth[room2].rightWallIsUp = false;
       myLabyrinth[room2].visited = true;
     }
     if (myLabyrinth[room1].y == myLabyrinth[room2].y + 1) {
-      myLabyrinth[room1].up = false;
-      myLabyrinth[room2].down = false;
+      myLabyrinth[room1].downWallIsUp = false;
+      myLabyrinth[room2].upWallIsUp = false;
       myLabyrinth[room2].visited = true;
     }
     if (myLabyrinth[room1].y == myLabyrinth[room2].y - 1) {
-      myLabyrinth[room1].down = false;
-      myLabyrinth[room2].up = false;
+      myLabyrinth[room1].upWallIsUp = false;
+      myLabyrinth[room2].downWallIsUp = false;
       myLabyrinth[room2].visited = true;
     }
   }

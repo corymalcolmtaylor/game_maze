@@ -111,7 +111,7 @@ class _MazeAreaState extends State<MazeArea>
           textScaleFactor: 1.0,
           style: TextStyle(
               height: 1.0,
-              color: Colors.black,
+              color: pixie.isVisible ? Colors.black : Colors.transparent,
               fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
         ),
       ),
@@ -147,6 +147,7 @@ class _MazeAreaState extends State<MazeArea>
       if (lamb.condition == Condition.dead) {
         lamb.emoji = '💀';
       }
+
       icons.add(
         AnimatedPositioned(
           key: Key(lamb.key),
@@ -165,7 +166,7 @@ class _MazeAreaState extends State<MazeArea>
               textScaleFactor: 1.0,
               style: TextStyle(
                   height: 1.15,
-                  color: Colors.black,
+                  color: lamb.isVisible ? Colors.black : Colors.transparent,
                   fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
             ),
           ),
@@ -278,10 +279,10 @@ class _MazeAreaState extends State<MazeArea>
   Widget makeRoom(Room room) {
     /*  rooms shall be changed to square containers in rows of a set width */
     var floorColor = Colors.greenAccent;
-    var northColor = (room.up == true) ? Colors.green : floorColor;
-    var southColor = (room.down == true) ? Colors.green : floorColor;
-    var westColor = (room.left == true) ? Colors.green : floorColor;
-    var eastColor = (room.right == true) ? Colors.green : floorColor;
+    var northColor = (room.downWallIsUp == true) ? Colors.green : floorColor;
+    var southColor = (room.upWallIsUp == true) ? Colors.green : floorColor;
+    var westColor = (room.leftWallIsUp == true) ? Colors.green : floorColor;
+    var eastColor = (room.rightWallIsUp == true) ? Colors.green : floorColor;
 
     var endLeft = ((room.x - 1) * roomLength);
     var endTop = ((room.y - 1) * roomLength);
@@ -609,6 +610,7 @@ class _MazeAreaState extends State<MazeArea>
       );
     }
     // add sprites
+    maze.setPixiesVisibility();
 
     var llsprites = List.from(maze.myLabyrinth.entries.map(
       (el) => getAnimatedSpriteIconsForLambs(el.value),
@@ -619,6 +621,7 @@ class _MazeAreaState extends State<MazeArea>
       sprites.addAll(ll);
     });
     sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.player));
+
     sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.minotaur));
 
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
@@ -640,23 +643,18 @@ class _MazeAreaState extends State<MazeArea>
             ),
             GestureDetector(
               onHorizontalDragEnd: (dragDetails) {
-                print('onHorizontalDragEnd   ');
                 moveThePlayer(direction: dir);
               },
               onVerticalDragEnd: (dragDetails) {
-                print('onVerticalDragEnd   ');
                 moveThePlayer(direction: dir);
               },
               onVerticalDragUpdate: (dragDetails) {
-                print('onVerticalDragUpdate   ');
                 vertaicalDragUpdate(dragDetails);
               },
               onHorizontalDragUpdate: (dragDetails) {
-                print('onHorizontalDragUpdate   ');
                 horizontalDragUpdate(dragDetails);
               },
               onDoubleTap: () {
-                print('onDoubleTap   ');
                 handlePlayerHitAWall();
                 maze.whosTurnIsIt = Ilk.minotaur;
                 computerMove(delayMove: maze.player.delayComputerMove);
@@ -695,23 +693,18 @@ class _MazeAreaState extends State<MazeArea>
               Center(
                 child: GestureDetector(
                   onHorizontalDragEnd: (dragDetails) {
-                    print('onHorizontalDragEnd   ');
                     moveThePlayer(direction: dir);
                   },
                   onVerticalDragEnd: (dragDetails) {
-                    print('onVerticalDragEnd   ');
                     moveThePlayer(direction: dir);
                   },
                   onVerticalDragUpdate: (dragDetails) {
-                    print('onVerticalDragUpdate   ');
                     vertaicalDragUpdate(dragDetails);
                   },
                   onHorizontalDragUpdate: (dragDetails) {
-                    print('onHorizontalDragUpdate   ');
                     horizontalDragUpdate(dragDetails);
                   },
                   onDoubleTap: () {
-                    print('onDoubleTap   ');
                     handlePlayerHitAWall();
                     maze.whosTurnIsIt = Ilk.minotaur;
                     computerMove(delayMove: maze.player.delayComputerMove);
