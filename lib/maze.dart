@@ -35,7 +35,14 @@ class Pixie {
   var key = Utils.createCryptoRandomString();
   var location = '';
   var lastLocation = '';
-  var movesLeft = 1;
+  var _movesLeft = 1;
+
+  get movesLeft => _movesLeft;
+
+  set movesLeft(movesLeft) {
+    _movesLeft = movesLeft;
+  }
+
   var delayComputerMove = true;
   var x = 0;
   var y = 0;
@@ -57,10 +64,31 @@ class Pixie {
 class Maze {
   int _maxRow;
   int _maxCol;
-  bool gameIsOver = false;
-  String gameOverMessage = '';
+  bool _gameIsOver = false;
+
+  bool get gameIsOver => _gameIsOver;
+
+  set gameIsOver(bool gameIsOver) {
+    _gameIsOver = gameIsOver;
+  }
+
+  String _gameOverMessage = '';
+
+  String get gameOverMessage => _gameOverMessage;
+
+  set gameOverMessage(String gameOverMessage) {
+    _gameOverMessage = gameOverMessage;
+  }
+
   Difficulty difficulty = Difficulty.easy;
-  Ilk whosTurnIsIt = Ilk.player;
+  Ilk _whosTurnIsIt = Ilk.player;
+
+  Ilk get whosTurnIsIt => _whosTurnIsIt;
+
+  set whosTurnIsIt(Ilk whosTurnIsIt) {
+    _whosTurnIsIt = whosTurnIsIt;
+  }
+
   var rand = Math.Random.secure();
 
   bool isEasy() {
@@ -93,6 +121,15 @@ class Maze {
 
   var lambs = <Pixie>[];
 
+  void clearLocationsiOfLambsInThisCondition({Condition condition}) {
+    lambs.forEach((lamb) {
+      if (lamb.condition == condition) {
+        lamb.location = '';
+        lamb.lastLocation = '';
+      }
+    });
+  }
+
   // create and initialize the labyrinth
   // squares named b_x_y eg b_1_3 for square A3 on a chess board
   // each square starts as its own set and has its own number; eg 1-64
@@ -116,6 +153,12 @@ class Maze {
         myLabyrinth['b_${xloop}_$yloop'].y = yloop;
       }
     }
+  }
+
+  void preparePlayerForATurn() {
+    player.movesLeft = playerMoves;
+    player.delayComputerMove = true;
+    whosTurnIsIt = Ilk.player;
   }
 
   bool bossGoHandleAnyLambsAtYourLocation({Pixie boss}) {
@@ -443,8 +486,8 @@ class Maze {
   }
 
   bool thisPixieIsJustAroundTheCornerFromThisBoss({Pixie boss, Pixie pixie}) {
-    var bossroom = myLabyrinth['b_${boss.x}_${boss.y}'];
-    var pixroom = myLabyrinth['b_${pixie.x}_${pixie.y}'];
+    //var bossroom = myLabyrinth['b_${boss.x}_${boss.y}'];
+    //var pixroom = myLabyrinth['b_${pixie.x}_${pixie.y}'];
     if (boss.x == pixie.x - 1 && boss.y == pixie.y + 1) {
       //boss is to the left of pixie
       if (!myLabyrinth['b_${boss.x}_${boss.y}'].rightWallIsUp &&
@@ -803,7 +846,7 @@ class Maze {
         }
       }
     }
-
+    whosTurnIsIt = Ilk.lamb;
     return minotaurHasMovedAtLeastOnceThisTurn();
   }
 

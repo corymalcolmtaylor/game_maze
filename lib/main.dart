@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 
 import 'dart:io' show Platform;
+import 'package:url_launcher/url_launcher.dart';
 
 import 'maze.dart';
 import 'w_StartNewGame.dart';
 import 'w_MazeBackButton.dart';
 import './utils.dart';
 
-void main() => runApp(MyApp());
+//void main() => runApp(MyApp());
+void main() => runApp(
+      MaterialApp(
+        title: Utils.TITLE,
+        home: MyApp(),
+      ),
+    );
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final title = 'Alice and the Hedge Maze';
-
     return MaterialApp(
-      title: title,
+      title: Utils.TITLE,
       theme: ThemeData(
           brightness: Brightness.dark,
           textTheme: TextTheme(
@@ -24,10 +29,88 @@ class MyApp extends StatelessWidget {
               body1: TextStyle(color: Colors.cyanAccent))),
       home: Scaffold(
         appBar: AppBar(
-          title: Text(title, style: TextStyle(color: Colors.cyanAccent)),
+          centerTitle: true,
+          title: Text(Utils.TITLE, style: TextStyle(color: Colors.cyanAccent)),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.info),
+              tooltip: 'Information',
+              onPressed: () {
+                showInformation(context);
+                print('icon button');
+              },
+            ),
+          ],
         ),
         body: MazeArea(),
       ),
+    );
+  }
+
+  Future<void> _launchURL() async {
+    const url =
+        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=Notes';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  Future<void> showInformation(BuildContext context) async {
+    Text message = Text(
+        'About ${Utils.TITLE}\n' +
+            'If you have any suggestions or find a bug please let us know.\n\n' +
+            'Developer email:',
+        style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
+    Text emailText = Text('thesoftwaretaylor@gmail.com',
+        style: TextStyle(
+            fontSize: 18,
+            decoration: TextDecoration.underline,
+            color: Colors.cyanAccent));
+    GestureDetector emaillink = GestureDetector(
+      child: emailText,
+      onTap: () {
+        print('email tap');
+        _launchURL();
+      },
+    );
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          title: Center(
+            child: Text(
+              'Information',
+              style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[message, emaillink],
+            ),
+          ),
+          actions: <Widget>[
+            OutlineButton(
+              shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(30.0),
+              ),
+              color: Colors.cyanAccent,
+              borderSide: BorderSide(
+                  color: Colors.cyan,
+                  style: BorderStyle.solid,
+                  width: Utils.WALLTHICKNESS),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK',
+                  style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -48,7 +131,7 @@ class _MazeAreaState extends State<MazeArea>
   static const animDurationMilliSeconds = 700;
 
   var sprites = <Widget>[];
-  final wallThickness = Utils.WALLTHICKNESS;
+
   var roomLength = 0.0;
   var maxWidth = 0.0;
 
@@ -76,9 +159,6 @@ class _MazeAreaState extends State<MazeArea>
     var endTop = 0.0;
     var endLeft = 0.0;
 
-    endLeft = whatIsTheLeftOffsetOfThisPixie(pixie: pixie);
-    endTop = whatIsTheTopOffsetOfThisPixie(pixie: pixie);
-
     var radians = 0.0;
     if (pixie.lastX > 0 && pixie.x < pixie.lastX) {
       radians = 3.0;
@@ -92,15 +172,61 @@ class _MazeAreaState extends State<MazeArea>
       }
     }
 
+    endLeft = whatIsTheLeftOffsetOfThisPixie(pixie: pixie);
+    endTop = whatIsTheTopOffsetOfThisPixie(pixie: pixie);
+
+    return getAnimatedPositionedForThisPixie(
+        pixie: pixie, endLeft: endLeft, endTop: endTop, radians: radians);
+  }
+
+  List<AnimatedPositioned> getAnimatedSpriteIconsForLambs(Room room) {
+    var endTop = 0.0;
+    var endLeft = 0.0;
+    List<AnimatedPositioned> icons = [];
+
+    var lambs = maze.lambs.where(
+      (el) => el.location == 'b_${room.x}_${room.y}',
+    );
+
+    lambs.forEach((pixie) {
+      var radians = 0.0;
+      if (pixie.x != pixie.lastX) {
+        if (pixie.x > pixie.lastX) {
+          radians = 3.0;
+          // print('set rad to 3 for ${lamb.emoji} ${lamb.x} > ${lamb.lastX}');
+          pixie.facing = Directions.right;
+        } else {
+          radians = 6.0;
+          //print('set rad to 6 for ${lamb.emoji}  ${lamb.x} > ${lamb.lastX}');
+          pixie.facing = Directions.left;
+        }
+      }
+
+      if (pixie.condition == Condition.dead) {
+        pixie.emoji = '💀';
+      }
+
+      endLeft = whatIsTheLeftOffsetOfThisPixie(pixie: pixie);
+      endTop = whatIsTheTopOffsetOfThisPixie(pixie: pixie);
+
+      icons.add(
+        getAnimatedPositionedForThisPixie(
+            pixie: pixie, endLeft: endLeft, endTop: endTop, radians: radians),
+      );
+    });
+    return icons;
+  }
+
+  AnimatedPositioned getAnimatedPositionedForThisPixie(
+      {Pixie pixie, double endLeft, double endTop, double radians}) {
     return AnimatedPositioned(
       key: Key(pixie.key),
       left: endLeft,
       top: endTop,
-      height: roomLength,
+      height: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
       curve: Curves.linear,
       duration: Duration(milliseconds: animDurationMilliSeconds),
       child: Transform(
-        // Transform widget
         transform: Matrix4.identity()
           ..setEntry(1, 1, 1) // perspective
           ..rotateX(0)
@@ -108,7 +234,6 @@ class _MazeAreaState extends State<MazeArea>
         alignment: FractionalOffset.center,
         child: Text(
           pixie.emoji,
-          overflow: TextOverflow.visible,
           textScaleFactor: 1.0,
           style: TextStyle(
               height: 1.0,
@@ -121,74 +246,18 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  List<AnimatedPositioned> getAnimatedSpriteIconsForLambs(Room room) {
-    var endTop = 0.0;
-    var endLeft = 0.0;
-    List<AnimatedPositioned> icons = [];
-
-    var lambs = maze.lambs.where(
-      (el) => el.location == 'b_${room.x}_${room.y}',
-    );
-
-    lambs.forEach((lamb) {
-      var xRadians = 0.0;
-      if (lamb.x != lamb.lastX) {
-        if (lamb.x > lamb.lastX) {
-          xRadians = 3.0;
-          // print('set rad to 3 for ${lamb.emoji} ${lamb.x} > ${lamb.lastX}');
-          lamb.facing = Directions.right;
-        } else {
-          xRadians = 6.0;
-          //print('set rad to 6 for ${lamb.emoji}  ${lamb.x} > ${lamb.lastX}');
-          lamb.facing = Directions.left;
-        }
-      }
-
-      endLeft = whatIsTheLeftOffsetOfThisPixie(pixie: lamb);
-      endTop = whatIsTheTopOffsetOfThisPixie(pixie: lamb);
-
-      if (lamb.condition == Condition.dead) {
-        lamb.emoji = '💀';
-      }
-
-      icons.add(
-        AnimatedPositioned(
-          key: Key(lamb.key),
-          left: endLeft,
-          top: endTop,
-          height: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb),
-          duration: Duration(milliseconds: animDurationMilliSeconds),
-          child: Transform(
-            transform: Matrix4.identity()
-              ..setEntry(1, 1, 1) // perspective
-              ..rotateX(0)
-              ..rotateY(xRadians),
-            alignment: FractionalOffset.center,
-            child: Text(
-              lamb.emoji,
-              textScaleFactor: 1.0,
-              style: TextStyle(
-                  height: 1.15,
-                  color: maze.isEasy() || lamb.isVisible
-                      ? Colors.black
-                      : Colors.transparent,
-                  fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: lamb)),
-            ),
-          ),
-        ),
-      );
-    });
-    return icons;
-  }
-
   double howMuchToReduceTheFontSizeForThisPixie({Pixie pixie}) {
     var reduceSizeBy = 2.0;
     if (pixie.ilk == Ilk.lamb) reduceSizeBy += 2;
-    return reduceSizeBy * wallThickness;
+    return reduceSizeBy * Utils.WALLTHICKNESS;
   }
 
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    return roomLength - howMuchToReduceTheFontSizeForThisPixie(pixie: pixie);
+    if (pixie.ilk == Ilk.lamb) {
+      return roomLength - howMuchToReduceTheFontSizeForThisPixie(pixie: pixie);
+    } else {
+      return roomLength;
+    }
   }
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
@@ -200,7 +269,7 @@ class _MazeAreaState extends State<MazeArea>
       return retval +
           (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 4);
     }
-    return retval + wallThickness;
+    return retval + Utils.WALLTHICKNESS;
   }
 
   double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
@@ -231,7 +300,7 @@ class _MazeAreaState extends State<MazeArea>
       lambDelay = animDurationMilliSeconds;
       Future.delayed(Duration(milliseconds: minoDelay), () {
         maze.moveMinotaur();
-        maze.whosTurnIsIt = Ilk.lamb;
+
         setState(() {
           // just force redraw
         });
@@ -240,12 +309,7 @@ class _MazeAreaState extends State<MazeArea>
 
     Future.delayed(Duration(milliseconds: minoDelay + lambDelay), () {
       var gameOver = maze.moveLambs();
-      maze.lambs.forEach((lamb) {
-        if (lamb.condition == Condition.dead) {
-          lamb.location = '';
-          lamb.lastLocation = '';
-        }
-      });
+      maze.clearLocationsiOfLambsInThisCondition(condition: Condition.dead);
       setState(() {
         // just force redraw
       });
@@ -253,7 +317,7 @@ class _MazeAreaState extends State<MazeArea>
       if (gameOver) {
         handleEndOfGame();
       } else {
-        preparePlayerForATurn();
+        maze.preparePlayerForATurn();
       }
     });
   }
@@ -274,12 +338,6 @@ class _MazeAreaState extends State<MazeArea>
     }
     maze.gameOverMessage = str;
     showGameOverMessage();
-  }
-
-  void preparePlayerForATurn() {
-    maze.player.movesLeft = maze.playerMoves;
-    maze.player.delayComputerMove = true;
-    maze.whosTurnIsIt = Ilk.player;
   }
 
   Widget makeRoom(Room room) {
@@ -303,10 +361,10 @@ class _MazeAreaState extends State<MazeArea>
         decoration: BoxDecoration(
           color: floorColor,
           border: Border(
-            bottom: BorderSide(color: southColor, width: wallThickness),
-            top: BorderSide(color: northColor, width: wallThickness),
-            right: BorderSide(color: eastColor, width: wallThickness),
-            left: BorderSide(color: westColor, width: wallThickness),
+            bottom: BorderSide(color: southColor, width: Utils.WALLTHICKNESS),
+            top: BorderSide(color: northColor, width: Utils.WALLTHICKNESS),
+            right: BorderSide(color: eastColor, width: Utils.WALLTHICKNESS),
+            left: BorderSide(color: westColor, width: Utils.WALLTHICKNESS),
           ),
         ),
       ),
@@ -349,7 +407,7 @@ class _MazeAreaState extends State<MazeArea>
               borderSide: BorderSide(
                   color: Colors.cyan,
                   style: BorderStyle.solid,
-                  width: wallThickness),
+                  width: Utils.WALLTHICKNESS),
               onPressed: () {
                 Navigator.of(context).pop();
                 showGameOverMessage();
@@ -523,7 +581,7 @@ class _MazeAreaState extends State<MazeArea>
                               borderSide: BorderSide(
                                   color: Colors.cyan,
                                   style: BorderStyle.solid,
-                                  width: wallThickness),
+                                  width: Utils.WALLTHICKNESS),
                               onPressed: () {
                                 setState(() {
                                   Navigator.of(context).pop();
@@ -574,9 +632,9 @@ class _MazeAreaState extends State<MazeArea>
         maxWidth = maxWidth * 0.85;
       }
     }
-    roomLength =
-        (((maxWidth.floor() - (wallThickness * (maze.maxRow))) / maze.maxRow))
-            .floorToDouble();
+    roomLength = (((maxWidth.floor() - (Utils.WALLTHICKNESS * (maze.maxRow))) /
+            maze.maxRow))
+        .floorToDouble();
   }
 
   Widget defineTopRow() {
@@ -592,7 +650,7 @@ class _MazeAreaState extends State<MazeArea>
               borderSide: BorderSide(
                   color: Colors.cyan,
                   style: BorderStyle.solid,
-                  width: wallThickness),
+                  width: Utils.WALLTHICKNESS),
               onPressed: () {
                 setState(() {
                   handleEndOfGame();
@@ -721,6 +779,7 @@ class _MazeAreaState extends State<MazeArea>
               onDoubleTap: () {
                 handlePlayerHitAWall();
                 maze.whosTurnIsIt = Ilk.minotaur;
+
                 computerMove(delayMove: maze.player.delayComputerMove);
               },
               child: SizedBox(
@@ -823,12 +882,7 @@ class _MazeAreaState extends State<MazeArea>
     if (maze.whosTurnIsIt != Ilk.player) return false;
     if (maze.player.movesLeft <= 0) return true;
 
-    maze.lambs.forEach((lamb) {
-      if (lamb.condition == Condition.freed) {
-        lamb.location = '';
-        lamb.lastLocation = '';
-      }
-    });
+    maze.clearLocationsiOfLambsInThisCondition(condition: Condition.freed);
 
     if (maze.moveThisSpriteInThisDirection(maze.player, direction)) {
       setState(() {

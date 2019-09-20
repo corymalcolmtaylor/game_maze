@@ -9,6 +9,7 @@ class Utils {
   static const WALLTHICKNESS = 2.0;
   static const EASY = 'Easy';
   static const HARD = 'Hard';
+  static const TITLE = 'Alice and the Hedge Maze';
 
   static final Random _random = Random.secure();
 
