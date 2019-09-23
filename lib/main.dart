@@ -134,6 +134,8 @@ class _MazeAreaState extends State<MazeArea>
 
   var roomLength = 0.0;
   var maxWidth = 0.0;
+  var hDelta = 0.0;
+  var vDelta = 0.0;
 
   @override
   void initState() {
@@ -247,28 +249,17 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   double howMuchToReduceTheFontSizeForThisPixie({Pixie pixie}) {
-    var reduceSizeBy = 2.0;
-    if (pixie.ilk == Ilk.lamb) reduceSizeBy += 2;
+    var reduceSizeBy = 4.0;
     return reduceSizeBy * Utils.WALLTHICKNESS;
   }
 
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    if (pixie.ilk == Ilk.lamb) {
-      return roomLength - howMuchToReduceTheFontSizeForThisPixie(pixie: pixie);
-    } else {
-      return roomLength;
-    }
+    return roomLength - howMuchToReduceTheFontSizeForThisPixie(pixie: pixie);
   }
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.y - 1) * roomLength);
-    if (pixie.ilk != Ilk.lamb) {
-      retval += roomLength / 12;
-    }
-    if (Platform.isAndroid) {
-      return retval +
-          (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 4);
-    }
+    retval += roomLength / 12;
     return retval + Utils.WALLTHICKNESS;
   }
 
@@ -278,8 +269,7 @@ class _MazeAreaState extends State<MazeArea>
       return retval +
           (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 2);
     } else {
-      return retval +
-          (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 4);
+      return retval;
     }
   }
 
@@ -763,38 +753,12 @@ class _MazeAreaState extends State<MazeArea>
                 ],
               ),
             ),
-            GestureDetector(
-              onHorizontalDragEnd: (dragDetails) {
-                moveThePlayer(direction: dir);
-              },
-              onVerticalDragEnd: (dragDetails) {
-                moveThePlayer(direction: dir);
-              },
-              onVerticalDragUpdate: (dragDetails) {
-                vertaicalDragUpdate(dragDetails);
-              },
-              onHorizontalDragUpdate: (dragDetails) {
-                horizontalDragUpdate(dragDetails);
-              },
-              onDoubleTap: () {
-                handlePlayerHitAWall();
-                maze.whosTurnIsIt = Ilk.minotaur;
-
-                computerMove(delayMove: maze.player.delayComputerMove);
-              },
-              child: SizedBox(
-                width: maxWidth,
-                height: maxWidth,
-                child: Stack(
-                    overflow: Overflow.visible, children: [...trs, ...sprites]),
-              ),
-            ),
+            buildCenter(trs, maxWidth),
           ],
         ),
       );
     } else {
       //print('build in portrait');
-
       return Center(
         child: Container(
           margin: EdgeInsets.symmetric(vertical: 5),
@@ -813,39 +777,48 @@ class _MazeAreaState extends State<MazeArea>
                   ),
                 ],
               ),
-              Center(
-                child: GestureDetector(
-                  onHorizontalDragEnd: (dragDetails) {
-                    moveThePlayer(direction: dir);
-                  },
-                  onVerticalDragEnd: (dragDetails) {
-                    moveThePlayer(direction: dir);
-                  },
-                  onVerticalDragUpdate: (dragDetails) {
-                    vertaicalDragUpdate(dragDetails);
-                  },
-                  onHorizontalDragUpdate: (dragDetails) {
-                    horizontalDragUpdate(dragDetails);
-                  },
-                  onDoubleTap: () {
-                    handlePlayerHitAWall();
-                    maze.whosTurnIsIt = Ilk.minotaur;
-                    computerMove(delayMove: maze.player.delayComputerMove);
-                  },
-                  child: SizedBox(
-                    width: roomLength * numRows,
-                    height: roomLength * numRows,
-                    child: Stack(
-                        overflow: Overflow.visible,
-                        children: [...trs, ...sprites]),
-                  ),
-                ),
-              ),
+              Center(child: buildCenter(trs, roomLength * numRows)),
             ],
           ),
         ),
       );
     }
+  }
+
+  GestureDetector buildCenter(List<Widget> trs, double stackSize) {
+    return GestureDetector(
+      onHorizontalDragEnd: (dragDetails) {
+        if (hDelta.abs() > 25) {
+          moveThePlayer(direction: dir);
+        }
+        print('hdelta ${hDelta}');
+        hDelta = 0;
+      },
+      onVerticalDragEnd: (dragDetails) {
+        if (vDelta.abs() > 25) {
+          moveThePlayer(direction: dir);
+        }
+        print('vdelta ${vDelta}');
+        vDelta = 0;
+      },
+      onVerticalDragUpdate: (dragDetails) {
+        vertaicalDragUpdate(dragDetails);
+      },
+      onHorizontalDragUpdate: (dragDetails) {
+        horizontalDragUpdate(dragDetails);
+      },
+      onDoubleTap: () {
+        handlePlayerHitAWall();
+        maze.whosTurnIsIt = Ilk.minotaur;
+        computerMove(delayMove: maze.player.delayComputerMove);
+      },
+      child: SizedBox(
+        width: stackSize,
+        height: stackSize,
+        child:
+            Stack(overflow: Overflow.visible, children: [...trs, ...sprites]),
+      ),
+    );
   }
 
   void moveThePlayer({Directions direction}) {
@@ -859,6 +832,7 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void horizontalDragUpdate(DragUpdateDetails dragDetails) {
+    hDelta += dragDetails.primaryDelta;
     if (dragDetails.primaryDelta > 0) {
       dir = Directions.right;
     } else {
@@ -869,6 +843,7 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void vertaicalDragUpdate(DragUpdateDetails dragDetails) {
+    vDelta += dragDetails.primaryDelta;
     if (dragDetails.primaryDelta > 0) {
       dir = Directions.down;
     } else if (dragDetails.primaryDelta < 0) {
