@@ -419,7 +419,7 @@ class _MazeAreaState extends State<MazeArea>
     const GAMEOVER = 'Game Over';
     var title = GAMEOVER;
     var msg = maze.gameOverMessage;
-    const MAZEDIMENSIONS = 'Maze Dimensions';
+    const MAZEDIMENSIONS = 'Maze Size';
 
     if (!maze.gameIsOver) {
       title = NEWGAME;
@@ -435,6 +435,7 @@ class _MazeAreaState extends State<MazeArea>
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
             backgroundColor: Colors.transparent,
+            contentPadding: EdgeInsets.all(0),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -451,14 +452,14 @@ class _MazeAreaState extends State<MazeArea>
                           style:
                               TextStyle(fontSize: 22, color: Colors.cyanAccent),
                         ),
-                      Text(
-                        MAZEDIMENSIONS,
-                        style:
-                            TextStyle(fontSize: 22, color: Colors.cyanAccent),
-                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
+                          Text(
+                            MAZEDIMENSIONS,
+                            style: TextStyle(
+                                fontSize: 22, color: Colors.cyanAccent),
+                          ),
                           Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Container(
@@ -473,29 +474,35 @@ class _MazeAreaState extends State<MazeArea>
                               child: Padding(
                                 padding: const EdgeInsets.all(12.0),
                                 child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    isDense: true,
-                                    value: numRowsInner.toString(),
-                                    onChanged: (String newValue) {
-                                      numRowsInner = int.parse(newValue);
-                                      numRows = numRowsInner;
-                                      setState(() {
-                                        print('new val == $numRowsInner');
-                                      });
-                                    },
-                                    items: <String>['8', '10', '12', '14']
-                                        .map<DropdownMenuItem<String>>(
-                                            (String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          '${value}x$value',
-                                          style: TextStyle(
-                                              fontSize: 22,
-                                              color: Colors.cyanAccent),
-                                        ),
-                                      );
-                                    }).toList(),
+                                  child: new Theme(
+                                    data: Theme.of(context).copyWith(
+                                      canvasColor: Colors.black87,
+                                    ),
+                                    child: DropdownButton<String>(
+                                      isDense: true,
+                                      value: numRowsInner.toString(),
+                                      onChanged: (String newValue) {
+                                        numRowsInner = int.parse(newValue);
+                                        numRows = numRowsInner;
+                                        setState(() {
+                                          print('new val == $numRowsInner');
+                                        });
+                                      },
+                                      items: <String>['8', '10', '12', '14']
+                                          .map<DropdownMenuItem<String>>(
+                                              (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            '${value}x$value',
+                                            textScaleFactor: 1.0,
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                color: Colors.cyanAccent),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -503,14 +510,14 @@ class _MazeAreaState extends State<MazeArea>
                           ),
                         ],
                       ),
-                      Text(
-                        'Difficulty',
-                        style:
-                            TextStyle(fontSize: 22, color: Colors.cyanAccent),
-                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
+                          Text(
+                            'Difficulty',
+                            style: TextStyle(
+                                fontSize: 22, color: Colors.cyanAccent),
+                          ),
                           Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Container(
@@ -525,32 +532,38 @@ class _MazeAreaState extends State<MazeArea>
                               child: Padding(
                                 padding: const EdgeInsets.all(12.0),
                                 child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    isDense: true,
-                                    value: maze.difficulty == Difficulty.easy
-                                        ? Utils.EASY
-                                        : Utils.HARD,
-                                    onChanged: (String newValue) {
-                                      maze.difficulty = newValue == Utils.EASY
-                                          ? Difficulty.easy
-                                          : Difficulty.hard;
-                                      setState(() {
-                                        print(' ');
-                                      });
-                                    },
-                                    items: <String>[Utils.EASY, Utils.HARD]
-                                        .map<DropdownMenuItem<String>>(
-                                            (String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: TextStyle(
-                                              fontSize: 22,
-                                              color: Colors.cyanAccent),
-                                        ),
-                                      );
-                                    }).toList(),
+                                  child: new Theme(
+                                    data: Theme.of(context).copyWith(
+                                      canvasColor: Colors.black87,
+                                    ),
+                                    child: DropdownButton<String>(
+                                      isDense: true,
+                                      value: maze.difficulty == Difficulty.easy
+                                          ? Utils.EASY
+                                          : Utils.HARD,
+                                      onChanged: (String newValue) {
+                                        maze.difficulty = newValue == Utils.EASY
+                                            ? Difficulty.easy
+                                            : Difficulty.hard;
+                                        setState(() {
+                                          print(' ');
+                                        });
+                                      },
+                                      items: <String>[Utils.EASY, Utils.HARD]
+                                          .map<DropdownMenuItem<String>>(
+                                              (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            textScaleFactor: 1.0,
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                color: Colors.cyanAccent),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
                               ),
