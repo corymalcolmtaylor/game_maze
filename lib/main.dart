@@ -625,10 +625,10 @@ class _MazeAreaState extends State<MazeArea>
     maxWidth = MediaQuery.of(context).size.width;
     var maxHeight = MediaQuery.of(context).size.height;
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      maxWidth = MediaQuery.of(context).size.height * 0.75;
+      maxWidth = MediaQuery.of(context).size.height * 0.85;
     } else {
       if (maxWidth / maxHeight > 0.66) {
-        maxWidth = maxWidth * 0.85;
+        maxWidth = maxWidth * 0.95;
       }
     }
     roomLength = (((maxWidth.floor() - (Utils.WALLTHICKNESS * (maze.maxRow))) /
