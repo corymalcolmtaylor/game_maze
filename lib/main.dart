@@ -195,11 +195,9 @@ class _MazeAreaState extends State<MazeArea>
       if (pixie.x != pixie.lastX) {
         if (pixie.x > pixie.lastX) {
           radians = 3.0;
-          // print('set rad to 3 for ${lamb.emoji} ${lamb.x} > ${lamb.lastX}');
           pixie.facing = Directions.right;
         } else {
           radians = 6.0;
-          //print('set rad to 6 for ${lamb.emoji}  ${lamb.x} > ${lamb.lastX}');
           pixie.facing = Directions.left;
         }
       }
@@ -236,7 +234,7 @@ class _MazeAreaState extends State<MazeArea>
         alignment: FractionalOffset.center,
         child: Text(
           pixie.emoji,
-          textScaleFactor: 1.0,
+          textScaleFactor: 0.8,
           style: TextStyle(
               height: 1.0,
               color: maze.isEasy() || pixie.isVisible
@@ -248,29 +246,19 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  double howMuchToReduceTheFontSizeForThisPixie({Pixie pixie}) {
-    var reduceSizeBy = 4.0;
-    return reduceSizeBy * Utils.WALLTHICKNESS;
-  }
-
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    return roomLength - howMuchToReduceTheFontSizeForThisPixie(pixie: pixie);
+    return roomLength;
   }
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.y - 1) * roomLength);
-    retval += roomLength / 12;
+    retval += roomLength * 0.1;
     return retval + Utils.WALLTHICKNESS;
   }
 
   double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.x - 1) * roomLength);
-    if (Platform.isIOS) {
-      return retval +
-          (howMuchToReduceTheFontSizeForThisPixie(pixie: pixie) / 2);
-    } else {
-      return retval;
-    }
+    return retval + Utils.WALLTHICKNESS;
   }
 
   void computerMove({bool delayMove}) async {
@@ -636,8 +624,6 @@ class _MazeAreaState extends State<MazeArea>
   void setSizes() {
     maxWidth = MediaQuery.of(context).size.width;
     var maxHeight = MediaQuery.of(context).size.height;
-    // print(
-    //    'setsizes width = $maxWidth hieght = $maxHeight ${maxWidth / maxHeight}');
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
       maxWidth = MediaQuery.of(context).size.height * 0.75;
     } else {
@@ -740,11 +726,6 @@ class _MazeAreaState extends State<MazeArea>
   Widget build(BuildContext context) {
     setSizes();
     var trs = <Widget>[];
-    if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      //print('build in landscape');
-    } else {
-      //print('build in portrait');
-    }
 
     for (int i = 1; i <= maze.maxRow; i++) {
       trs.addAll(
@@ -774,7 +755,6 @@ class _MazeAreaState extends State<MazeArea>
     sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.minotaur));
 
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      //print('build in landscape');
       return Center(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -795,7 +775,6 @@ class _MazeAreaState extends State<MazeArea>
         ),
       );
     } else {
-      //print('build in portrait');
       return Center(
         child: Container(
           margin: EdgeInsets.symmetric(vertical: 5),
@@ -828,14 +807,12 @@ class _MazeAreaState extends State<MazeArea>
         if (hDelta.abs() > 25) {
           moveThePlayer(direction: dir);
         }
-        print('hdelta ${hDelta}');
         hDelta = 0;
       },
       onVerticalDragEnd: (dragDetails) {
         if (vDelta.abs() > 25) {
           moveThePlayer(direction: dir);
         }
-        print('vdelta ${vDelta}');
         vDelta = 0;
       },
       onVerticalDragUpdate: (dragDetails) {
@@ -863,8 +840,6 @@ class _MazeAreaState extends State<MazeArea>
       if (maze.whosTurnIsIt == Ilk.minotaur) {
         computerMove(delayMove: maze.player.delayComputerMove);
       }
-    } else {
-      //print('player not moved');
     }
   }
 
