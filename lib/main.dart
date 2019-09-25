@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.black54,
           title: Center(
             child: Text(
               'Information',
@@ -305,7 +305,10 @@ class _MazeAreaState extends State<MazeArea>
       });
 
       if (gameOver) {
-        handleEndOfGame();
+        Future.delayed(Duration(milliseconds: 1 * animDurationMilliSeconds),
+            () {
+          handleEndOfGame();
+        });
       } else {
         maze.preparePlayerForATurn();
       }
@@ -318,7 +321,7 @@ class _MazeAreaState extends State<MazeArea>
       str = 'The Goblin got Alice! ️😞\n';
     } else {
       if (maze.player.savedLambs > maze.player.lostLambs) {
-        str = 'Alice ${maze.player.savedLambs} rescued!\nYou WIN! 😀';
+        str = 'You rescued ${maze.player.savedLambs}!\nYou WIN! 😀';
       } else if (maze.player.savedLambs == maze.player.lostLambs) {
         str =
             '${maze.player.savedLambs} rescued and captured.\nResult is a draw. 😐';
@@ -363,20 +366,24 @@ class _MazeAreaState extends State<MazeArea>
 
   Future<void> showRules() async {
     Text message = Text(
-        'Swipe the maze to move Alice 👧 around the maze one step at a time.\n' +
-            'She gets three moves per turn.\n' +
+        'Swipe verticaly or horizontally on the maze to move Alice 👧.' +
+            'She moves one step at a time and gets three per turn.\n' +
             'End her turn early by moving into a wall or double tapping.\n' +
-            'Rescue the animals by getting Alice to them before they get captured by the goblin 👺.\n' +
-            'If the goblin captures Alice the game ends but otherwise ' +
-            'if she saves more animals than the goblin captures you win.\n' +
-            'Difficulty mode Hard means that you cannot see other characters until Alice can.',
+            'Rescue the animals by getting Alice to them before they get ' +
+            'captured by the goblin 👺.\n' +
+            'If the goblin captures Alice the game ends in defeat but otherwise ' +
+            'if you save more animals than the goblin captures you win.\n' +
+            'Difficulty modes:\n' +
+            'Easy is the default mode, in Easy mode you can see everything.\n' +
+            'Hard mode means that you cannot see the other ' +
+            'characters until Alice can.',
         style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.black54,
           title: Center(
             child: Text(
               'Rules',
@@ -434,7 +441,7 @@ class _MazeAreaState extends State<MazeArea>
         var numRowsInner = numRows;
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.black54,
             contentPadding: EdgeInsets.all(0),
             content: SingleChildScrollView(
               child: Column(
@@ -443,9 +450,11 @@ class _MazeAreaState extends State<MazeArea>
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(title,
-                          style: TextStyle(
-                              fontSize: 28, color: Colors.cyanAccent)),
+                      Text(
+                        title,
+                        style:
+                            TextStyle(fontSize: 28, color: Colors.cyanAccent),
+                      ),
                       if (msg != '')
                         Text(
                           msg,
@@ -557,6 +566,7 @@ class _MazeAreaState extends State<MazeArea>
                                           child: Text(
                                             value,
                                             textScaleFactor: 1.0,
+                                            overflow: TextOverflow.visible,
                                             style: TextStyle(
                                                 fontSize: 24,
                                                 color: Colors.cyanAccent),
@@ -706,6 +716,20 @@ class _MazeAreaState extends State<MazeArea>
                   )),
             ],
           ),
+          Row(
+            children: <Widget>[
+              Text(
+                'Moves left:',
+                style: TextStyle(fontSize: 22),
+              ),
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
+                  child: Text(
+                    '${maze.player.movesLeft}',
+                    style: TextStyle(fontSize: 22),
+                  )),
+            ],
+          )
         ],
       ),
     );
