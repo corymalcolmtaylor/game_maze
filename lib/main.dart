@@ -262,9 +262,9 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   void computerMove({bool delayMove}) async {
-    if (maze.gameIsOver ||
+    if (maze.gameIsOver() ||
         !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
-      maze.gameIsOver = true;
+      maze.setGameIsOver(true);
       handleEndOfGame();
       return;
     }
@@ -274,7 +274,7 @@ class _MazeAreaState extends State<MazeArea>
       minoDelay = animDurationMilliSeconds;
     }
     var lambDelay = 0;
-    if (maze.whosTurnIsIt == Ilk.minotaur) {
+    if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
       lambDelay = animDurationMilliSeconds;
       Future.delayed(Duration(milliseconds: minoDelay), () {
         maze.moveMinotaur();
@@ -413,10 +413,10 @@ class _MazeAreaState extends State<MazeArea>
     const NEWGAME = 'New Game';
     const GAMEOVER = 'Game Over';
     var title = GAMEOVER;
-    var msg = maze.gameOverMessage;
+    var msg = maze.getGameOverMessage();
     const MAZEDIMENSIONS = 'Maze Size';
 
-    if (!maze.gameIsOver) {
+    if (!maze.gameIsOver()) {
       title = NEWGAME;
       msg = '';
     }
@@ -823,7 +823,7 @@ class _MazeAreaState extends State<MazeArea>
       },
       onDoubleTap: () {
         handlePlayerHitAWall();
-        maze.whosTurnIsIt = Ilk.minotaur;
+        maze.setWhosTurnItIs(Ilk.minotaur);
         computerMove(delayMove: maze.player.delayComputerMove);
       },
       child: SizedBox(
@@ -837,7 +837,7 @@ class _MazeAreaState extends State<MazeArea>
 
   void moveThePlayer({Directions direction}) {
     if (movePlayer(direction: direction)) {
-      if (maze.whosTurnIsIt == Ilk.minotaur) {
+      if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
         computerMove(delayMove: maze.player.delayComputerMove);
       }
     }
@@ -865,8 +865,8 @@ class _MazeAreaState extends State<MazeArea>
 
   /*return true if the minotaur should move next, otherwise false */
   bool movePlayer({Directions direction}) {
-    if (maze.gameIsOver) return false;
-    if (maze.whosTurnIsIt != Ilk.player) return false;
+    if (maze.gameIsOver()) return false;
+    if (maze.getWhosTurnIsIt() != Ilk.player) return false;
     if (maze.player.movesLeft <= 0) return true;
 
     maze.clearLocationsiOfLambsInThisCondition(condition: Condition.freed);
@@ -879,9 +879,9 @@ class _MazeAreaState extends State<MazeArea>
       handlePlayerHitAWall();
     }
     if (maze.player.movesLeft <= 0) {
-      maze.whosTurnIsIt = Ilk.minotaur;
+      maze.setWhosTurnItIs(Ilk.minotaur);
     }
-    if (maze.whosTurnIsIt == Ilk.minotaur) return true;
+    if (maze.getWhosTurnIsIt() == Ilk.minotaur) return true;
     return false;
   }
 
@@ -895,7 +895,7 @@ class _MazeAreaState extends State<MazeArea>
     setSizes();
     maze.initMaze();
     maze.carveLabyrinth();
-    maze.gameIsOver = false;
+    maze.setGameIsOver(false);
     setState(() {});
   }
 }

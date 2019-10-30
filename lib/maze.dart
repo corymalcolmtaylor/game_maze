@@ -66,15 +66,19 @@ class Maze {
   int _maxCol;
   bool _gameIsOver = false;
 
-  bool get gameIsOver => _gameIsOver;
+  bool gameIsOver() {
+    return _gameIsOver == true;
+  }
 
-  set gameIsOver(bool gameIsOver) {
+  void setGameIsOver(bool gameIsOver) {
     _gameIsOver = gameIsOver;
   }
 
   String _gameOverMessage = '';
 
-  String get gameOverMessage => _gameOverMessage;
+  String getGameOverMessage() {
+    return '$_gameOverMessage';
+  }
 
   set gameOverMessage(String gameOverMessage) {
     _gameOverMessage = gameOverMessage;
@@ -83,9 +87,11 @@ class Maze {
   Difficulty difficulty = Difficulty.easy;
   Ilk _whosTurnIsIt = Ilk.player;
 
-  Ilk get whosTurnIsIt => _whosTurnIsIt;
+  Ilk getWhosTurnIsIt() {
+    return _whosTurnIsIt;
+  }
 
-  set whosTurnIsIt(Ilk whosTurnIsIt) {
+  void setWhosTurnItIs(Ilk whosTurnIsIt) {
     _whosTurnIsIt = whosTurnIsIt;
   }
 
@@ -141,9 +147,9 @@ class Maze {
     _maxCol = _maxRow;
     lambs.clear();
     myLabyrinth.clear();
-    gameIsOver = false;
+    _gameIsOver = false;
     gameOverMessage = '';
-    whosTurnIsIt = Ilk.player;
+    _whosTurnIsIt = Ilk.player;
     Room.badGuyHasMovedThisManyTimes = 0;
     for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
       for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
@@ -158,7 +164,7 @@ class Maze {
   void preparePlayerForATurn() {
     player.movesLeft = playerMoves;
     player.delayComputerMove = true;
-    whosTurnIsIt = Ilk.player;
+    _whosTurnIsIt = Ilk.player;
   }
 
   bool bossGoHandleAnyLambsAtYourLocation({Pixie boss}) {
@@ -766,7 +772,7 @@ class Maze {
     // if no pixie is targeted it moves at random until it reaches a wall or an intersection
     // (there is a 50% chance it stops at an intersection unless it can now see a lamb when it will stop)
 
-    if (gameIsOver) {
+    if (_gameIsOver) {
       return false;
     }
     bool bossCannotSeeALamb = true;
@@ -846,7 +852,7 @@ class Maze {
         }
       }
     }
-    whosTurnIsIt = Ilk.lamb;
+    _whosTurnIsIt = Ilk.lamb;
     return minotaurHasMovedAtLeastOnceThisTurn();
   }
 
@@ -889,7 +895,7 @@ class Maze {
   }
 
   bool moveLambs() {
-    if (gameIsOver) return gameIsOver;
+    if (gameIsOver()) return gameIsOver();
     lambs.forEach((lamb) {
       if (lamb.condition == Condition.alive) {
         attemptToMoveThisPixieToAnAdjacentRoom(pix: lamb);
@@ -904,13 +910,13 @@ class Maze {
     if (!anyLeftAlive) {
       return endGame();
     }
-    return gameIsOver;
+    return gameIsOver();
   }
 
   bool endGame() {
-    gameIsOver = true;
+    setGameIsOver(true);
 
-    return gameIsOver;
+    return gameIsOver();
   }
 
   Next aNext(x, y) {
