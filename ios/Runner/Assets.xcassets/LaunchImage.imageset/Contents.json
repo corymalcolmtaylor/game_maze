@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "mazesplash.png",
+      "filename" : "ios_gamemaze_splash.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "mazesplash-1.png",
+      "filename" : "ios_gamemaze_splash-1.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "mazesplash-2.png",
+      "filename" : "ios_gamemaze_splash-2.png",
       "scale" : "3x"
     }
   ],
