@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
 
   Future<void> _launchURL() async {
     const url =
-        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=Notes';
+        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=BetaNotes';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
 
   Future<void> showInformation(BuildContext context) async {
     Text message = Text(
-        'About ${Utils.TITLE}\n' +
+        'About ${Utils.TITLE} - BETA\n' +
             'If you have any suggestions or find a bug please let us know.\n\n' +
             'Developer email:',
         style: TextStyle(fontSize: 22, color: Colors.cyanAccent));

@@ -1,5 +1,5 @@
 {
   "editor.formatOnSave": true,
   "workbench.editor.showTabs": false,
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "automatic"
 }
