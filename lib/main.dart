@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
     GestureDetector emaillink = GestureDetector(
       child: emailText,
       onTap: () {
-        print('email tap');
+        print('email tapped');
         _launchURL();
       },
     );

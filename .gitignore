@@ -65,6 +65,12 @@
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
+**/ios/Flutter/Flutter.podspec
+**/ios/**/ExportOptions.plist
+**/ios/**/DistributionSummary.plist
+*.ipa
+*.log
+
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
