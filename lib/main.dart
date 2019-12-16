@@ -237,6 +237,7 @@ class _MazeAreaState extends State<MazeArea>
           textScaleFactor: 0.8,
           style: TextStyle(
               height: 1.0,
+              fontFamily: 'NotoEmoji',
               color: maze.isEasy() || pixie.isVisible
                   ? Colors.black
                   : Colors.transparent,
