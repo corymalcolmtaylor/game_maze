@@ -166,7 +166,8 @@ class _MazeAreaState extends State<MazeArea>
       radians = 3.0;
     }
     //if earlier versions of android the goblin needs to switch direction facing
-    if (Platform.isAndroid && pixie.ilk == Ilk.minotaur) {
+    if (pixie.ilk == Ilk.minotaur) {
+      //Platform.isAndroid &&
       if (radians == 3) {
         radians = 0.0;
       } else {
@@ -232,19 +233,36 @@ class _MazeAreaState extends State<MazeArea>
           ..rotateX(0)
           ..rotateY(radians),
         alignment: FractionalOffset.center,
-        child: Text(
-          pixie.emoji,
-          textScaleFactor: 0.8,
-          style: TextStyle(
-              height: 1.0,
-              fontFamily: 'NotoEmoji',
-              color: maze.isEasy() || pixie.isVisible
-                  ? Colors.black
-                  : Colors.transparent,
-              fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
-        ),
+        child: getEmojiText(pixie),
       ),
     );
+  }
+
+  Text getEmojiText(Pixie pixie) {
+    if (Platform.isIOS) {
+      return Text(
+        pixie.emoji,
+        textScaleFactor: 0.8,
+        style: TextStyle(
+            height: 1.0,
+            fontFamily: 'NotoEmoji',
+            color: maze.isEasy() || pixie.isVisible
+                ? pixie.preferredColor
+                : Colors.transparent,
+            fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
+      );
+    } else {
+      return Text(
+        pixie.emoji,
+        textScaleFactor: 0.8,
+        style: TextStyle(
+            height: 1.0,
+            color: maze.isEasy() || pixie.isVisible
+                ? Colors.black
+                : Colors.transparent,
+            fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
+      );
+    }
   }
 
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {

@@ -1,4 +1,6 @@
 import 'dart:math' as Math;
+import 'package:flutter/material.dart';
+
 import 'Utils.dart';
 
 class Next {
@@ -54,6 +56,7 @@ class Pixie {
   var savedLambs = 0;
   var lostLambs = 0;
   var emoji = '';
+  var preferredColor = Colors.white;
   Directions newDirection;
   var follow = false;
   Directions direction;
@@ -1182,6 +1185,7 @@ class Maze {
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
     minotaur.emoji = '👺';
+    minotaur.preferredColor = Colors.red;
     minotaur.movesLeft = maxRow;
     // minotaur.x = 8;
     //minotaur.y = 8;
@@ -1196,6 +1200,7 @@ class Maze {
     loc.ilk = Ilk.player;
     player = loc;
     player.emoji = '👧';
+    player.preferredColor = Colors.amberAccent;
     player.movesLeft = playerMoves;
     player.lostLambs = 0;
     player.savedLambs = 0;
