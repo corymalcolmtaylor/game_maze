@@ -10,10 +10,7 @@ import './utils.dart';
 
 //void main() => runApp(MyApp());
 void main() => runApp(
-      MaterialApp(
-        title: Utils.TITLE,
-        home: MyApp(),
-      ),
+      MyApp(),
     );
 
 class MyApp extends StatelessWidget {
@@ -22,6 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: Utils.TITLE,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
           brightness: Brightness.dark,
           textTheme: TextTheme(
@@ -49,7 +47,7 @@ class MyApp extends StatelessWidget {
 
   Future<void> _launchURL() async {
     const url =
-        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=BetaNotes';
+        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=Notes';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -59,7 +57,7 @@ class MyApp extends StatelessWidget {
 
   Future<void> showInformation(BuildContext context) async {
     Text message = Text(
-        'About ${Utils.TITLE} - BETA\n' +
+        'About ${Utils.TITLE} - \n' +
             'If you have any suggestions or find a bug please let us know.\n\n' +
             'Developer email:',
         style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
@@ -342,11 +340,14 @@ class _MazeAreaState extends State<MazeArea>
 
   Widget makeRoom(Room room) {
     /*  rooms shall be changed to square containers in rows of a set width */
-    var floorColor = Colors.greenAccent;
-    var northColor = (room.downWallIsUp == true) ? Colors.green : floorColor;
-    var southColor = (room.upWallIsUp == true) ? Colors.green : floorColor;
-    var westColor = (room.leftWallIsUp == true) ? Colors.green : floorColor;
-    var eastColor = (room.rightWallIsUp == true) ? Colors.green : floorColor;
+    var floorColor = Colors.green[200];
+    var northColor =
+        (room.downWallIsUp == true) ? Colors.green[700] : floorColor;
+    var southColor = (room.upWallIsUp == true) ? Colors.green[700] : floorColor;
+    var westColor =
+        (room.leftWallIsUp == true) ? Colors.green[700] : floorColor;
+    var eastColor =
+        (room.rightWallIsUp == true) ? Colors.green[700] : floorColor;
 
     var endLeft = ((room.x - 1) * roomLength);
     var endTop = ((room.y - 1) * roomLength);

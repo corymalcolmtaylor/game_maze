@@ -56,7 +56,7 @@ class Pixie {
   var savedLambs = 0;
   var lostLambs = 0;
   var emoji = '';
-  var preferredColor = Colors.white;
+  var preferredColor = Colors.blue[800];
   Directions newDirection;
   var follow = false;
   Directions direction;
@@ -120,14 +120,11 @@ class Maze {
   var numberOfRooms = 0;
   final playerMoves = 3;
   Map<String, Room> myLabyrinth = Map();
-  //var myStack = [];
   List<String> myStack = [];
-  //var specialcells =  <String>[];
   List<String> specialcells = [];
   var firstedge = '';
   var minotaur = Pixie(Ilk.minotaur);
   var player = Pixie(Ilk.player);
-
   var lambs = <Pixie>[];
 
   void clearLocationsiOfLambsInThisCondition({Condition condition}) {
@@ -495,10 +492,7 @@ class Maze {
   }
 
   bool thisPixieIsJustAroundTheCornerFromThisBoss({Pixie boss, Pixie pixie}) {
-    //var bossroom = myLabyrinth['b_${boss.x}_${boss.y}'];
-    //var pixroom = myLabyrinth['b_${pixie.x}_${pixie.y}'];
     if (boss.x == pixie.x - 1 && boss.y == pixie.y + 1) {
-      //boss is to the left of pixie
       if (!myLabyrinth['b_${boss.x}_${boss.y}'].rightWallIsUp &&
           !myLabyrinth['b_${pixie.x}_${pixie.y}'].upWallIsUp) {
         return true;
@@ -1185,11 +1179,8 @@ class Maze {
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
     minotaur.emoji = '👺';
-    minotaur.preferredColor = Colors.red;
+    minotaur.preferredColor = Colors.red[800];
     minotaur.movesLeft = maxRow;
-    // minotaur.x = 8;
-    //minotaur.y = 8;
-    //minotaur.location = 'b_${minotaur.x}_${minotaur.y}';
   }
 
   void placePlayer() {
@@ -1200,14 +1191,10 @@ class Maze {
     loc.ilk = Ilk.player;
     player = loc;
     player.emoji = '👧';
-    player.preferredColor = Colors.amberAccent;
+    player.preferredColor = Colors.orange[800];
     player.movesLeft = playerMoves;
     player.lostLambs = 0;
     player.savedLambs = 0;
-
-    //player.x = 1;
-    //player.y = 1;
-    //player.location = 'b_${player.x}_${player.y}';
   }
 
   bool closeToMinotaur(Pixie pix) {
@@ -1295,7 +1282,6 @@ class Maze {
     }
   }
 
-  // makeloops : num loops = floor(MAXROW /4).floor + possible extra for treasure room
   void makeloops() {
     var numloops = (_maxRow / 4).floor();
     //for each special room
