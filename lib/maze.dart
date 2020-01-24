@@ -67,8 +67,18 @@ class Pixie {
 class Maze {
   int _maxRow;
   int _maxCol;
-  bool _gameIsOver = false;
 
+  String _eogEmoji = '';
+
+  set eogEmoji(String eogEmoji) {
+    _eogEmoji = eogEmoji;
+  }
+
+  String getEogEmoji() {
+    return '$_eogEmoji';
+  }
+
+  bool _gameIsOver = false;
   bool gameIsOver() {
     return _gameIsOver == true;
   }
@@ -78,7 +88,6 @@ class Maze {
   }
 
   String _gameOverMessage = '';
-
   String getGameOverMessage() {
     return '$_gameOverMessage';
   }
@@ -127,7 +136,7 @@ class Maze {
   var player = Pixie(Ilk.player);
   var lambs = <Pixie>[];
 
-  void clearLocationsiOfLambsInThisCondition({Condition condition}) {
+  void clearLocationsOfLambsInThisCondition({Condition condition}) {
     lambs.forEach((lamb) {
       if (lamb.condition == condition) {
         lamb.location = '';
@@ -1229,7 +1238,7 @@ class Maze {
         lamb.emoji = '🐖';
         break;
       case 4:
-        lamb.emoji = '🐍';
+        lamb.emoji = '🐀';
         break;
       case 5:
         lamb.emoji = '🐞';
@@ -1238,13 +1247,13 @@ class Maze {
         lamb.emoji = '🐧';
         break;
       case 7:
-        lamb.emoji = '🐢';
+        lamb.emoji = '🐐';
         break;
       case 8:
         lamb.emoji = '🐈';
         break;
       case 9:
-        lamb.emoji = '🐴'; //
+        lamb.emoji = '🐎'; //
         break;
       case 10:
         lamb.emoji = '🐒';

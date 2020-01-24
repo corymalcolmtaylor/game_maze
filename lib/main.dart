@@ -13,49 +13,29 @@ void main() => runApp(
       MyApp(),
     );
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class MazeScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: Utils.TITLE,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          brightness: Brightness.dark,
-          textTheme: TextTheme(
-              title: TextStyle(color: Colors.cyanAccent),
-              body1: TextStyle(color: Colors.cyanAccent))),
-      home: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(Utils.TITLE, style: TextStyle(color: Colors.cyanAccent)),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.info),
-              tooltip: 'Information',
-              onPressed: () {
-                showInformation(context);
-                print('icon button');
-              },
-            ),
-          ],
-        ),
-        body: MazeArea(),
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(Utils.TITLE, style: TextStyle(color: Colors.cyanAccent)),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.info),
+            tooltip: 'Information',
+            onPressed: () {
+              showInformation(context);
+              print('icon button');
+            },
+          ),
+        ],
       ),
+      body: MazeArea(),
     );
   }
 
-  Future<void> _launchURL() async {
-    const url =
-        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=Notes';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  Future<void> showInformation(BuildContext context) async {
+  void showInformation(BuildContext context) {
     Text message = Text(
         'About ${Utils.TITLE} - \n' +
             'If you have any suggestions or find a bug please let us know.\n\n' +
@@ -73,42 +53,70 @@ class MyApp extends StatelessWidget {
         _launchURL();
       },
     );
-    return showDialog<void>(
+    var alert = AlertDialog(
+      backgroundColor: Colors.black54,
+      title: Center(
+        child: Text(
+          'Information',
+          style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+        ),
+      ),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[message, emaillink],
+        ),
+      ),
+      actions: <Widget>[
+        OutlineButton(
+          shape: new RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(30.0),
+          ),
+          color: Colors.cyanAccent,
+          borderSide: BorderSide(
+              color: Colors.cyan,
+              style: BorderStyle.solid,
+              width: Utils.WALLTHICKNESS),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('OK',
+              style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
+        ),
+      ],
+    );
+    showDialog(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.black54,
-          title: Center(
-            child: Text(
-              'Information',
-              style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[message, emaillink],
-            ),
-          ),
-          actions: <Widget>[
-            OutlineButton(
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0),
-              ),
-              color: Colors.cyanAccent,
-              borderSide: BorderSide(
-                  color: Colors.cyan,
-                  style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK',
-                  style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
-            ),
-          ],
-        );
+        return alert;
       },
+    );
+  }
+
+  Future<void> _launchURL() async {
+    const url =
+        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=Notes';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+}
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: Utils.TITLE,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+          brightness: Brightness.dark,
+          textTheme: TextTheme(
+              title: TextStyle(color: Colors.cyanAccent),
+              body1: TextStyle(color: Colors.cyanAccent))),
+      home: MazeScaffold(),
     );
   }
 }
@@ -126,7 +134,6 @@ class _MazeAreaState extends State<MazeArea>
   int numRows = 8;
 
   final maximumMoveAttempts = 8;
-  static const animDurationMilliSeconds = 700;
 
   var sprites = <Widget>[];
 
@@ -224,7 +231,7 @@ class _MazeAreaState extends State<MazeArea>
       top: endTop,
       height: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
       curve: Curves.linear,
-      duration: Duration(milliseconds: animDurationMilliSeconds),
+      duration: Duration(milliseconds: Utils.animDurationMilliSeconds),
       child: Transform(
         transform: Matrix4.identity()
           ..setEntry(1, 1, 1) // perspective
@@ -236,7 +243,7 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  Text getEmojiText(Pixie pixie) {
+  Widget getEmojiText(Pixie pixie) {
     if (Platform.isIOS) {
       return Text(
         pixie.emoji,
@@ -288,12 +295,13 @@ class _MazeAreaState extends State<MazeArea>
 
     int minoDelay = 0;
     if (delayMove) {
-      minoDelay = animDurationMilliSeconds;
+      minoDelay = Utils.animDurationMilliSeconds;
     }
     var lambDelay = 0;
     if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
-      lambDelay = animDurationMilliSeconds;
+      lambDelay = Utils.animDurationMilliSeconds;
       Future.delayed(Duration(milliseconds: minoDelay), () {
+        //maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
         maze.moveMinotaur();
 
         setState(() {
@@ -304,37 +312,53 @@ class _MazeAreaState extends State<MazeArea>
 
     Future.delayed(Duration(milliseconds: minoDelay + lambDelay), () {
       var gameOver = maze.moveLambs();
-      maze.clearLocationsiOfLambsInThisCondition(condition: Condition.dead);
+      maze.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
+
       setState(() {
         // just force redraw
       });
 
       if (gameOver) {
-        Future.delayed(Duration(milliseconds: 1 * animDurationMilliSeconds),
-            () {
+        Future.delayed(
+            Duration(milliseconds: 1 * Utils.animDurationMilliSeconds), () {
           handleEndOfGame();
         });
       } else {
         maze.preparePlayerForATurn();
       }
+    }).then((_) {
+      Future.delayed(Duration(milliseconds: Utils.animDurationMilliSeconds),
+          () {
+        print('clear freed 2');
+        maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+        setState(() {
+          // just force redraw
+        });
+      });
     });
   }
 
   void handleEndOfGame() {
     String str = '';
+    maze.eogEmoji = '';
     if (maze.player.condition == Condition.dead) {
-      str = 'The Goblin got Alice! ️😞\n';
+      str = 'The Goblin got Alice! ️';
+      maze.eogEmoji = '😞';
     } else {
       if (maze.player.savedLambs > maze.player.lostLambs) {
-        str = 'You rescued ${maze.player.savedLambs}!\nYou WIN! 😀';
+        str = 'You rescued ${maze.player.savedLambs}!\nYou WIN! ';
+        maze.eogEmoji = '😀';
       } else if (maze.player.savedLambs == maze.player.lostLambs) {
         str =
-            '${maze.player.savedLambs} rescued and captured.\nResult is a draw. 😐';
+            '${maze.player.savedLambs} rescued and captured.\nResult is a draw. ';
+        maze.eogEmoji = '😐';
       } else {
-        str = 'Goblin captured ${maze.player.lostLambs}. 😞';
+        str = 'Goblin captured ${maze.player.lostLambs}. ';
+        maze.eogEmoji = '😞';
       }
     }
     maze.gameOverMessage = str;
+
     showGameOverMessage();
   }
 
@@ -373,19 +397,55 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Future<void> showRules() async {
-    Text message = Text(
-        'Swipe verticaly or horizontally on the maze to move Alice 👧.' +
-            'She moves one step at a time and gets three per turn.\n' +
-            'End her turn early by moving into a wall or double tapping.\n' +
-            'Rescue the animals by getting Alice to them before they get ' +
-            'captured by the goblin 👺.\n' +
-            'If the goblin captures Alice the game ends in defeat but otherwise ' +
-            'if you save more animals than the goblin captures you win.\n' +
-            'Difficulty modes:\n' +
-            'Easy is the default mode, in Easy mode you can see everything.\n' +
-            'Hard mode means that you cannot see the other ' +
-            'characters until Alice can.',
-        style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
+    const textstyle = TextStyle(
+      fontSize: 22,
+      color: Colors.cyanAccent,
+    );
+    var notoalice = TextStyle(
+        fontSize: 22,
+        color: Colors.orange[800],
+        fontFamily: 'NotoEmoji',
+        backgroundColor: Colors.green[200]);
+    var notogoblin = TextStyle(
+        fontSize: 22,
+        color: Colors.red[800],
+        fontFamily: 'NotoEmoji',
+        backgroundColor: Colors.green[200]);
+    RichText message = RichText(
+      text: TextSpan(
+        children: <TextSpan>[
+          TextSpan(
+            text: 'Swipe verticaly or horizontally on the maze to move Alice ',
+            style: textstyle,
+          ),
+          TextSpan(
+            text: '👧',
+            style: Platform.isIOS ? notoalice : textstyle,
+          ),
+          TextSpan(
+            text: '.\nShe moves one step at a time and gets three per turn.\n' +
+                'End her turn early by moving into a wall or double tapping.\n' +
+                'Rescue the animals by getting Alice to them before they get ' +
+                'captured by the goblin  ',
+            style: textstyle,
+          ),
+          TextSpan(
+            text: '👺',
+            style: Platform.isIOS ? notogoblin : textstyle,
+          ),
+          TextSpan(
+            text: '.\nIf the goblin captures Alice the game ends in defeat but otherwise ' +
+                'if you save more animals than the goblin captures you win.\n' +
+                'Difficulty modes:\n' +
+                'Easy is the default mode, in Easy mode you can see everything.\n' +
+                'Hard mode means that you cannot see the other ' +
+                'characters until Alice can.',
+            style: textstyle,
+          ),
+        ],
+      ),
+    );
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -441,6 +501,12 @@ class _MazeAreaState extends State<MazeArea>
       msg = '';
     }
 
+    var emojiTextStyle = TextStyle(
+      fontSize: 22,
+      color: Colors.yellow,
+      fontFamily: 'NotoEmoji',
+    );
+
     return showDialog<void>(
       context: context,
 
@@ -464,10 +530,18 @@ class _MazeAreaState extends State<MazeArea>
                             TextStyle(fontSize: 28, color: Colors.cyanAccent),
                       ),
                       if (msg != '')
-                        Text(
-                          msg,
-                          style:
-                              TextStyle(fontSize: 22, color: Colors.cyanAccent),
+                        RichText(
+                          text: TextSpan(children: <TextSpan>[
+                            TextSpan(
+                              text: msg,
+                              style: TextStyle(
+                                  fontSize: 22, color: Colors.cyanAccent),
+                            ),
+                            TextSpan(
+                              text: maze.getEogEmoji(),
+                              style: emojiTextStyle,
+                            ),
+                          ]),
                         ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -889,8 +963,6 @@ class _MazeAreaState extends State<MazeArea>
     if (maze.getWhosTurnIsIt() != Ilk.player) return false;
     if (maze.player.movesLeft <= 0) return true;
 
-    maze.clearLocationsiOfLambsInThisCondition(condition: Condition.freed);
-
     if (maze.moveThisSpriteInThisDirection(maze.player, direction)) {
       setState(() {
         //print('player moved  ' + direction.toString());
@@ -901,7 +973,18 @@ class _MazeAreaState extends State<MazeArea>
     if (maze.player.movesLeft <= 0) {
       maze.setWhosTurnItIs(Ilk.minotaur);
     }
-    if (maze.getWhosTurnIsIt() == Ilk.minotaur) return true;
+    if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
+      //maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+      Future.delayed(Duration(milliseconds: Utils.animDurationMilliSeconds),
+          () {
+        print('clear freed 1');
+        maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+        setState(() {
+          // just force redraw
+        });
+      });
+      return true;
+    }
     return false;
   }
 
