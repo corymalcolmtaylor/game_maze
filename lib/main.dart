@@ -99,7 +99,7 @@ class MazeScaffold extends StatelessWidget {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      throw 'Could not launch $url';
+      print('Could not launch $url');
     }
   }
 }
@@ -114,8 +114,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           brightness: Brightness.dark,
           textTheme: TextTheme(
-              title: TextStyle(color: Colors.cyanAccent),
-              body1: TextStyle(color: Colors.cyanAccent))),
+              headline6: TextStyle(color: Colors.cyanAccent),
+              bodyText2: TextStyle(color: Colors.cyanAccent))),
       home: MazeScaffold(),
     );
   }
@@ -226,19 +226,23 @@ class _MazeAreaState extends State<MazeArea>
   AnimatedPositioned getAnimatedPositionedForThisPixie(
       {Pixie pixie, double endLeft, double endTop, double radians}) {
     return AnimatedPositioned(
+      width: roomLength,
       key: Key(pixie.key),
       left: endLeft,
       top: endTop,
       height: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
       curve: Curves.linear,
       duration: Duration(milliseconds: Utils.animDurationMilliSeconds),
-      child: Transform(
-        transform: Matrix4.identity()
-          ..setEntry(1, 1, 1) // perspective
-          ..rotateX(0)
-          ..rotateY(radians),
-        alignment: FractionalOffset.center,
-        child: getEmojiText(pixie),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Transform(
+          transform: Matrix4.identity()
+            ..setEntry(1, 1, 1) // perspective
+            ..rotateX(0)
+            ..rotateY(radians),
+          alignment: FractionalOffset.center,
+          child: getEmojiText(pixie),
+        ),
       ),
     );
   }
@@ -271,13 +275,13 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    return roomLength;
+    return roomLength - (Utils.WALLTHICKNESS * 3);
   }
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.y - 1) * roomLength);
-    retval += roomLength * 0.1;
-    return retval + Utils.WALLTHICKNESS;
+    //retval += roomLength * 0.1;
+    return retval + (2 * Utils.WALLTHICKNESS);
   }
 
   double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
@@ -458,9 +462,11 @@ class _MazeAreaState extends State<MazeArea>
               style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
             ),
           ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[message],
+          content: Scrollbar(
+            child: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[message],
+              ),
             ),
           ),
           actions: <Widget>[

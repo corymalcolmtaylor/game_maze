@@ -1,12 +1,10 @@
-/**
- * code taken from https://www.scottbrady91.com/Dart/Generating-a-Crypto-Random-String-in-Dart
- */
+/// code taken from https://www.scottbrady91.com/Dart/Generating-a-Crypto-Random-String-in-Dart
 
 import 'dart:convert';
 import 'dart:math';
 
 class Utils {
-  static const WALLTHICKNESS = 2.0;
+  static const WALLTHICKNESS = 1.0;
   static const EASY = 'Easy';
   static const HARD = 'Hard';
   static const TITLE = 'Alice and the Hedge Maze';
