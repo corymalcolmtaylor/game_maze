@@ -17,7 +17,7 @@ class MazeBackButton extends StatelessWidget {
           borderSide: BorderSide(
               color: Colors.cyan,
               style: BorderStyle.solid,
-              width: Utils.WALLTHICKNESS),
+              width: Utils.WALLTHICKNESS + 1),
           onPressed: () {
             Navigator.of(context).pop();
             setstate();

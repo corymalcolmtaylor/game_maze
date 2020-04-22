@@ -20,14 +20,14 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchImage" id="vSu-qP-VOK">
-                                <rect key="frame" x="57" y="280" width="300" height="282"/>
+                                <rect key="frame" x="57" y="279" width="300" height="283"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="vSu-qP-VOK" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Qas-GG-qgv"/>
-                            <constraint firstItem="vSu-qP-VOK" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="d3g-lJ-eOJ"/>
+                            <constraint firstItem="vSu-qP-VOK" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" priority="999" id="Qas-GG-qgv"/>
+                            <constraint firstItem="vSu-qP-VOK" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" priority="999" id="d3g-lJ-eOJ"/>
                         </constraints>
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>

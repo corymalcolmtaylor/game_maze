@@ -22,6 +22,7 @@ class MazeScaffold extends StatelessWidget {
     }
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
         centerTitle: false,
         title: Text(strtitle,
             style: TextStyle(color: Colors.cyanAccent, fontSize: 14)),
@@ -36,7 +37,7 @@ class MazeScaffold extends StatelessWidget {
               borderSide: BorderSide(
                   color: Colors.cyan,
                   style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS),
+                  width: Utils.WALLTHICKNESS + 1),
 
               onPressed: () {
                 showRules(context);
@@ -57,7 +58,7 @@ class MazeScaffold extends StatelessWidget {
               borderSide: BorderSide(
                   color: Colors.cyan,
                   style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS),
+                  width: Utils.WALLTHICKNESS + 1),
               textColor: Colors.white,
               onPressed: () {
                 showInformation(context);
@@ -152,7 +153,7 @@ class MazeScaffold extends StatelessWidget {
               borderSide: BorderSide(
                   color: Colors.cyan,
                   style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS),
+                  width: Utils.WALLTHICKNESS + 1),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -207,7 +208,7 @@ class MazeScaffold extends StatelessWidget {
           borderSide: BorderSide(
               color: Colors.cyan,
               style: BorderStyle.solid,
-              width: Utils.WALLTHICKNESS),
+              width: Utils.WALLTHICKNESS + 1),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -245,6 +246,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           brightness: Brightness.dark,
+          backgroundColor: Colors.black,
           textTheme: TextTheme(
               headline6: TextStyle(color: Colors.cyanAccent),
               bodyText2: TextStyle(color: Colors.cyanAccent))),
@@ -600,7 +602,7 @@ class _MazeAreaState extends State<MazeArea>
                               decoration: new BoxDecoration(
                                 border: new Border.all(
                                     color: Colors.cyanAccent,
-                                    width: Utils.WALLTHICKNESS,
+                                    width: Utils.WALLTHICKNESS + 1,
                                     style: BorderStyle.solid),
                                 borderRadius: new BorderRadius.all(
                                     new Radius.circular(20.0)),
@@ -658,7 +660,7 @@ class _MazeAreaState extends State<MazeArea>
                               decoration: new BoxDecoration(
                                 border: new Border.all(
                                     color: Colors.cyanAccent,
-                                    width: Utils.WALLTHICKNESS,
+                                    width: Utils.WALLTHICKNESS + 1,
                                     style: BorderStyle.solid),
                                 borderRadius: new BorderRadius.all(
                                     new Radius.circular(20.0)),
@@ -759,7 +761,7 @@ class _MazeAreaState extends State<MazeArea>
           borderSide: BorderSide(
               color: Colors.cyan,
               style: BorderStyle.solid,
-              width: Utils.WALLTHICKNESS),
+              width: Utils.WALLTHICKNESS + 1),
           onPressed: () {
             setState(() {
               handleEndOfGame();
@@ -863,28 +865,33 @@ class _MazeAreaState extends State<MazeArea>
     sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.minotaur));
 
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      return Center(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  defineTopRow(),
-                  defineScoreRow(),
-                ],
+      return Container(
+        color: Colors.black,
+        child: Center(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                color: Colors.black,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    defineTopRow(),
+                    defineScoreRow(),
+                  ],
+                ),
               ),
-            ),
-            buildCenter(trs, maxWidth),
-          ],
+              buildCenter(trs, maxWidth),
+            ],
+          ),
         ),
       );
     } else {
       return Center(
         child: Container(
+          color: Colors.black,
           // margin: EdgeInsets.symmetric(vertical: 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
