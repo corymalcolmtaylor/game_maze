@@ -8,6 +8,7 @@ class Utils {
   static const EASY = 'Easy';
   static const HARD = 'Hard';
   static const TITLE = 'Alice and the Hedge Maze';
+  static const TITLE_ios = 'Alice and the\nHedge Maze';
   static const animDurationMilliSeconds = 700;
 
   static final Random _random = Random.secure();

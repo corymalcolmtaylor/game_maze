@@ -16,22 +16,152 @@ void main() => runApp(
 class MazeScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var strtitle = Utils.TITLE;
+    if (Platform.isIOS) {
+      strtitle = Utils.TITLE_ios;
+    }
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: Text(Utils.TITLE, style: TextStyle(color: Colors.cyanAccent)),
+        centerTitle: false,
+        title: Text(strtitle,
+            style: TextStyle(color: Colors.cyanAccent, fontSize: 14)),
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.info),
-            tooltip: 'Information',
-            onPressed: () {
-              showInformation(context);
-              print('icon button');
-            },
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+            child: OutlineButton(
+              shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(20.0),
+              ),
+              color: Colors.cyanAccent,
+              borderSide: BorderSide(
+                  color: Colors.cyan,
+                  style: BorderStyle.solid,
+                  width: Utils.WALLTHICKNESS),
+
+              onPressed: () {
+                showRules(context);
+                print('icon cc button, Show Rules');
+              },
+              child: Text('Rules',
+                  style: TextStyle(color: Colors.cyanAccent, fontSize: 18)),
+              //shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+            child: OutlineButton(
+              shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(20.0),
+              ),
+              color: Colors.cyanAccent,
+              borderSide: BorderSide(
+                  color: Colors.cyan,
+                  style: BorderStyle.solid,
+                  width: Utils.WALLTHICKNESS),
+              textColor: Colors.white,
+              onPressed: () {
+                showInformation(context);
+                print('icon button, Show info');
+              },
+              child: Text('About',
+                  style: TextStyle(color: Colors.cyanAccent, fontSize: 18)),
+              //shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
+            ),
           ),
         ],
       ),
       body: MazeArea(),
+    );
+  }
+
+  Future<void> showRules(BuildContext context) async {
+    const textstyle = TextStyle(
+      fontSize: 22,
+      color: Colors.cyanAccent,
+    );
+    var notoalice = TextStyle(
+        fontSize: 22,
+        color: Colors.orange[800],
+        fontFamily: 'NotoEmoji',
+        backgroundColor: Colors.green[200]);
+    var notogoblin = TextStyle(
+        fontSize: 22,
+        color: Colors.red[800],
+        fontFamily: 'NotoEmoji',
+        backgroundColor: Colors.green[200]);
+    RichText message = RichText(
+      text: TextSpan(
+        children: <TextSpan>[
+          TextSpan(
+            text: 'Swipe verticaly or horizontally on the maze to move Alice ',
+            style: textstyle,
+          ),
+          TextSpan(
+            text: '👧',
+            style: Platform.isIOS ? notoalice : textstyle,
+          ),
+          TextSpan(
+            text: '.\nShe moves one step at a time and gets three per turn.\n' +
+                'End her turn early by moving into a wall or double tapping.\n' +
+                'Rescue the animals by getting Alice to them before they get ' +
+                'captured by the goblin  ',
+            style: textstyle,
+          ),
+          TextSpan(
+            text: '👺',
+            style: Platform.isIOS ? notogoblin : textstyle,
+          ),
+          TextSpan(
+            text: '.\nIf the goblin captures Alice the game ends in defeat but otherwise ' +
+                'if you save more animals than the goblin captures you win.\n' +
+                'Difficulty modes:\n' +
+                'Easy is the default mode, in Easy mode you can see everything.\n' +
+                'Hard mode means that you cannot see the other ' +
+                'characters until Alice can.',
+            style: textstyle,
+          ),
+        ],
+      ),
+    );
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black54,
+          title: Center(
+            child: Text(
+              'Rules',
+              style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+            ),
+          ),
+          content: Scrollbar(
+            child: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[message],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            OutlineButton(
+              shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(30.0),
+              ),
+              color: Colors.cyanAccent,
+              borderSide: BorderSide(
+                  color: Colors.cyan,
+                  style: BorderStyle.solid,
+                  width: Utils.WALLTHICKNESS),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK',
+                  style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -61,9 +191,11 @@ class MazeScaffold extends StatelessWidget {
           style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
         ),
       ),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[message, emaillink],
+      content: Scrollbar(
+        child: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[message, emaillink],
+          ),
         ),
       ),
       actions: <Widget>[
@@ -400,101 +532,6 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  Future<void> showRules() async {
-    const textstyle = TextStyle(
-      fontSize: 22,
-      color: Colors.cyanAccent,
-    );
-    var notoalice = TextStyle(
-        fontSize: 22,
-        color: Colors.orange[800],
-        fontFamily: 'NotoEmoji',
-        backgroundColor: Colors.green[200]);
-    var notogoblin = TextStyle(
-        fontSize: 22,
-        color: Colors.red[800],
-        fontFamily: 'NotoEmoji',
-        backgroundColor: Colors.green[200]);
-    RichText message = RichText(
-      text: TextSpan(
-        children: <TextSpan>[
-          TextSpan(
-            text: 'Swipe verticaly or horizontally on the maze to move Alice ',
-            style: textstyle,
-          ),
-          TextSpan(
-            text: '👧',
-            style: Platform.isIOS ? notoalice : textstyle,
-          ),
-          TextSpan(
-            text: '.\nShe moves one step at a time and gets three per turn.\n' +
-                'End her turn early by moving into a wall or double tapping.\n' +
-                'Rescue the animals by getting Alice to them before they get ' +
-                'captured by the goblin  ',
-            style: textstyle,
-          ),
-          TextSpan(
-            text: '👺',
-            style: Platform.isIOS ? notogoblin : textstyle,
-          ),
-          TextSpan(
-            text: '.\nIf the goblin captures Alice the game ends in defeat but otherwise ' +
-                'if you save more animals than the goblin captures you win.\n' +
-                'Difficulty modes:\n' +
-                'Easy is the default mode, in Easy mode you can see everything.\n' +
-                'Hard mode means that you cannot see the other ' +
-                'characters until Alice can.',
-            style: textstyle,
-          ),
-        ],
-      ),
-    );
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.black54,
-          title: Center(
-            child: Text(
-              'Rules',
-              style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
-            ),
-          ),
-          content: Scrollbar(
-            child: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[message],
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            OutlineButton(
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0),
-              ),
-              color: Colors.cyanAccent,
-              borderSide: BorderSide(
-                  color: Colors.cyan,
-                  style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS),
-              onPressed: () {
-                Navigator.of(context).pop();
-                showGameOverMessage();
-                setState(() {
-                  print('OK showed rules');
-                });
-              },
-              child: Text('OK',
-                  style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future<void> showGameOverMessage() async {
     const NEWGAME = 'New Game';
     const GAMEOVER = 'Game Over';
@@ -672,31 +709,6 @@ class _MazeAreaState extends State<MazeArea>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-                            child: OutlineButton(
-                              shape: new RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(30.0),
-                              ),
-                              color: Colors.cyanAccent,
-                              borderSide: BorderSide(
-                                  color: Colors.cyan,
-                                  style: BorderStyle.solid,
-                                  width: Utils.WALLTHICKNESS),
-                              onPressed: () {
-                                setState(() {
-                                  Navigator.of(context).pop();
-
-                                  showRules();
-                                });
-                              },
-                              child: Text(
-                                'Show Rules',
-                                style: TextStyle(
-                                    fontSize: 24, color: Colors.cyanAccent),
-                              ),
-                            ),
-                          ),
                           if (MediaQuery.of(context).orientation ==
                               Orientation.landscape)
                             StartNewGame(
@@ -737,33 +749,29 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget defineTopRow() {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            child: OutlineButton(
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0),
-              ),
-              borderSide: BorderSide(
-                  color: Colors.cyan,
-                  style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS),
-              onPressed: () {
-                setState(() {
-                  handleEndOfGame();
-                });
-              },
-              child: Text(
-                'New Game\nOptions and Rules',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 26, color: Colors.cyanAccent),
-              ),
-            ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        child: OutlineButton(
+          shape: new RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(30.0),
+          ),
+          borderSide: BorderSide(
+              color: Colors.cyan,
+              style: BorderStyle.solid,
+              width: Utils.WALLTHICKNESS),
+          onPressed: () {
+            setState(() {
+              handleEndOfGame();
+            });
+          },
+          child: Text(
+            'New Game',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 26, color: Colors.cyanAccent),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -877,9 +885,9 @@ class _MazeAreaState extends State<MazeArea>
     } else {
       return Center(
         child: Container(
-          margin: EdgeInsets.symmetric(vertical: 5),
+          // margin: EdgeInsets.symmetric(vertical: 5),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Row(
