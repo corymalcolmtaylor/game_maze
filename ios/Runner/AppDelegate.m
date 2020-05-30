@@ -8,6 +8,9 @@
      
     UIApplication.sharedApplication.statusBarHidden = false;
 
+    
+    UIApplication.sharedApplication.statusBarHidden = false;
+
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
   return [super application:application didFinishLaunchingWithOptions:launchOptions];

@@ -22,8 +22,10 @@ class MazeBackButton extends StatelessWidget {
             Navigator.of(context).pop();
             setstate();
           },
-          child: Text('Back',
-              style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
+          child: Text(
+            'Back',
+            style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+          ),
         ),
       ),
     );

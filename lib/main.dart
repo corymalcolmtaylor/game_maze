@@ -22,6 +22,7 @@ class MazeScaffold extends StatelessWidget {
     }
     return Scaffold(
       appBar: AppBar(
+        elevation: 1,
         backgroundColor: Colors.black,
         centerTitle: false,
         title: Text(strtitle,
@@ -64,8 +65,10 @@ class MazeScaffold extends StatelessWidget {
                 showInformation(context);
                 print('icon button, Show info');
               },
-              child: Text('About',
-                  style: TextStyle(color: Colors.cyanAccent, fontSize: 18)),
+              child: Text(
+                'About',
+                style: TextStyle(color: Colors.cyanAccent, fontSize: 18),
+              ),
               //shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
             ),
           ),
@@ -157,8 +160,10 @@ class MazeScaffold extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK',
-                  style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
+              child: Text(
+                'OK',
+                style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+              ),
             ),
           ],
         );
@@ -168,15 +173,18 @@ class MazeScaffold extends StatelessWidget {
 
   void showInformation(BuildContext context) {
     Text message = Text(
-        'About ${Utils.TITLE} - \n' +
-            'If you have any suggestions or find a bug please let us know.\n\n' +
-            'Developer email:',
-        style: TextStyle(fontSize: 22, color: Colors.cyanAccent));
-    Text emailText = Text('thesoftwaretaylor@gmail.com',
-        style: TextStyle(
-            fontSize: 18,
-            decoration: TextDecoration.underline,
-            color: Colors.cyanAccent));
+      'About ${Utils.TITLE} - \n' +
+          'If you have any suggestions or find a bug please let us know.\n\n' +
+          'Developer email:',
+      style: TextStyle(fontSize: 22, color: Colors.cyanAccent),
+    );
+    Text emailText = Text(
+      'thesoftwaretaylor@gmail.com',
+      style: TextStyle(
+          fontSize: 18,
+          decoration: TextDecoration.underline,
+          color: Colors.cyanAccent),
+    );
     GestureDetector emaillink = GestureDetector(
       child: emailText,
       onTap: () {
@@ -212,8 +220,10 @@ class MazeScaffold extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('OK',
-              style: TextStyle(fontSize: 24, color: Colors.cyanAccent)),
+          child: Text(
+            'OK',
+            style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+          ),
         ),
       ],
     );
@@ -245,11 +255,13 @@ class MyApp extends StatelessWidget {
       title: Utils.TITLE,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          brightness: Brightness.dark,
-          backgroundColor: Colors.black,
-          textTheme: TextTheme(
-              headline6: TextStyle(color: Colors.cyanAccent),
-              bodyText2: TextStyle(color: Colors.cyanAccent))),
+        brightness: Brightness.dark,
+        backgroundColor: Colors.black,
+        textTheme: TextTheme(
+          headline6: TextStyle(color: Colors.cyanAccent),
+          bodyText2: TextStyle(color: Colors.cyanAccent),
+        ),
+      ),
       home: MazeScaffold(),
     );
   }
@@ -387,23 +399,25 @@ class _MazeAreaState extends State<MazeArea>
         pixie.emoji,
         textScaleFactor: 0.8,
         style: TextStyle(
-            height: 1.0,
-            fontFamily: 'NotoEmoji',
-            color: maze.isEasy() || pixie.isVisible
-                ? pixie.preferredColor
-                : Colors.transparent,
-            fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
+          height: 1.0,
+          fontFamily: 'NotoEmoji',
+          color: maze.isEasy() || pixie.isVisible
+              ? pixie.preferredColor
+              : Colors.transparent,
+          fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
+        ),
       );
     } else {
       return Text(
         pixie.emoji,
         textScaleFactor: 0.8,
         style: TextStyle(
-            height: 1.0,
-            color: maze.isEasy() || pixie.isVisible
-                ? Colors.black
-                : Colors.transparent,
-            fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie)),
+          height: 1.0,
+          color: maze.isEasy() || pixie.isVisible
+              ? Colors.black
+              : Colors.transparent,
+          fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
+        ),
       );
     }
   }
@@ -441,7 +455,6 @@ class _MazeAreaState extends State<MazeArea>
       Future.delayed(Duration(milliseconds: minoDelay), () {
         //maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
         maze.moveMinotaur();
-
         setState(() {
           // just force redraw
         });
@@ -561,170 +574,168 @@ class _MazeAreaState extends State<MazeArea>
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
             backgroundColor: Colors.black54,
-            contentPadding: EdgeInsets.all(0),
+            contentPadding: EdgeInsets.all(2),
             content: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Column(
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 28, color: Colors.cyanAccent),
+                  ),
+                  if (msg != '')
+                    RichText(
+                      text: TextSpan(children: <TextSpan>[
+                        TextSpan(
+                          text: msg,
+                          style:
+                              TextStyle(fontSize: 22, color: Colors.cyanAccent),
+                        ),
+                        TextSpan(
+                          text: maze.getEogEmoji(),
+                          style: emojiTextStyle,
+                        ),
+                      ]),
+                    ),
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        title,
+                        MAZEDIMENSIONS,
                         style:
-                            TextStyle(fontSize: 28, color: Colors.cyanAccent),
+                            TextStyle(fontSize: 20, color: Colors.cyanAccent),
                       ),
-                      if (msg != '')
-                        RichText(
-                          text: TextSpan(children: <TextSpan>[
-                            TextSpan(
-                              text: msg,
-                              style: TextStyle(
-                                  fontSize: 22, color: Colors.cyanAccent),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Container(
+                            decoration: new BoxDecoration(
+                              border: new Border.all(
+                                  color: Colors.cyanAccent,
+                                  width: Utils.WALLTHICKNESS + 1,
+                                  style: BorderStyle.solid),
+                              borderRadius: new BorderRadius.all(
+                                  new Radius.circular(10.0)),
                             ),
-                            TextSpan(
-                              text: maze.getEogEmoji(),
-                              style: emojiTextStyle,
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: DropdownButtonHideUnderline(
+                                child: new Theme(
+                                  data: Theme.of(context).copyWith(
+                                    canvasColor: Colors.black87,
+                                  ),
+                                  child: DropdownButton<String>(
+                                    isDense: true,
+                                    value: numRowsInner.toString(),
+                                    onChanged: (String newValue) {
+                                      numRowsInner = int.parse(newValue);
+                                      numRows = numRowsInner;
+                                      setState(() {
+                                        print('new val == $numRowsInner');
+                                      });
+                                    },
+                                    items: <String>['8', '10', '12', '14']
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          '${value}x$value',
+                                          textScaleFactor: 1.0,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              color: Colors.cyanAccent),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ]),
+                          ),
                         ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            MAZEDIMENSIONS,
-                            style: TextStyle(
-                                fontSize: 22, color: Colors.cyanAccent),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Container(
-                              decoration: new BoxDecoration(
-                                border: new Border.all(
-                                    color: Colors.cyanAccent,
-                                    width: Utils.WALLTHICKNESS + 1,
-                                    style: BorderStyle.solid),
-                                borderRadius: new BorderRadius.all(
-                                    new Radius.circular(20.0)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: new Theme(
-                                    data: Theme.of(context).copyWith(
-                                      canvasColor: Colors.black87,
-                                    ),
-                                    child: DropdownButton<String>(
-                                      isDense: true,
-                                      value: numRowsInner.toString(),
-                                      onChanged: (String newValue) {
-                                        numRowsInner = int.parse(newValue);
-                                        numRows = numRowsInner;
-                                        setState(() {
-                                          print('new val == $numRowsInner');
-                                        });
-                                      },
-                                      items: <String>['8', '10', '12', '14']
-                                          .map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            '${value}x$value',
-                                            textScaleFactor: 1.0,
-                                            style: TextStyle(
-                                                fontSize: 24,
-                                                color: Colors.cyanAccent),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Difficulty',
+                        style:
+                            TextStyle(fontSize: 20, color: Colors.cyanAccent),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Container(
+                            decoration: new BoxDecoration(
+                              border: new Border.all(
+                                  color: Colors.cyanAccent,
+                                  width: Utils.WALLTHICKNESS + 1,
+                                  style: BorderStyle.solid),
+                              borderRadius: new BorderRadius.all(
+                                  new Radius.circular(10.0)),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: DropdownButtonHideUnderline(
+                                child: new Theme(
+                                  data: Theme.of(context).copyWith(
+                                    canvasColor: Colors.black87,
+                                  ),
+                                  child: DropdownButton<String>(
+                                    isDense: true,
+                                    value: maze.difficulty == Difficulty.easy
+                                        ? Utils.EASY
+                                        : Utils.HARD,
+                                    onChanged: (String newValue) {
+                                      maze.difficulty = newValue == Utils.EASY
+                                          ? Difficulty.easy
+                                          : Difficulty.hard;
+                                      setState(() {
+                                        print(' ');
+                                      });
+                                    },
+                                    items: <String>[Utils.EASY, Utils.HARD]
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
+                                          textScaleFactor: 1.0,
+                                          overflow: TextOverflow.visible,
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              color: Colors.cyanAccent),
+                                        ),
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            'Difficulty',
-                            style: TextStyle(
-                                fontSize: 22, color: Colors.cyanAccent),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Container(
-                              decoration: new BoxDecoration(
-                                border: new Border.all(
-                                    color: Colors.cyanAccent,
-                                    width: Utils.WALLTHICKNESS + 1,
-                                    style: BorderStyle.solid),
-                                borderRadius: new BorderRadius.all(
-                                    new Radius.circular(20.0)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: new Theme(
-                                    data: Theme.of(context).copyWith(
-                                      canvasColor: Colors.black87,
-                                    ),
-                                    child: DropdownButton<String>(
-                                      isDense: true,
-                                      value: maze.difficulty == Difficulty.easy
-                                          ? Utils.EASY
-                                          : Utils.HARD,
-                                      onChanged: (String newValue) {
-                                        maze.difficulty = newValue == Utils.EASY
-                                            ? Difficulty.easy
-                                            : Difficulty.hard;
-                                        setState(() {
-                                          print(' ');
-                                        });
-                                      },
-                                      items: <String>[Utils.EASY, Utils.HARD]
-                                          .map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            textScaleFactor: 1.0,
-                                            overflow: TextOverflow.visible,
-                                            style: TextStyle(
-                                                fontSize: 24,
-                                                color: Colors.cyanAccent),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          if (MediaQuery.of(context).orientation ==
-                              Orientation.landscape)
-                            StartNewGame(
-                              startgame: startNewGameAndSetState,
-                            ),
-                        ],
-                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
                       if (MediaQuery.of(context).orientation ==
-                          Orientation.portrait)
+                          Orientation.landscape)
                         StartNewGame(
                           startgame: startNewGameAndSetState,
                         ),
                     ],
                   ),
+                  if (MediaQuery.of(context).orientation ==
+                      Orientation.portrait)
+                    StartNewGame(
+                      startgame: startNewGameAndSetState,
+                    ),
                   if (title == NEWGAME) MazeBackButton(setstate: setMyState),
                 ],
               ),
@@ -739,7 +750,7 @@ class _MazeAreaState extends State<MazeArea>
     maxWidth = MediaQuery.of(context).size.width;
     var maxHeight = MediaQuery.of(context).size.height;
     if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      maxWidth = MediaQuery.of(context).size.height * 0.85;
+      maxWidth = MediaQuery.of(context).size.height * 0.75;
     } else {
       if (maxWidth / maxHeight > 0.66) {
         maxWidth = maxWidth * 0.95;
@@ -752,7 +763,7 @@ class _MazeAreaState extends State<MazeArea>
 
   Widget defineTopRow() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(5.0),
       child: Container(
         child: OutlineButton(
           shape: new RoundedRectangleBorder(
