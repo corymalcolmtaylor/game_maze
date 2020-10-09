@@ -101,27 +101,34 @@ class MazeScaffold extends StatelessWidget {
             style: textstyle,
           ),
           TextSpan(
-            text: '👧',
+            text: '👧..\n',
             style: Platform.isIOS ? notoalice : textstyle,
           ),
           TextSpan(
-            text: '.\nShe moves one step at a time and gets three per turn.\n' +
+            text: 'She moves one step at a time and gets three per turn.\n' +
                 'End her turn early by moving into a wall or double tapping.\n' +
                 'Rescue the animals by getting Alice to them before they get ' +
                 'captured by the goblin  ',
             style: textstyle,
           ),
           TextSpan(
-            text: '👺',
+            text: '👺.\n',
             style: Platform.isIOS ? notogoblin : textstyle,
           ),
           TextSpan(
-            text: '.\nIf the goblin captures Alice the game ends in defeat but otherwise ' +
-                'if you save more animals than the goblin captures you win.\n' +
-                'Difficulty modes:\n' +
-                'Easy is the default mode, in Easy mode you can see everything.\n' +
-                'Hard mode means that you cannot see the other ' +
-                'characters until Alice can.',
+            text: 'If the goblin captures Alice the game ends in defeat '
+                'but otherwise if you save more animals than the goblin '
+                'captures you win.\n'
+                'Difficulty modes:\n'
+                'Easy mode is the default mode, in Easy mode you can see '
+                'everything.\n'
+                'Hard mode means that you cannot see the other '
+                'characters until Alice can.\n'
+                'Tough mode is like Hard mode but now the Goblin will '
+                'not capture any animals, in this way it wll not cause '
+                'its own defeat by capturing the last animal after the '
+                'player has already captured more than half and will '
+                'have more time to catch Alice.',
             style: textstyle,
           ),
         ],
@@ -547,6 +554,21 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
+  String getMazeDifficulty() {
+    if (maze.difficulty == Difficulty.hard) return Utils.HARD;
+    if (maze.difficulty == Difficulty.tough) return Utils.TOUGH;
+    return Utils.EASY;
+  }
+
+  void setMazeDifficulty(newValue) {
+    if (newValue == Utils.HARD)
+      maze.difficulty = Difficulty.hard;
+    else if (newValue == Utils.TOUGH)
+      maze.difficulty = Difficulty.tough;
+    else
+      maze.difficulty = Difficulty.easy;
+  }
+
   Future<void> showGameOverMessage() async {
     const NEWGAME = 'New Game';
     const GAMEOVER = 'Game Over';
@@ -686,20 +708,20 @@ class _MazeAreaState extends State<MazeArea>
                                   ),
                                   child: DropdownButton<String>(
                                     isDense: true,
-                                    value: maze.difficulty == Difficulty.easy
-                                        ? Utils.EASY
-                                        : Utils.HARD,
+                                    value: getMazeDifficulty(),
                                     onChanged: (String newValue) {
-                                      maze.difficulty = newValue == Utils.EASY
-                                          ? Difficulty.easy
-                                          : Difficulty.hard;
+                                      setMazeDifficulty(newValue);
+
                                       setState(() {
                                         print(' ');
                                       });
                                     },
-                                    items: <String>[Utils.EASY, Utils.HARD]
-                                        .map<DropdownMenuItem<String>>(
-                                            (String value) {
+                                    items: <String>[
+                                      Utils.EASY,
+                                      Utils.HARD,
+                                      Utils.TOUGH
+                                    ].map<DropdownMenuItem<String>>(
+                                        (String value) {
                                       return DropdownMenuItem<String>(
                                         value: value,
                                         child: Text(

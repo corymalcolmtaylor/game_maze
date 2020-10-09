@@ -27,7 +27,7 @@ class Room {
   var minotaursPath = 0;
 }
 
-enum Difficulty { easy, hard }
+enum Difficulty { easy, hard, tough }
 enum Ilk { player, minotaur, lamb }
 enum Directions { up, down, right, left }
 enum Condition { alive, dead, freed }
@@ -113,6 +113,14 @@ class Maze {
     return difficulty == Difficulty.easy;
   }
 
+  bool isHard() {
+    return difficulty == Difficulty.hard;
+  }
+
+  bool isTough() {
+    return difficulty == Difficulty.tough;
+  }
+
   int get maxRow {
     return _maxRow;
   }
@@ -190,15 +198,20 @@ class Maze {
         return;
       }
       if (el.location == boss.location) {
-        boss.movesLeft = 0;
-        if (boss.ilk == Ilk.minotaur) {
+        if (boss.ilk == Ilk.minotaur && difficulty != Difficulty.tough) {
+          boss.movesLeft = 0;
           el.condition = Condition.dead;
           player.lostLambs++;
           print('lost lamb ${el.emoji}');
         } else if (boss.ilk == Ilk.player) {
+          boss.movesLeft = 0;
           el.condition = Condition.freed;
           player.savedLambs++;
           print('saved lamb ${el.emoji}');
+        } else {
+          print(
+              'lost lamb difficulty=${difficulty}, ${el.emoji}, ${el.location}');
+          print('*****');
         }
         handled = true;
       }
@@ -218,11 +231,12 @@ class Maze {
   }
 
   bool movePixieToXY(Pixie pixie, int x, int y) {
+    print('movePixieToXY b_${x}_$y');
     final newloc = 'b_${x}_$y';
     if (pixie.ilk == Ilk.lamb && minotaur.location == newloc) {
       return false;
     }
-    /* do not let lambs wak on each other */
+    /* do not let lambs walk on each other */
     if (pixie.ilk == Ilk.lamb &&
         thisLocationIsOccupiedByALamb(location: newloc)) {
       return false;
@@ -233,7 +247,7 @@ class Maze {
       pixie.lastLocation = '';
       return false;
     }
-    pixie.lastLocation = 'b_${pixie.x}_${pixie.y}';
+    pixie.lastLocation = 'movePixieToXY b_${pixie.x}_${pixie.y}';
     pixie.lastX = pixie.x;
     pixie.lastY = pixie.y;
     pixie.x = x;
@@ -304,6 +318,7 @@ class Maze {
   }
 
   bool moveThisPixieInThisDirection(Pixie pixie, Directions direction) {
+    print('moveThisPixieInThisDirection ${pixie.location}');
     switch (direction) {
       case Directions.down:
         {
@@ -580,6 +595,8 @@ class Maze {
       return playerDirection;
     }
 
+    if (difficulty == Difficulty.tough) return direction;
+
     var xlesslambs = lambs.where((lamb) {
       return (lamb.y == boss.y &&
           lamb.x < boss.x &&
@@ -760,6 +777,7 @@ class Maze {
   }
 
   int markMinotaursPath({String location}) {
+    print('markMinotaursPath $location');
     myLabyrinth[location].minotaursPath = ++Room.badGuyHasMovedThisManyTimes;
     return myLabyrinth[location].minotaursPath;
   }
@@ -772,11 +790,16 @@ class Maze {
     bool minotaurHasMovedAtLeastOnceThisTurn() {
       return minotaur.movesLeft < maxRow;
     }
-    // the minotaur moves in one direction until it eats a lamb,
-    // runs into a wall or stops at an intersection of halls
-    // first it charges the nearest pixie it sees (it cannot see around corners or through walls)
-    // if no pixie is targeted it moves at random until it reaches a wall or an intersection
-    // (there is a 50% chance it stops at an intersection unless it can now see a lamb when it will stop)
+    // the minotaur moves in one direction until it eats a pixie,
+    // runs into a wall or stops at an intersection.
+    // First it charges the nearest pixie it sees (it cannot see around corners
+    // or through walls)
+    // unless the maze is in in Tough mode in which case the goblin
+    // will ignore the pixies if the player has freed more pixies than it
+    // has captured.
+    // If no pixie is targeted it moves at random until it reaches a wall
+    // or an intersection (there is a 50% chance it stops at an intersection
+    // unless it can now see a lamb when it will stop)
 
     if (_gameIsOver) {
       return false;
