@@ -210,7 +210,7 @@ class Maze {
           print('saved lamb ${el.emoji}');
         } else {
           print(
-              'lost lamb difficulty=${difficulty}, ${el.emoji}, ${el.location}');
+              'lost lamb difficulty=$difficulty, ${el.emoji}, ${el.location}');
           print('*****');
         }
         handled = true;

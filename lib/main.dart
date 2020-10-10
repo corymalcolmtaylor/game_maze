@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'dart:io' show Platform;
+//import 'dart:io' show Platform;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:universal_io/io.dart';
 
 import 'maze.dart';
 import 'w_StartNewGame.dart';
@@ -17,6 +18,7 @@ class MazeScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var strtitle = Utils.TITLE;
+    print('****** MazeScaffold build OS: ${Platform.operatingSystem}');
     if (Platform.isIOS) {
       strtitle = Utils.TITLE_ios;
     }
@@ -102,7 +104,7 @@ class MazeScaffold extends StatelessWidget {
           ),
           TextSpan(
             text: '👧..\n',
-            style: Platform.isIOS ? notoalice : textstyle,
+            style: !Platform.isAndroid ? notoalice : textstyle,
           ),
           TextSpan(
             text: 'She moves one step at a time and gets three per turn.\n' +
@@ -113,7 +115,7 @@ class MazeScaffold extends StatelessWidget {
           ),
           TextSpan(
             text: '👺.\n',
-            style: Platform.isIOS ? notogoblin : textstyle,
+            style: !Platform.isAndroid ? notogoblin : textstyle,
           ),
           TextSpan(
             text: 'If the goblin captures Alice the game ends in defeat '
@@ -401,7 +403,7 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget getEmojiText(Pixie pixie) {
-    if (Platform.isIOS) {
+    if (!Platform.isAndroid) {
       return Text(
         pixie.emoji,
         textScaleFactor: 0.8,
