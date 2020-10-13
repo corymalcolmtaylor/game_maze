@@ -8,7 +8,7 @@ class MazeBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(1, 1, 6, 1),
+      padding: const EdgeInsets.fromLTRB(1, 12, 6, 12),
       child: Container(
         child: OutlineButton(
           shape: new RoundedRectangleBorder(

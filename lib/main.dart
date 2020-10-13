@@ -83,13 +83,18 @@ class MazeScaffold extends StatelessWidget {
   Future<void> showRules(BuildContext context) async {
     const textstyle = TextStyle(
       fontSize: 22,
+      color: Colors.cyan,
+    );
+    const textstyletitle = TextStyle(
+      fontSize: 24,
       color: Colors.cyanAccent,
     );
     var notoalice = TextStyle(
-        fontSize: 22,
-        color: Colors.orange[800],
-        fontFamily: 'NotoEmoji',
-        backgroundColor: Colors.green[200]);
+      fontSize: 22,
+      color: Colors.orange[800],
+      fontFamily: 'NotoEmoji',
+      backgroundColor: Colors.green[200],
+    );
     var notogoblin = TextStyle(
         fontSize: 22,
         color: Colors.red[800],
@@ -99,38 +104,69 @@ class MazeScaffold extends StatelessWidget {
       text: TextSpan(
         children: <TextSpan>[
           TextSpan(
-            text: 'Swipe verticaly or horizontally on the maze to move Alice ',
+            text: 'Swipe vertically or horizontally on the maze to move ',
             style: textstyle,
           ),
           TextSpan(
-            text: '👧..\n',
+            text: 'Alice ',
+            style: textstyletitle,
+          ),
+          TextSpan(
+            text: '👧',
             style: !Platform.isAndroid ? notoalice : textstyle,
           ),
           TextSpan(
-            text: 'She moves one step at a time and gets three per turn.\n' +
+            text: '.\nShe moves one step at a time and gets three per turn.\n' +
                 'End her turn early by moving into a wall or double tapping.\n' +
                 'Rescue the animals by getting Alice to them before they get ' +
-                'captured by the goblin  ',
+                'captured by the ',
             style: textstyle,
           ),
           TextSpan(
-            text: '👺.\n',
+            text: 'Goblin ',
+            style: textstyletitle,
+          ),
+          TextSpan(
+            text: '👺',
             style: !Platform.isAndroid ? notogoblin : textstyle,
           ),
           TextSpan(
-            text: 'If the goblin captures Alice the game ends in defeat '
-                'but otherwise if you save more animals than the goblin '
-                'captures you win.\n'
-                'Difficulty modes:\n'
-                'Easy mode is the default mode, in Easy mode you can see '
-                'everything.\n'
-                'Hard mode means that you cannot see the other '
-                'characters until Alice can.\n'
-                'Tough mode is like Hard mode but now the Goblin will '
-                'not capture any animals, in this way it wll not cause '
+            text: '.\nIf the Goblin captures Alice the game ends in defeat '
+                'but otherwise if you save more animals than the Goblin '
+                'captures you win once all the animals are gone.\n',
+            style: textstyle,
+          ),
+          TextSpan(
+            text: 'Difficulty modes:\n',
+            style: textstyletitle,
+          ),
+          TextSpan(
+            text: 'Easy',
+            style: textstyletitle,
+          ),
+          TextSpan(
+            text: ' mode is the default mode, in Easy mode you can see '
+                'everything.\n',
+            style: textstyle,
+          ),
+          TextSpan(
+            text: 'Hard',
+            style: textstyletitle,
+          ),
+          TextSpan(
+              text: ' mode means that you cannot see the other '
+                  'characters until Alice can.\n',
+              style: textstyle),
+          TextSpan(
+            text: 'Tough',
+            style: textstyletitle,
+          ),
+          TextSpan(
+            text: ' mode is like Hard mode but now the Goblin will '
+                'not capture any animals, in this way it will not cause '
                 'its own defeat by capturing the last animal after the '
-                'player has already captured more than half and will '
-                'have more time to catch Alice.',
+                'player has already captured more than half and it will '
+                'have more time to capture Alice.',
             style: textstyle,
           ),
         ],
@@ -181,18 +217,22 @@ class MazeScaffold extends StatelessWidget {
   }
 
   void showInformation(BuildContext context) {
+    Text title = Text(
+      '${Utils.TITLE}',
+      style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+    );
     Text message = Text(
-      'About ${Utils.TITLE} - \n' +
+      ' is a simple maze game inspired by the works of Lewis Carroll.\n' +
           'If you have any suggestions or find a bug please let us know.\n\n' +
           'Developer email:',
-      style: TextStyle(fontSize: 22, color: Colors.cyanAccent),
+      style: TextStyle(fontSize: 22, color: Colors.cyan),
     );
     Text emailText = Text(
       'thesoftwaretaylor@gmail.com',
       style: TextStyle(
           fontSize: 18,
           decoration: TextDecoration.underline,
-          color: Colors.cyanAccent),
+          color: Colors.cyan),
     );
     GestureDetector emaillink = GestureDetector(
       child: emailText,
@@ -205,14 +245,14 @@ class MazeScaffold extends StatelessWidget {
       backgroundColor: Colors.black54,
       title: Center(
         child: Text(
-          'Information',
+          'About',
           style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
         ),
       ),
       content: Scrollbar(
         child: SingleChildScrollView(
           child: ListBody(
-            children: <Widget>[message, emaillink],
+            children: <Widget>[title, message, emaillink],
           ),
         ),
       ),
@@ -624,14 +664,17 @@ class _MazeAreaState extends State<MazeArea>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
-                        MAZEDIMENSIONS,
-                        style:
-                            TextStyle(fontSize: 20, color: Colors.cyanAccent),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          MAZEDIMENSIONS,
+                          style:
+                              TextStyle(fontSize: 20, color: Colors.cyanAccent),
+                        ),
                       ),
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.all(6.0),
+                          padding: const EdgeInsets.all(12.0),
                           child: Container(
                             decoration: new BoxDecoration(
                               border: new Border.all(
@@ -642,7 +685,7 @@ class _MazeAreaState extends State<MazeArea>
                                   new Radius.circular(10.0)),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(2.0),
+                              padding: const EdgeInsets.all(6.0),
                               child: DropdownButtonHideUnderline(
                                 child: new Theme(
                                   data: Theme.of(context).copyWith(
@@ -684,10 +727,13 @@ class _MazeAreaState extends State<MazeArea>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
-                        'Difficulty',
-                        style:
-                            TextStyle(fontSize: 20, color: Colors.cyanAccent),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Difficulty',
+                          style:
+                              TextStyle(fontSize: 20, color: Colors.cyanAccent),
+                        ),
                       ),
                       Expanded(
                         child: Padding(
@@ -702,7 +748,7 @@ class _MazeAreaState extends State<MazeArea>
                                   new Radius.circular(10.0)),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(2.0),
+                              padding: const EdgeInsets.all(6.0),
                               child: DropdownButtonHideUnderline(
                                 child: new Theme(
                                   data: Theme.of(context).copyWith(
