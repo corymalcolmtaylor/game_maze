@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:game_maze/theme.dart';
 import './utils.dart';
+import 'generated/l10n.dart';
 
 class StartNewGame extends StatelessWidget {
   final Function startgame;
@@ -16,14 +18,14 @@ class StartNewGame extends StatelessWidget {
           borderSide: BorderSide(
               color: Colors.cyan,
               style: BorderStyle.solid,
-              width: Utils.WALLTHICKNESS + 1),
+              width: Utils.borderWallThickness),
           onPressed: () {
             Navigator.of(context).pop();
             startgame();
           },
           child: Text(
-            'Start Game',
-            style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+            S.of(context).startGame,
+            style: theme.textTheme.bodyText2,
           ),
         ),
       ),

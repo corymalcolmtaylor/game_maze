@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:game_maze/theme.dart';
 import './utils.dart';
+import 'package:game_maze/generated/l10n.dart';
 
 class MazeBackButton extends StatelessWidget {
-  final Function setstate;
-
-  MazeBackButton({this.setstate});
+  MazeBackButton();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -17,14 +17,13 @@ class MazeBackButton extends StatelessWidget {
           borderSide: BorderSide(
               color: Colors.cyan,
               style: BorderStyle.solid,
-              width: Utils.WALLTHICKNESS + 1),
+              width: Utils.borderWallThickness),
           onPressed: () {
             Navigator.of(context).pop();
-            setstate();
           },
           child: Text(
-            'Back',
-            style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+            S.of(context).back,
+            style: theme.textTheme.bodyText2,
           ),
         ),
       ),

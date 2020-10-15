@@ -1,78 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-//import 'dart:io' show Platform;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:universal_io/io.dart';
 
+import 'generated/l10n.dart';
 import 'maze.dart';
 import 'w_StartNewGame.dart';
 import 'w_MazeBackButton.dart';
 import './utils.dart';
+import 'theme.dart';
 
-//void main() => runApp(MyApp());
 void main() => runApp(
       MyApp(),
     );
+enum GameActions { options, rules, about, maze }
 
 class MazeScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var strtitle = Utils.TITLE;
+    var strtitle = S.of(context).aliceAndTheHedgeMaze;
     print('****** MazeScaffold build OS: ${Platform.operatingSystem}');
-    if (Platform.isIOS) {
-      strtitle = Utils.TITLE_ios;
-    }
+
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
         backgroundColor: Colors.black,
         centerTitle: false,
-        title: Text(strtitle,
-            style: TextStyle(color: Colors.cyanAccent, fontSize: 14)),
+        title: Text(strtitle, style: theme.textTheme.headline6),
         actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
-            child: OutlineButton(
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(20.0),
-              ),
-              color: Colors.cyanAccent,
-              borderSide: BorderSide(
-                  color: Colors.cyan,
-                  style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS + 1),
-
-              onPressed: () {
+          PopupMenuButton<GameActions>(
+            onSelected: (GameActions result) {
+              if (result == GameActions.rules) {
                 showRules(context);
-                print('icon cc button, Show Rules');
-              },
-              child: Text('Rules',
-                  style: TextStyle(color: Colors.cyanAccent, fontSize: 18)),
-              //shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
-            child: OutlineButton(
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(20.0),
-              ),
-              color: Colors.cyanAccent,
-              borderSide: BorderSide(
-                  color: Colors.cyan,
-                  style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS + 1),
-              textColor: Colors.white,
-              onPressed: () {
+
+                print('icon button, Show Rules');
+              } else if (result == GameActions.about) {
                 showInformation(context);
-                print('icon button, Show info');
-              },
-              child: Text(
-                'About',
-                style: TextStyle(color: Colors.cyanAccent, fontSize: 18),
+                print('icon button, Show about');
+              }
+            },
+            color: Colors.black,
+            itemBuilder: (BuildContext context) =>
+                <PopupMenuEntry<GameActions>>[
+              PopupMenuItem<GameActions>(
+                value: GameActions.rules,
+                child: Text(
+                  S.of(context).rules,
+                  style: theme.textTheme.headline6,
+                ),
               ),
-              //shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
-            ),
+              PopupMenuItem<GameActions>(
+                value: GameActions.about,
+                child: Text(
+                  S.of(context).about,
+                  style: theme.textTheme.headline6,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -81,14 +66,6 @@ class MazeScaffold extends StatelessWidget {
   }
 
   Future<void> showRules(BuildContext context) async {
-    const textstyle = TextStyle(
-      fontSize: 22,
-      color: Colors.cyan,
-    );
-    const textstyletitle = TextStyle(
-      fontSize: 24,
-      color: Colors.cyanAccent,
-    );
     var notoalice = TextStyle(
       fontSize: 22,
       color: Colors.orange[800],
@@ -104,70 +81,67 @@ class MazeScaffold extends StatelessWidget {
       text: TextSpan(
         children: <TextSpan>[
           TextSpan(
-            text: 'Swipe vertically or horizontally on the maze to move ',
-            style: textstyle,
+            text: S.of(context).rescueThem, //   swipeVerticallyOrH,
+            style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: 'Alice ',
-            style: textstyletitle,
+            text: S.of(context).alice,
+            style: theme.textTheme.bodyText1,
           ),
           TextSpan(
             text: '👧',
-            style: !Platform.isAndroid ? notoalice : textstyle,
+            style: !Platform.isAndroid ? notoalice : theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: '.\nShe moves one step at a time and gets three per turn.\n' +
-                'End her turn early by moving into a wall or double tapping.\n' +
-                'Rescue the animals by getting Alice to them before they get ' +
-                'captured by the ',
-            style: textstyle,
+            text: S.of(context).toTouchThem,
+            style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: 'Goblin ',
-            style: textstyletitle,
+            text: S.of(context).goblin,
+            style: theme.textTheme.bodyText1,
           ),
           TextSpan(
             text: '👺',
-            style: !Platform.isAndroid ? notogoblin : textstyle,
+            style: !Platform.isAndroid ? notogoblin : theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: '.\nIf the Goblin captures Alice the game ends in defeat '
-                'but otherwise if you save more animals than the Goblin '
-                'captures you win once all the animals are gone.\n',
-            style: textstyle,
+            text: S.of(context).swipeVerticallyOrH,
+            style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: 'Difficulty modes:\n',
-            style: textstyletitle,
+            text: S.of(context).sheMovesOneStep,
+            style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: 'Easy',
-            style: textstyletitle,
+            text: S.of(context).ifTheGoblinCap,
+            style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: ' mode is the default mode, in Easy mode you can see '
-                'everything.\n',
-            style: textstyle,
+            text: S.of(context).difficultyModes,
+            style: theme.textTheme.bodyText1,
           ),
           TextSpan(
-            text: 'Hard',
-            style: textstyletitle,
+            text: S.of(context).easy,
+            style: theme.textTheme.bodyText1,
           ),
           TextSpan(
-              text: ' mode means that you cannot see the other '
-                  'characters until Alice can.\n',
-              style: textstyle),
-          TextSpan(
-            text: 'Tough',
-            style: textstyletitle,
+            text: S.of(context).modeIsTheDefault,
+            style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: ' mode is like Hard mode but now the Goblin will '
-                'not capture any animals, in this way it will not cause '
-                'its own defeat by capturing the last animal after the '
-                'player has already captured more than half and it will '
-                'have more time to capture Alice.',
-            style: textstyle,
+            text: S.of(context).hard,
+            style: theme.textTheme.bodyText1,
+          ),
+          TextSpan(
+              text: S.of(context).modeMeansThat,
+              style: theme.textTheme.bodyText2),
+          TextSpan(
+            text: S.of(context).tough,
+            style: theme.textTheme.bodyText1,
+          ),
+          TextSpan(
+            text: S.of(context).modeIsLikeHard,
+            style: theme.textTheme.bodyText2,
           ),
         ],
       ),
@@ -175,119 +149,94 @@ class MazeScaffold extends StatelessWidget {
 
     return showDialog<void>(
       context: context,
+
       barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.black54,
-          title: Center(
-            child: Text(
-              'Rules',
-              style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
-            ),
-          ),
-          content: Scrollbar(
-            child: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[message],
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            OutlineButton(
-              shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0),
-              ),
-              color: Colors.cyanAccent,
-              borderSide: BorderSide(
-                  color: Colors.cyan,
-                  style: BorderStyle.solid,
-                  width: Utils.WALLTHICKNESS + 1),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.black54,
+            title: Center(
               child: Text(
-                'OK',
-                style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
+                S.of(context).rules,
+                style: theme.textTheme.headline2,
               ),
             ),
-          ],
+            content: Scrollbar(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    message,
+                    MazeBackButton(),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  Future<void> showInformation(BuildContext context) {
+    Text title = Text(
+      S.of(context).aliceAndTheHedgeMaze,
+      style: theme.textTheme.headline4,
+    );
+    Text message = Text(
+      S.of(context).isASimpleMazeG,
+      style: theme.textTheme.bodyText2,
+    );
+    Text emailText = Text(S.of(context).thesoftwaretaylorgmailcom,
+        style: theme.textTheme.headline6.copyWith(color: Colors.cyanAccent));
+    GestureDetector emaillink = GestureDetector(
+      child: emailText,
+      onTap: () {
+        print('email tapped');
+        _launchURL(context);
+      },
+    );
+    var alert = AlertDialog(
+      backgroundColor: Colors.black87,
+      title: Center(
+        child: Text(
+          S.of(context).about,
+          style: theme.textTheme.headline2,
+        ),
+      ),
+      content: Scrollbar(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              title,
+              message,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: emaillink,
+              ),
+              MazeBackButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+    return showDialog<void>(
+      context: context,
+
+      barrierDismissible: false, // user must tap button!
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return alert;
+          },
         );
       },
     );
   }
 
-  void showInformation(BuildContext context) {
-    Text title = Text(
-      '${Utils.TITLE}',
-      style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
-    );
-    Text message = Text(
-      ' is a simple maze game inspired by the works of Lewis Carroll.\n' +
-          'If you have any suggestions or find a bug please let us know.\n\n' +
-          'Developer email:',
-      style: TextStyle(fontSize: 22, color: Colors.cyan),
-    );
-    Text emailText = Text(
-      'thesoftwaretaylor@gmail.com',
-      style: TextStyle(
-          fontSize: 18,
-          decoration: TextDecoration.underline,
-          color: Colors.cyan),
-    );
-    GestureDetector emaillink = GestureDetector(
-      child: emailText,
-      onTap: () {
-        print('email tapped');
-        _launchURL();
-      },
-    );
-    var alert = AlertDialog(
-      backgroundColor: Colors.black54,
-      title: Center(
-        child: Text(
-          'About',
-          style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
-        ),
-      ),
-      content: Scrollbar(
-        child: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[title, message, emaillink],
-          ),
-        ),
-      ),
-      actions: <Widget>[
-        OutlineButton(
-          shape: new RoundedRectangleBorder(
-            borderRadius: new BorderRadius.circular(30.0),
-          ),
-          color: Colors.cyanAccent,
-          borderSide: BorderSide(
-              color: Colors.cyan,
-              style: BorderStyle.solid,
-              width: Utils.WALLTHICKNESS + 1),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text(
-            'OK',
-            style: TextStyle(fontSize: 24, color: Colors.cyanAccent),
-          ),
-        ),
-      ],
-    );
-    showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
-
-  Future<void> _launchURL() async {
-    const url =
-        'mailto:thesoftwaretaylor@gmail.com?subject=HedgeMaze&body=Notes';
+  Future<void> _launchURL(BuildContext context) async {
+    var url =
+        'mailto:thesoftwaretaylor@gmail.com?subject=${S.of(context).aliceAndTheHedgeMaze}';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -301,16 +250,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: Utils.TITLE,
+      onGenerateTitle: (context) => S.of(context).aliceAndTheHedgeMaze,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
         backgroundColor: Colors.black,
-        textTheme: TextTheme(
-          headline6: TextStyle(color: Colors.cyanAccent),
-          bodyText2: TextStyle(color: Colors.cyanAccent),
-        ),
       ),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        S.delegate
+      ],
+      supportedLocales: S.delegate.supportedLocales,
       home: MazeScaffold(),
     );
   }
@@ -346,12 +297,6 @@ class _MazeAreaState extends State<MazeArea>
 
   void startNewGameAndSetState() {
     startNewGame();
-    setState(() {
-      print('started new game');
-    });
-  }
-
-  void setMyState() {
     setState(() {
       print('started new game');
     });
@@ -472,18 +417,18 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   double whatIsTheEmojiFontSizeOfThisPixie({Pixie pixie}) {
-    return roomLength - (Utils.WALLTHICKNESS * 3);
+    return roomLength - (Utils.wallThickness * 3);
   }
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.y - 1) * roomLength);
     //retval += roomLength * 0.1;
-    return retval + (2 * Utils.WALLTHICKNESS);
+    return retval + (2 * Utils.wallThickness);
   }
 
   double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.x - 1) * roomLength);
-    return retval + Utils.WALLTHICKNESS;
+    return retval + Utils.wallThickness;
   }
 
   void computerMove({bool delayMove}) async {
@@ -502,7 +447,6 @@ class _MazeAreaState extends State<MazeArea>
     if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
       lambDelay = Utils.animDurationMilliSeconds;
       Future.delayed(Duration(milliseconds: minoDelay), () {
-        //maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
         maze.moveMinotaur();
         setState(() {
           // just force redraw
@@ -586,10 +530,10 @@ class _MazeAreaState extends State<MazeArea>
         decoration: BoxDecoration(
           color: floorColor,
           border: Border(
-            bottom: BorderSide(color: southColor, width: Utils.WALLTHICKNESS),
-            top: BorderSide(color: northColor, width: Utils.WALLTHICKNESS),
-            right: BorderSide(color: eastColor, width: Utils.WALLTHICKNESS),
-            left: BorderSide(color: westColor, width: Utils.WALLTHICKNESS),
+            bottom: BorderSide(color: southColor, width: Utils.wallThickness),
+            top: BorderSide(color: northColor, width: Utils.wallThickness),
+            right: BorderSide(color: eastColor, width: Utils.wallThickness),
+            left: BorderSide(color: westColor, width: Utils.wallThickness),
           ),
         ),
       ),
@@ -612,14 +556,11 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Future<void> showGameOverMessage() async {
-    const NEWGAME = 'New Game';
-    const GAMEOVER = 'Game Over';
-    var title = GAMEOVER;
+    var title = S.of(context).gameOver;
     var msg = maze.getGameOverMessage();
-    const MAZEDIMENSIONS = 'Maze Size';
 
     if (!maze.gameIsOver()) {
-      title = NEWGAME;
+      title = S.current.options;
       msg = '';
     }
 
@@ -643,17 +584,19 @@ class _MazeAreaState extends State<MazeArea>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    title,
-                    style: TextStyle(fontSize: 28, color: Colors.cyanAccent),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      title,
+                      style: theme.textTheme.headline2,
+                    ),
                   ),
                   if (msg != '')
                     RichText(
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                           text: msg,
-                          style:
-                              TextStyle(fontSize: 22, color: Colors.cyanAccent),
+                          style: theme.textTheme.bodyText1,
                         ),
                         TextSpan(
                           text: maze.getEogEmoji(),
@@ -661,152 +604,152 @@ class _MazeAreaState extends State<MazeArea>
                         ),
                       ]),
                     ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          MAZEDIMENSIONS,
-                          style:
-                              TextStyle(fontSize: 20, color: Colors.cyanAccent),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            S.of(context).mazeSize,
+                            style: theme.textTheme.bodyText2,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Container(
-                            decoration: new BoxDecoration(
-                              border: new Border.all(
-                                  color: Colors.cyanAccent,
-                                  width: Utils.WALLTHICKNESS + 1,
-                                  style: BorderStyle.solid),
-                              borderRadius: new BorderRadius.all(
-                                  new Radius.circular(10.0)),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: DropdownButtonHideUnderline(
-                                child: new Theme(
-                                  data: Theme.of(context).copyWith(
-                                    canvasColor: Colors.black87,
-                                  ),
-                                  child: DropdownButton<String>(
-                                    isDense: true,
-                                    value: numRowsInner.toString(),
-                                    onChanged: (String newValue) {
-                                      numRowsInner = int.parse(newValue);
-                                      numRows = numRowsInner;
-                                      setState(() {
-                                        print('new val == $numRowsInner');
-                                      });
-                                    },
-                                    items: <String>['8', '10', '12', '14']
-                                        .map<DropdownMenuItem<String>>(
-                                            (String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          '${value}x$value',
-                                          textScaleFactor: 1.0,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.cyanAccent),
-                                        ),
-                                      );
-                                    }).toList(),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Container(
+                              decoration: new BoxDecoration(
+                                border: new Border.all(
+                                    color: Colors.cyanAccent,
+                                    width: Utils.borderWallThickness,
+                                    style: BorderStyle.solid),
+                                borderRadius: new BorderRadius.all(
+                                    new Radius.circular(10.0)),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: DropdownButtonHideUnderline(
+                                  child: new Theme(
+                                    data: Theme.of(context).copyWith(
+                                      canvasColor: Colors.black87,
+                                    ),
+                                    child: DropdownButton<String>(
+                                      isDense: true,
+                                      value: numRowsInner.toString(),
+                                      onChanged: (String newValue) {
+                                        numRowsInner = int.parse(newValue);
+                                        numRows = numRowsInner;
+                                        setState(() {
+                                          print('new val == $numRowsInner');
+                                        });
+                                      },
+                                      items: <String>['8', '10', '12', '14']
+                                          .map<DropdownMenuItem<String>>(
+                                              (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            '${value}x$value',
+                                            textScaleFactor: 1.0,
+                                            style: theme.textTheme.bodyText2,
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Difficulty',
-                          style:
-                              TextStyle(fontSize: 20, color: Colors.cyanAccent),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            S.of(context).difficulty,
+                            style: theme.textTheme.bodyText2,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Container(
-                            decoration: new BoxDecoration(
-                              border: new Border.all(
-                                  color: Colors.cyanAccent,
-                                  width: Utils.WALLTHICKNESS + 1,
-                                  style: BorderStyle.solid),
-                              borderRadius: new BorderRadius.all(
-                                  new Radius.circular(10.0)),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: DropdownButtonHideUnderline(
-                                child: new Theme(
-                                  data: Theme.of(context).copyWith(
-                                    canvasColor: Colors.black87,
-                                  ),
-                                  child: DropdownButton<String>(
-                                    isDense: true,
-                                    value: getMazeDifficulty(),
-                                    onChanged: (String newValue) {
-                                      setMazeDifficulty(newValue);
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Container(
+                              decoration: new BoxDecoration(
+                                border: new Border.all(
+                                    color: Colors.cyanAccent,
+                                    width: Utils.borderWallThickness,
+                                    style: BorderStyle.solid),
+                                borderRadius: new BorderRadius.all(
+                                    new Radius.circular(10.0)),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: DropdownButtonHideUnderline(
+                                  child: new Theme(
+                                    data: Theme.of(context).copyWith(
+                                      canvasColor: Colors.black87,
+                                    ),
+                                    child: DropdownButton<String>(
+                                      isDense: true,
+                                      value: getMazeDifficulty(),
+                                      onChanged: (String newValue) {
+                                        setMazeDifficulty(newValue);
 
-                                      setState(() {
-                                        print(' ');
-                                      });
-                                    },
-                                    items: <String>[
-                                      Utils.EASY,
-                                      Utils.HARD,
-                                      Utils.TOUGH
-                                    ].map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          textScaleFactor: 1.0,
-                                          overflow: TextOverflow.visible,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.cyanAccent),
-                                        ),
-                                      );
-                                    }).toList(),
+                                        setState(() {
+                                          print(' ');
+                                        });
+                                      },
+                                      items: <String>[
+                                        Utils.EASY,
+                                        Utils.HARD,
+                                        Utils.TOUGH
+                                      ].map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            textScaleFactor: 1.0,
+                                            overflow: TextOverflow.visible,
+                                            style: theme.textTheme.bodyText2,
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      if (MediaQuery.of(context).orientation ==
-                          Orientation.landscape)
+                  if (MediaQuery.of(context).orientation ==
+                      Orientation.landscape)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
                         StartNewGame(
                           startgame: startNewGameAndSetState,
                         ),
-                    ],
-                  ),
+                      ],
+                    ),
                   if (MediaQuery.of(context).orientation ==
                       Orientation.portrait)
                     StartNewGame(
                       startgame: startNewGameAndSetState,
                     ),
-                  if (title == NEWGAME) MazeBackButton(setstate: setMyState),
+                  if (title == S.of(context).gameOver) MazeBackButton(),
                 ],
               ),
             ),
@@ -826,7 +769,7 @@ class _MazeAreaState extends State<MazeArea>
         maxWidth = maxWidth * 0.95;
       }
     }
-    roomLength = (((maxWidth.floor() - (Utils.WALLTHICKNESS * (maze.maxRow))) /
+    roomLength = (((maxWidth.floor() - (Utils.wallThickness * (maze.maxRow))) /
             maze.maxRow))
         .floorToDouble();
   }
@@ -842,16 +785,16 @@ class _MazeAreaState extends State<MazeArea>
           borderSide: BorderSide(
               color: Colors.cyan,
               style: BorderStyle.solid,
-              width: Utils.WALLTHICKNESS + 1),
+              width: Utils.borderWallThickness),
           onPressed: () {
             setState(() {
               handleEndOfGame();
             });
           },
           child: Text(
-            'New Game',
+            S.of(context).newGame,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 26, color: Colors.cyanAccent),
+            style: theme.textTheme.bodyText2,
           ),
         ),
       ),
@@ -868,42 +811,42 @@ class _MazeAreaState extends State<MazeArea>
           Row(
             children: <Widget>[
               Text(
-                'Alice Saved:',
-                style: TextStyle(fontSize: 22),
+                S.of(context).aliceSaved,
+                style: theme.textTheme.bodyText2,
               ),
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
                     maze.player.savedLambs.toString(),
-                    style: TextStyle(fontSize: 22),
+                    style: theme.textTheme.bodyText2,
                   )),
             ],
           ),
           Row(
             children: <Widget>[
               Text(
-                'Goblin Captured:',
-                style: TextStyle(fontSize: 22),
+                S.of(context).goblinCaptured,
+                style: theme.textTheme.bodyText2,
               ),
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
                     maze.player.lostLambs.toString(),
-                    style: TextStyle(fontSize: 22),
+                    style: theme.textTheme.bodyText2,
                   )),
             ],
           ),
           Row(
             children: <Widget>[
               Text(
-                'Moves left:',
-                style: TextStyle(fontSize: 22),
+                S.of(context).movesLeft,
+                style: theme.textTheme.bodyText2,
               ),
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
                     '${maze.player.movesLeft}',
-                    style: TextStyle(fontSize: 22),
+                    style: theme.textTheme.bodyText2,
                   )),
             ],
           )
@@ -973,7 +916,6 @@ class _MazeAreaState extends State<MazeArea>
       return Center(
         child: Container(
           color: Colors.black,
-          // margin: EdgeInsets.symmetric(vertical: 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1076,7 +1018,6 @@ class _MazeAreaState extends State<MazeArea>
       maze.setWhosTurnItIs(Ilk.minotaur);
     }
     if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
-      //maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
       Future.delayed(Duration(milliseconds: Utils.animDurationMilliSeconds),
           () {
         print('clear freed 1');
