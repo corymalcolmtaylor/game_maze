@@ -312,7 +312,6 @@ class _MazeAreaState extends State<MazeArea>
     }
     //if earlier versions of android the goblin needs to switch direction facing
     if (pixie.ilk == Ilk.minotaur) {
-      //Platform.isAndroid &&
       if (radians == 3) {
         radians = 0.0;
       } else {
