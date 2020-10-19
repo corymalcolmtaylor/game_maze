@@ -816,7 +816,9 @@ class _MazeAreaState extends State<MazeArea>
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
-                    maze.player.savedLambs.toString(),
+                    '${maze.player.savedLambs.toString()} ' +
+                        S.of(context).xf +
+                        ' ${maze.maxRow.toString()}',
                     style: theme.textTheme.bodyText2,
                   )),
             ],
@@ -830,7 +832,7 @@ class _MazeAreaState extends State<MazeArea>
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
-                    maze.player.lostLambs.toString(),
+                    '${maze.player.lostLambs.toString()}',
                     style: theme.textTheme.bodyText2,
                   )),
             ],

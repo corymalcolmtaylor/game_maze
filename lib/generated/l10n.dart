@@ -322,6 +322,16 @@ class S {
       args: [],
     );
   }
+
+  /// `of`
+  String get xf {
+    return Intl.message(
+      'of',
+      name: 'xf',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

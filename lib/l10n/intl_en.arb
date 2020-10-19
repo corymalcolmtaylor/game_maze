@@ -3,7 +3,6 @@
   "back": "Back",
   "startGame": "Start Game",
   "aliceAndTheHedgeMaze": "Alice and the Hedge Maze",
-  
   "tough": "\nTough",
   "hard": "\nHard",
   "easy": "\nEasy",
@@ -29,5 +28,6 @@
   "newGame": "New Game",
   "aliceSaved": "Alice Saved:",
   "goblinCaptured": "Goblin Captured:",
-  "movesLeft": "Moves left:"
+  "movesLeft": "Moves left:",
+  "xf": "of"
 }

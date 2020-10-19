@@ -49,6 +49,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "swipeVerticallyOrH" : MessageLookupByLibrary.simpleMessage(" captures them.\n\nSwipe vertically or horizontally on the maze to move Alice"),
     "thesoftwaretaylorgmailcom" : MessageLookupByLibrary.simpleMessage("thesoftwaretaylor@gmail.com"),
     "toTouchThem" : MessageLookupByLibrary.simpleMessage("to touch them before the "),
-    "tough" : MessageLookupByLibrary.simpleMessage("\nTough")
+    "tough" : MessageLookupByLibrary.simpleMessage("\nTough"),
+    "xf" : MessageLookupByLibrary.simpleMessage("of")
   };
 }
