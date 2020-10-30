@@ -40,7 +40,7 @@ class MazeScaffold extends StatelessWidget {
                 print('icon button, Show about');
               }
             },
-            color: Colors.black,
+            color: Colors.grey[900],
             itemBuilder: (BuildContext context) =>
                 <PopupMenuEntry<GameActions>>[
               PopupMenuItem<GameActions>(
@@ -236,11 +236,16 @@ class MazeScaffold extends StatelessWidget {
 
   Future<void> _launchURL(BuildContext context) async {
     var url =
-        'mailto:thesoftwaretaylor@gmail.com?subject=${S.of(context).aliceAndTheHedgeMaze}';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      print('Could not launch $url');
+        '${S.of(context).mailtothesoft}${S.of(context).aliceAndTheHedgeMaze}';
+    try {
+      if (await canLaunch(url)) {
+        print('try to launch');
+        await launch(url);
+      } else {
+        throw '${S.of(context).couldNotLaunch} $url';
+      }
+    } catch (e) {
+      print('catch e ${e.toString()}');
     }
   }
 }
@@ -485,18 +490,18 @@ class _MazeAreaState extends State<MazeArea>
     String str = '';
     maze.eogEmoji = '';
     if (maze.player.condition == Condition.dead) {
-      str = 'The Goblin got Alice! ️';
+      str = S.of(context).theGoblinGotAlice;
       maze.eogEmoji = '😞';
     } else {
       if (maze.player.savedLambs > maze.player.lostLambs) {
-        str = 'You rescued ${maze.player.savedLambs}!\nYou WIN! ';
+        str =
+            '${S.of(context).youRescued} ${maze.player.savedLambs}${S.of(context).nyouWin}';
         maze.eogEmoji = '😀';
       } else if (maze.player.savedLambs == maze.player.lostLambs) {
-        str =
-            '${maze.player.savedLambs} rescued and captured.\nResult is a draw. ';
+        str = '${maze.player.savedLambs} ${S.of(context).rescuedAndCaptured}';
         maze.eogEmoji = '😐';
       } else {
-        str = 'Goblin captured ${maze.player.lostLambs}. ';
+        str = '${S.of(context).goblinCaptured}${maze.player.lostLambs}. ';
         maze.eogEmoji = '😞';
       }
     }
@@ -540,15 +545,15 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   String getMazeDifficulty() {
-    if (maze.difficulty == Difficulty.hard) return Utils.HARD;
-    if (maze.difficulty == Difficulty.tough) return Utils.TOUGH;
-    return Utils.EASY;
+    if (maze.difficulty == Difficulty.hard) return Utils.hard;
+    if (maze.difficulty == Difficulty.tough) return Utils.tough;
+    return Utils.easy;
   }
 
   void setMazeDifficulty(newValue) {
-    if (newValue == Utils.HARD)
+    if (newValue == Utils.hard)
       maze.difficulty = Difficulty.hard;
-    else if (newValue == Utils.TOUGH)
+    else if (newValue == Utils.tough)
       maze.difficulty = Difficulty.tough;
     else
       maze.difficulty = Difficulty.easy;
@@ -708,9 +713,9 @@ class _MazeAreaState extends State<MazeArea>
                                         });
                                       },
                                       items: <String>[
-                                        Utils.EASY,
-                                        Utils.HARD,
-                                        Utils.TOUGH
+                                        Utils.easy,
+                                        Utils.hard,
+                                        Utils.tough
                                       ].map<DropdownMenuItem<String>>(
                                           (String value) {
                                         return DropdownMenuItem<String>(
@@ -968,8 +973,7 @@ class _MazeAreaState extends State<MazeArea>
       child: SizedBox(
         width: stackSize,
         height: stackSize,
-        child:
-            Stack(overflow: Overflow.visible, children: [...trs, ...sprites]),
+        child: Stack(clipBehavior: Clip.none, children: [...trs, ...sprites]),
       ),
     );
   }

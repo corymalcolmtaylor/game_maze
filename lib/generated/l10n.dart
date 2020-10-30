@@ -9,6 +9,8 @@ import 'intl/messages_all.dart';
 // **************************************************************************
 
 // ignore_for_file: non_constant_identifier_names, lines_longer_than_80_chars
+// ignore_for_file: join_return_with_assignment, prefer_final_in_for_each
+// ignore_for_file: avoid_redundant_argument_values
 
 class S {
   S();
@@ -63,30 +65,30 @@ class S {
     );
   }
 
-  /// `\nTough`
+  /// `Tough`
   String get tough {
     return Intl.message(
-      '\nTough',
+      'Tough',
       name: 'tough',
       desc: '',
       args: [],
     );
   }
 
-  /// `\nHard`
+  /// `Hard`
   String get hard {
     return Intl.message(
-      '\nHard',
+      'Hard',
       name: 'hard',
       desc: '',
       args: [],
     );
   }
 
-  /// `\nEasy`
+  /// `Easy`
   String get easy {
     return Intl.message(
-      '\nEasy',
+      'Easy',
       name: 'easy',
       desc: '',
       args: [],
@@ -328,6 +330,66 @@ class S {
     return Intl.message(
       'of',
       name: 'xf',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `mailto:thesoftwaretaylor@gmail.com?subject=`
+  String get mailtothesoft {
+    return Intl.message(
+      'mailto:thesoftwaretaylor@gmail.com?subject=',
+      name: 'mailtothesoft',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not launch `
+  String get couldNotLaunch {
+    return Intl.message(
+      'Could not launch ',
+      name: 'couldNotLaunch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Goblin got Alice! ️`
+  String get theGoblinGotAlice {
+    return Intl.message(
+      'The Goblin got Alice! ️',
+      name: 'theGoblinGotAlice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You rescued `
+  String get youRescued {
+    return Intl.message(
+      'You rescued ',
+      name: 'youRescued',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `!\nYou WIN! `
+  String get nyouWin {
+    return Intl.message(
+      '!\nYou WIN! ',
+      name: 'nyouWin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// ` rescued and captured.\nResult is a draw. `
+  String get rescuedAndCaptured {
+    return Intl.message(
+      ' rescued and captured.\nResult is a draw. ',
+      name: 'rescuedAndCaptured',
       desc: '',
       args: [],
     );

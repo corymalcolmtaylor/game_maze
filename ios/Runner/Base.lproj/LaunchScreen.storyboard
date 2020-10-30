@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina6_1" orientation="portrait" appearance="dark"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -11,33 +12,34 @@
         <scene sceneID="EHf-IW-A2E">
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Ydg-fD-yQy"/>
-                        <viewControllerLayoutGuide type="bottom" id="xbc-2k-c8Z"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    <view key="view" contentMode="scaleToFill" id="cp4-Aj-ghs">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchImage" id="vSu-qP-VOK">
-                                <rect key="frame" x="57" y="276" width="300" height="286"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="splash" translatesAutoresizingMaskIntoConstraints="NO" id="MOz-P7-nTT">
+                                <rect key="frame" x="19.666666666666657" y="260.66666666666669" width="375" height="375.00000000000006"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="375" id="QEZ-hb-7J1"/>
+                                    <constraint firstAttribute="height" constant="375" id="UNT-3V-eVn"/>
+                                    <constraint firstAttribute="width" secondItem="MOz-P7-nTT" secondAttribute="height" multiplier="1:1" id="gr5-x1-uf4"/>
+                                    <constraint firstAttribute="width" secondItem="MOz-P7-nTT" secondAttribute="height" multiplier="1:1" id="tXa-XR-F0I"/>
+                                </constraints>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <viewLayoutGuide key="safeArea" id="puB-Oa-jZZ"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="vSu-qP-VOK" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" priority="999" id="Qas-GG-qgv"/>
-                            <constraint firstItem="vSu-qP-VOK" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" priority="999" id="d3g-lJ-eOJ"/>
+                            <constraint firstItem="MOz-P7-nTT" firstAttribute="centerX" secondItem="cp4-Aj-ghs" secondAttribute="centerX" id="0cv-h1-lMv"/>
+                            <constraint firstItem="MOz-P7-nTT" firstAttribute="centerY" secondItem="cp4-Aj-ghs" secondAttribute="centerY" id="6DG-MH-3c8"/>
                         </constraints>
                     </view>
-                    <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="76.811594202898561" y="251.11607142857142"/>
+            <point key="canvasLocation" x="-65" y="250"/>
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchImage" width="122" height="98"/>
+        <image name="splash" width="204" height="204"/>
     </resources>
 </document>

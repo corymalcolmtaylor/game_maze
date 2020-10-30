@@ -247,7 +247,7 @@ class Maze {
       pixie.lastLocation = '';
       return false;
     }
-    pixie.lastLocation = 'movePixieToXY b_${pixie.x}_${pixie.y}';
+    pixie.lastLocation = 'b_${pixie.x}_${pixie.y}';
     pixie.lastX = pixie.x;
     pixie.lastY = pixie.y;
     pixie.x = x;

@@ -3,9 +3,9 @@
   "back": "Back",
   "startGame": "Start Game",
   "aliceAndTheHedgeMaze": "Alice and the Hedge Maze",
-  "tough": "\nTough",
-  "hard": "\nHard",
-  "easy": "\nEasy",
+  "tough": "Tough",
+  "hard": "Hard",
+  "easy": "Easy",
   "rules": "Rules",
   "about": "About",
   "rescueThem": "Rescue the animals by getting ",
@@ -29,5 +29,11 @@
   "aliceSaved": "Alice Saved:",
   "goblinCaptured": "Goblin Captured:",
   "movesLeft": "Moves left:",
-  "xf": "of"
+  "xf": "of",
+  "mailtothesoft": "mailto:thesoftwaretaylor@gmail.com?subject=",
+  "couldNotLaunch": "Could not launch ",
+  "theGoblinGotAlice": "The Goblin got Alice! ️",
+  "youRescued": "You rescued ",
+  "nyouWin": "!\\nYou WIN! ",
+  "rescuedAndCaptured": " rescued and captured.\\nResult is a draw. "
 }

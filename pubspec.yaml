@@ -11,7 +11,7 @@ description: A simple maze game made with Flutter.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.2.0+11
+version: 1.2.1+12
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  url_launcher: ^5.7.2
+  url_launcher: ^5.7.8
   flutter_localizations:
     sdk: flutter
 
@@ -36,7 +36,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.7.4
-  flutter_native_splash: ^0.1.9
+  flutter_native_splash: ^0.1.9     
+    
+
+flutter_native_splash:
+  image: dev_assets/splash.png   
+  color: "000000"
+  ios: false
 
 flutter_icons:
   android: true
