@@ -34,6 +34,6 @@
   "couldNotLaunch": "Could not launch ",
   "theGoblinGotAlice": "The Goblin got Alice! ️",
   "youRescued": "You rescued ",
-  "nyouWin": "!\\nYou WIN! ",
-  "rescuedAndCaptured": " rescued and captured.\\nResult is a draw. "
+  "nyouWin": "!\nYou WIN! ",
+  "rescuedAndCaptured": " rescued and captured.\nResult is a draw. "
 }
