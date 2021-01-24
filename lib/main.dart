@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:universal_io/io.dart';
 
+import 'core/pixie.dart';
+import 'core/room.dart';
+import 'features/game/presentation/bloc/game_bloc.dart';
+import 'features/game/presentation/widgets/w_MazeBackButton.dart';
+import 'features/game/presentation/widgets/w_StartNewGame.dart';
+import 'features/panel/presentation/bloc/panel_bloc.dart';
 import 'generated/l10n.dart';
-import 'maze.dart';
-import 'w_StartNewGame.dart';
-import 'w_MazeBackButton.dart';
-import './utils.dart';
+import './core/maze.dart';
+import './core/utils.dart';
 import 'theme.dart';
 
 void main() => runApp(
       MyApp(),
     );
-enum GameActions { options, rules, about, maze }
 
-class MazeScaffold extends StatelessWidget {
+class MazeScaffold extends StatefulWidget {
+  @override
+  _MazeScaffoldState createState() => _MazeScaffoldState();
+}
+
+class _MazeScaffoldState extends State<MazeScaffold> {
   @override
   Widget build(BuildContext context) {
     var strtitle = S.of(context).aliceAndTheHedgeMaze;
@@ -255,20 +264,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      onGenerateTitle: (context) => S.of(context).aliceAndTheHedgeMaze,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        backgroundColor: Colors.black,
-      ),
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        S.delegate
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      home: MazeScaffold(),
-    );
+        onGenerateTitle: (context) => S.of(context).aliceAndTheHedgeMaze,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          backgroundColor: Colors.black,
+        ),
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          S.delegate
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<PanelBloc>(
+              create: (BuildContext context) => PanelBloc(),
+            ),
+            BlocProvider<GameBloc>(
+              create: (BuildContext context) => GameBloc(),
+            ),
+          ],
+          child: MazeScaffold(),
+        ));
   }
 }
 
@@ -281,8 +299,9 @@ class MazeArea extends StatefulWidget {
 
 class _MazeAreaState extends State<MazeArea>
     with SingleTickerProviderStateMixin {
-  Maze maze;
+  //Maze maze;
   int numRows = 8;
+  GameDifficulty difficulty = GameDifficulty.normal;
 
   final maximumMoveAttempts = 8;
 
@@ -296,8 +315,23 @@ class _MazeAreaState extends State<MazeArea>
   @override
   void initState() {
     super.initState();
-    maze = Maze(numRows);
-    maze.carveLabyrinth();
+    //maze = Maze(numRows, difficulty);
+    //getMaze().carveLabyrinth();
+  }
+
+  Maze getMaze() {
+    GameState gs = BlocProvider.of<GameBloc>(context).state;
+    if (gs is InitialGame) {
+      return gs.maze;
+    }
+    if (gs is LoadedGame) {
+      return gs.maze;
+    }
+    return Maze(8, GameDifficulty.normal);
+  }
+
+  PanelBloc getPanelBloc() {
+    return BlocProvider.of<PanelBloc>(context);
   }
 
   void startNewGameAndSetState() {
@@ -336,9 +370,9 @@ class _MazeAreaState extends State<MazeArea>
     var endLeft = 0.0;
     List<AnimatedPositioned> icons = [];
 
-    var lambs = maze.lambs.where(
-      (el) => el.location == 'b_${room.x}_${room.y}',
-    );
+    var lambs = getMaze().lambs.where(
+          (el) => el.location == 'b_${room.x}_${room.y}',
+        );
 
     lambs.forEach((pixie) {
       var radians = 0.0;
@@ -399,8 +433,8 @@ class _MazeAreaState extends State<MazeArea>
         style: TextStyle(
           height: 1.0,
           fontFamily: 'NotoEmoji',
-          color: maze.isEasy() || pixie.isVisible
-              ? pixie.preferredColor
+          color: getMaze().isEasy() || pixie.isVisible
+              ? Color(pixie.preferredColor)
               : Colors.transparent,
           fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
         ),
@@ -411,7 +445,7 @@ class _MazeAreaState extends State<MazeArea>
         textScaleFactor: 0.8,
         style: TextStyle(
           height: 1.0,
-          color: maze.isEasy() || pixie.isVisible
+          color: getMaze().isEasy() || pixie.isVisible
               ? Colors.black
               : Colors.transparent,
           fontSize: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
@@ -435,10 +469,10 @@ class _MazeAreaState extends State<MazeArea>
     return retval + Utils.wallThickness;
   }
 
-  void computerMove({bool delayMove}) async {
-    if (maze.gameIsOver() ||
-        !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
-      maze.setGameIsOver(true);
+  void computerMovex({bool delayMove}) async {
+    if (getMaze().gameIsOver() ||
+        !getMaze().lambs.any((lamb) => lamb.condition == Condition.alive)) {
+      getMaze().setGameIsOver(true);
       handleEndOfGame();
       return;
     }
@@ -448,10 +482,10 @@ class _MazeAreaState extends State<MazeArea>
       minoDelay = Utils.animDurationMilliSeconds;
     }
     var lambDelay = 0;
-    if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
+    if (getMaze().getWhosTurnIsIt() == Ilk.minotaur) {
       lambDelay = Utils.animDurationMilliSeconds;
       Future.delayed(Duration(milliseconds: minoDelay), () {
-        maze.moveMinotaur();
+        getMaze().moveMinotaur();
         setState(() {
           // just force redraw
         });
@@ -459,8 +493,8 @@ class _MazeAreaState extends State<MazeArea>
     }
 
     Future.delayed(Duration(milliseconds: minoDelay + lambDelay), () {
-      var gameOver = maze.moveLambs();
-      maze.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
+      var gameOver = getMaze().moveLambs();
+      getMaze().clearLocationsOfLambsInThisCondition(condition: Condition.dead);
 
       setState(() {
         // just force redraw
@@ -472,13 +506,14 @@ class _MazeAreaState extends State<MazeArea>
           handleEndOfGame();
         });
       } else {
-        maze.preparePlayerForATurn();
+        getMaze().preparePlayerForATurn();
       }
     }).then((_) {
       Future.delayed(Duration(milliseconds: Utils.animDurationMilliSeconds),
           () {
         print('clear freed 2');
-        maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+        getMaze()
+            .clearLocationsOfLambsInThisCondition(condition: Condition.freed);
         setState(() {
           // just force redraw
         });
@@ -488,24 +523,25 @@ class _MazeAreaState extends State<MazeArea>
 
   void handleEndOfGame() {
     String str = '';
-    maze.eogEmoji = '';
-    if (maze.player.condition == Condition.dead) {
+    getMaze().setEogEmoji('');
+    if (getMaze().player.condition == Condition.dead) {
       str = S.of(context).theGoblinGotAlice;
-      maze.eogEmoji = '😞';
+      getMaze().setEogEmoji('😞');
     } else {
-      if (maze.player.savedLambs > maze.player.lostLambs) {
+      if (getMaze().player.savedLambs > getMaze().player.lostLambs) {
         str =
-            '${S.of(context).youRescued} ${maze.player.savedLambs}${S.of(context).nyouWin}';
-        maze.eogEmoji = '😀';
-      } else if (maze.player.savedLambs == maze.player.lostLambs) {
-        str = '${maze.player.savedLambs} ${S.of(context).rescuedAndCaptured}';
-        maze.eogEmoji = '😐';
+            '${S.of(context).youRescued} ${getMaze().player.savedLambs}${S.of(context).nyouWin}';
+        getMaze().setEogEmoji('😀');
+      } else if (getMaze().player.savedLambs == getMaze().player.lostLambs) {
+        str =
+            '${getMaze().player.savedLambs} ${S.of(context).rescuedAndCaptured}';
+        getMaze().setEogEmoji('😐');
       } else {
-        str = '${S.of(context).goblinCaptured}${maze.player.lostLambs}. ';
-        maze.eogEmoji = '😞';
+        str = '${S.of(context).goblinCaptured}${getMaze().player.lostLambs}. ';
+        getMaze().setEogEmoji('😞');
       }
     }
-    maze.gameOverMessage = str;
+    getMaze().setGameOverMessage(str);
 
     showGameOverMessage();
   }
@@ -545,25 +581,25 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   String getMazeDifficulty() {
-    if (maze.difficulty == Difficulty.hard) return Utils.hard;
-    if (maze.difficulty == Difficulty.tough) return Utils.tough;
-    return Utils.easy;
+    if (getMaze().difficulty == GameDifficulty.hard) return Utils.hard;
+    if (getMaze().difficulty == GameDifficulty.tough) return Utils.tough;
+    return Utils.normal;
   }
 
   void setMazeDifficulty(newValue) {
     if (newValue == Utils.hard)
-      maze.difficulty = Difficulty.hard;
+      difficulty = GameDifficulty.hard;
     else if (newValue == Utils.tough)
-      maze.difficulty = Difficulty.tough;
+      difficulty = GameDifficulty.tough;
     else
-      maze.difficulty = Difficulty.easy;
+      difficulty = GameDifficulty.normal;
   }
 
   Future<void> showGameOverMessage() async {
     var title = S.of(context).gameOver;
-    var msg = maze.getGameOverMessage();
+    var msg = getMaze().getGameOverMessage();
 
-    if (!maze.gameIsOver()) {
+    if (!getMaze().gameIsOver()) {
       title = S.current.options;
       msg = '';
     }
@@ -603,7 +639,7 @@ class _MazeAreaState extends State<MazeArea>
                           style: theme.textTheme.bodyText1,
                         ),
                         TextSpan(
-                          text: maze.getEogEmoji(),
+                          text: getMaze().getEogEmoji(),
                           style: emojiTextStyle,
                         ),
                       ]),
@@ -713,7 +749,7 @@ class _MazeAreaState extends State<MazeArea>
                                         });
                                       },
                                       items: <String>[
-                                        Utils.easy,
+                                        Utils.normal,
                                         Utils.hard,
                                         Utils.tough
                                       ].map<DropdownMenuItem<String>>(
@@ -773,9 +809,10 @@ class _MazeAreaState extends State<MazeArea>
         maxWidth = maxWidth * 0.95;
       }
     }
-    roomLength = (((maxWidth.floor() - (Utils.wallThickness * (maze.maxRow))) /
-            maze.maxRow))
-        .floorToDouble();
+    roomLength =
+        (((maxWidth.floor() - (Utils.wallThickness * (getMaze().getMaxRow()))) /
+                getMaze().getMaxRow()))
+            .floorToDouble();
   }
 
   Widget defineTopRow() {
@@ -821,9 +858,9 @@ class _MazeAreaState extends State<MazeArea>
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
-                    '${maze.player.savedLambs.toString()} ' +
+                    '${getMaze().player.savedLambs.toString()} ' +
                         S.of(context).xf +
-                        ' ${maze.maxRow.toString()}',
+                        ' ${getMaze().getMaxRow().toString()}',
                     style: theme.textTheme.bodyText2,
                   )),
             ],
@@ -837,7 +874,7 @@ class _MazeAreaState extends State<MazeArea>
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
-                    '${maze.player.lostLambs.toString()}',
+                    '${getMaze().player.lostLambs.toString()}',
                     style: theme.textTheme.bodyText2,
                   )),
             ],
@@ -851,7 +888,7 @@ class _MazeAreaState extends State<MazeArea>
               Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
                   child: Text(
-                    '${maze.player.movesLeft}',
+                    '${getMaze().player.getMovesLeft()}',
                     style: theme.textTheme.bodyText2,
                   )),
             ],
@@ -864,98 +901,104 @@ class _MazeAreaState extends State<MazeArea>
   Directions dir;
   @override
   Widget build(BuildContext context) {
+    print('mazearea build id ${getMaze().randomid}');
     setSizes();
     var trs = <Widget>[];
 
-    for (int i = 1; i <= maze.maxRow; i++) {
-      trs.addAll(
-        List.from(
-          maze.myLabyrinth.entries
-              .where((elroom) => elroom.value.y == i)
-              .map(
-                (el) => makeRoom(el.value),
-              )
-              .toList(),
-        ),
-      );
-    }
-    // add sprites
-    maze.setPixiesVisibility();
-
-    var llsprites = List.from(maze.myLabyrinth.entries.map(
-      (el) => getAnimatedSpriteIconsForLambs(el.value),
-    ));
-
-    sprites.clear();
-    llsprites.forEach((ll) {
-      sprites.addAll(ll);
-    });
-    sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.player));
-
-    sprites.add(getAnimatedSpriteIconThisPixie(pixie: maze.minotaur));
-
-    if (MediaQuery.of(context).orientation == Orientation.landscape) {
-      return Container(
-        color: Colors.black,
-        child: Center(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                color: Colors.black,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    defineTopRow(),
-                    defineScoreRow(),
-                  ],
-                ),
-              ),
-              buildCenter(trs, maxWidth),
-            ],
+    return BlocBuilder<GameBloc, GameState>(builder: (context, mazestate) {
+      print('BlocBuilder build    ');
+      for (int i = 1; i <= getMaze().getMaxRow(); i++) {
+        trs.addAll(
+          List.from(
+            getMaze()
+                .myLabyrinth
+                .entries
+                .where((elroom) => elroom.value.y == i)
+                .map(
+                  (el) => makeRoom(el.value),
+                )
+                .toList(),
           ),
-        ),
-      );
-    } else {
-      return Center(
-        child: Container(
+        );
+      }
+      // add sprites
+      //getMaze().setPixiesVisibility();
+
+      var llsprites = List.from(getMaze().myLabyrinth.entries.map(
+            (el) => getAnimatedSpriteIconsForLambs(el.value),
+          ));
+
+      sprites.clear();
+      llsprites.forEach((ll) {
+        sprites.addAll(ll);
+      });
+      sprites.add(getAnimatedSpriteIconThisPixie(pixie: getMaze().player));
+
+      sprites.add(getAnimatedSpriteIconThisPixie(pixie: getMaze().minotaur));
+
+      if (MediaQuery.of(context).orientation == Orientation.landscape) {
+        return Container(
           color: Colors.black,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Column(
+          child: Center(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  color: Colors.black,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       defineTopRow(),
                       defineScoreRow(),
                     ],
                   ),
-                ],
-              ),
-              Center(child: buildCenter(trs, roomLength * numRows)),
-            ],
+                ),
+                buildCenter(trs, maxWidth),
+              ],
+            ),
           ),
-        ),
-      );
-    }
+        );
+      } else {
+        return Center(
+          child: Container(
+            color: Colors.black,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        defineTopRow(),
+                        defineScoreRow(),
+                      ],
+                    ),
+                  ],
+                ),
+                Center(child: buildCenter(trs, roomLength * numRows)),
+              ],
+            ),
+          ),
+        );
+      }
+    });
   }
 
   GestureDetector buildCenter(List<Widget> trs, double stackSize) {
     return GestureDetector(
       onHorizontalDragEnd: (dragDetails) {
         if (hDelta.abs() > 25) {
-          moveThePlayer(direction: dir);
+          movePlayer(direction: dir);
         }
         hDelta = 0;
       },
       onVerticalDragEnd: (dragDetails) {
         if (vDelta.abs() > 25) {
-          moveThePlayer(direction: dir);
+          movePlayer(direction: dir);
         }
         vDelta = 0;
       },
@@ -966,9 +1009,11 @@ class _MazeAreaState extends State<MazeArea>
         horizontalDragUpdate(dragDetails);
       },
       onDoubleTap: () {
-        handlePlayerHitAWall();
-        maze.setWhosTurnItIs(Ilk.minotaur);
-        computerMove(delayMove: maze.player.delayComputerMove);
+        BlocProvider.of<GameBloc>(context).add(EndTurnEvent(
+            'end turn  alice ${DateTime.now().millisecondsSinceEpoch}'));
+        //handlePlayerHitAWall();
+        // getMaze().setWhosTurnItIs(Ilk.minotaur);
+        //computerMove(delayMove: getMaze().player.delayComputerMove);
       },
       child: SizedBox(
         width: stackSize,
@@ -976,14 +1021,6 @@ class _MazeAreaState extends State<MazeArea>
         child: Stack(clipBehavior: Clip.none, children: [...trs, ...sprites]),
       ),
     );
-  }
-
-  void moveThePlayer({Directions direction}) {
-    if (movePlayer(direction: direction)) {
-      if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
-        computerMove(delayMove: maze.player.delayComputerMove);
-      }
-    }
   }
 
   void horizontalDragUpdate(DragUpdateDetails dragDetails) {
@@ -1007,46 +1044,17 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   /*return true if the minotaur should move next, otherwise false */
-  bool movePlayer({Directions direction}) {
-    if (maze.gameIsOver()) return false;
-    if (maze.getWhosTurnIsIt() != Ilk.player) return false;
-    if (maze.player.movesLeft <= 0) return true;
+  void movePlayer({Directions direction}) {
+    if (getMaze().gameIsOver()) return;
+    if (getMaze().getWhosTurnIsIt() != Ilk.player) return;
+    if (getMaze().player.getMovesLeft() <= 0) return;
 
-    if (maze.moveThisSpriteInThisDirection(maze.player, direction)) {
-      setState(() {
-        //print('player moved  ' + direction.toString());
-      });
-    } else {
-      handlePlayerHitAWall();
-    }
-    if (maze.player.movesLeft <= 0) {
-      maze.setWhosTurnItIs(Ilk.minotaur);
-    }
-    if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
-      Future.delayed(Duration(milliseconds: Utils.animDurationMilliSeconds),
-          () {
-        print('clear freed 1');
-        maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
-        setState(() {
-          // just force redraw
-        });
-      });
-      return true;
-    }
-    return false;
-  }
-
-  void handlePlayerHitAWall() {
-    maze.player.movesLeft = 0;
+    BlocProvider.of<GameBloc>(context)
+        .add(MoveEvent('move alice $direction', direction));
   }
 
   void startNewGame() {
-    sprites.clear();
-    maze.maxRow = numRows;
-    setSizes();
-    maze.initMaze();
-    maze.carveLabyrinth();
-    maze.setGameIsOver(false);
-    setState(() {});
+    BlocProvider.of<GameBloc>(context)
+        .add(InitializeNewGameEvent(numRows, difficulty));
   }
 }

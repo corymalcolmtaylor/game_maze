@@ -35,5 +35,7 @@
   "theGoblinGotAlice": "The Goblin got Alice! ️",
   "youRescued": "You rescued ",
   "nyouWin": "!\nYou WIN! ",
-  "rescuedAndCaptured": " rescued and captured.\nResult is a draw. "
+  "rescuedAndCaptured": " rescued and captured.\nResult is a draw. ",
+  "normal": "Normal",
+  "version": "Version"
 }

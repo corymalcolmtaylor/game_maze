@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:game_maze/theme.dart';
-import './utils.dart';
-import 'generated/l10n.dart';
+import 'package:game_maze/core/utils.dart';
+import 'package:game_maze/generated/l10n.dart';
 
-class StartNewGame extends StatelessWidget {
-  final Function startgame;
-  StartNewGame({this.startgame});
+class MazeBackButton extends StatelessWidget {
+  MazeBackButton();
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(1, 12, 6, 12),
       child: Container(
         child: OutlineButton(
           shape: new RoundedRectangleBorder(
@@ -21,10 +20,9 @@ class StartNewGame extends StatelessWidget {
               width: Utils.borderWallThickness),
           onPressed: () {
             Navigator.of(context).pop();
-            startgame();
           },
           child: Text(
-            S.of(context).startGame,
+            S.of(context).back,
             style: theme.textTheme.bodyText2,
           ),
         ),

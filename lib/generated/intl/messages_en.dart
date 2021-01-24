@@ -43,6 +43,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "modeMeansThat" : MessageLookupByLibrary.simpleMessage(" mode means that you cannot see the other characters until Alice can."),
     "movesLeft" : MessageLookupByLibrary.simpleMessage("Moves left:"),
     "newGame" : MessageLookupByLibrary.simpleMessage("New Game"),
+    "normal" : MessageLookupByLibrary.simpleMessage("Normal"),
     "nyouWin" : MessageLookupByLibrary.simpleMessage("!\nYou WIN! "),
     "options" : MessageLookupByLibrary.simpleMessage("Options"),
     "rescueThem" : MessageLookupByLibrary.simpleMessage("Rescue the animals by getting "),
@@ -55,6 +56,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "thesoftwaretaylorgmailcom" : MessageLookupByLibrary.simpleMessage("thesoftwaretaylor@gmail.com"),
     "toTouchThem" : MessageLookupByLibrary.simpleMessage("to touch them before the "),
     "tough" : MessageLookupByLibrary.simpleMessage("Tough"),
+    "version" : MessageLookupByLibrary.simpleMessage("Version"),
     "xf" : MessageLookupByLibrary.simpleMessage("of"),
     "youRescued" : MessageLookupByLibrary.simpleMessage("You rescued ")
   };

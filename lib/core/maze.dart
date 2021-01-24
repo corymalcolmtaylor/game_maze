@@ -1,76 +1,101 @@
 import 'dart:math' as Math;
 import 'package:flutter/material.dart';
 
-import 'Utils.dart';
+import 'next.dart';
+import 'pixie.dart';
+import 'room.dart';
+import 'utils.dart';
 
-class Next {
-  String one = '0';
-  String two = '0';
-  String three = '0';
-  String four = '0';
-  var total = 0;
-  String max = '0';
-}
+import 'package:json_annotation/json_annotation.dart';
 
-class Room {
-  static var badGuyHasMovedThisManyTimes = 0;
-  var x = 0;
-  var y = 0;
-  var leftWallIsUp = true;
-  var rightWallIsUp = true;
-  var upWallIsUp = true;
-  var downWallIsUp = true;
-  var dir = '';
-  var visited = false;
-  var setid = 0;
-  bool spUsed = false;
-  var minotaursPath = 0;
-}
+part 'maze.g.dart';
 
-enum Difficulty { easy, hard, tough }
-enum Ilk { player, minotaur, lamb }
-enum Directions { up, down, right, left }
-enum Condition { alive, dead, freed }
-
-class Pixie {
-  Pixie(this.ilk);
-  var key = Utils.createCryptoRandomString();
-  var location = '';
-  var lastLocation = '';
-  var _movesLeft = 1;
-
-  get movesLeft => _movesLeft;
-
-  set movesLeft(movesLeft) {
-    _movesLeft = movesLeft;
-  }
-
-  var delayComputerMove = true;
-  var x = 0;
-  var y = 0;
-  var lastX = 0;
-  var lastY = 0;
-  var recentlyMoved = false;
-  var ilk = Ilk.player;
-  var condition = Condition.alive;
-  var savedLambs = 0;
-  var lostLambs = 0;
-  var emoji = '';
-  var preferredColor = Colors.blue[800];
-  Directions newDirection;
-  var follow = false;
-  Directions direction;
-  var facing = Directions.left;
-  var isVisible = true;
-}
-
+@JsonSerializable(explicitToJson: true, anyMap: true)
 class Maze {
-  int _maxRow;
+  final int maxRow;
   int _maxCol;
 
-  String _eogEmoji = '';
+  //final _playerMoves = 3;
+  int randomid = 0;
+  bool _gameIsOver = false;
+  var numberOfRooms = 0;
 
-  set eogEmoji(String eogEmoji) {
+  String _eogEmoji = '';
+  var firstedge = '';
+  String _gameOverMessage = '';
+
+  final GameDifficulty difficulty;
+  Ilk _whosTurnIsIt = Ilk.player;
+
+  Map<String, Room> myLabyrinth = Map();
+  List<String> myStack = [];
+  List<String> specialCells = [];
+  var lambs = <Pixie>[];
+
+  var minotaur = Pixie(Ilk.minotaur);
+  var player = Pixie(Ilk.player);
+
+  factory Maze.fromJson(Map<String, dynamic> json) => _$MazeFromJson(json);
+  Map<String, dynamic> toJson() => _$MazeToJson(this);
+
+  factory Maze.initial() {
+    Maze mz = Maze(8, GameDifficulty.normal);
+    mz.initMaze();
+    return mz;
+  }
+
+  // create and initialize the labyrinth
+  //s squares named b_x_y eg b_1_3 for square A3 on a chess board
+  // each square starts as its own set and has its own number; eg 1-64
+  Maze(this.maxRow, this.difficulty) {
+    initMaze();
+    carveLabyrinth();
+  } // END FUNCTION ***********************
+
+  initMaze() {
+    _maxCol = maxRow;
+    lambs.clear();
+    myLabyrinth.clear();
+    _gameIsOver = false;
+    setGameOverMessage('');
+    _whosTurnIsIt = Ilk.player;
+    Room.badGuyHasMovedThisManyTimes = 0;
+    for (var yloop = 1; yloop < maxRow + 1; yloop++) {
+      for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
+        myLabyrinth['b_${xloop}_$yloop'] = Room();
+
+        myLabyrinth['b_${xloop}_$yloop'].x = xloop;
+        myLabyrinth['b_${xloop}_$yloop'].y = yloop;
+      }
+    }
+  }
+
+  //int newRandomId() {
+  //  return DateTime.now().millisecondsSinceEpoch${} + 1;
+  //}
+
+  Maze copyThisMaze() {
+    var mz = Maze(maxRow, difficulty)
+      ..myLabyrinth = Utils.deepCopyRoomMap(myLabyrinth)
+      .._gameOverMessage = _gameOverMessage
+      .._gameIsOver = _gameIsOver
+      .._maxCol = _maxCol
+      ..numberOfRooms = numberOfRooms
+      ..firstedge = firstedge
+      ..player = player
+      ..minotaur = minotaur
+      ..lambs = lambs.toList()
+      ..randomid = randomid + 1;
+
+    print('copyThisMaze randomid ${mz.randomid}');
+    return mz;
+  }
+
+  int getPlayerMoves() {
+    return 3;
+  }
+
+  void setEogEmoji(String eogEmoji) {
     _eogEmoji = eogEmoji;
   }
 
@@ -78,7 +103,6 @@ class Maze {
     return '$_eogEmoji';
   }
 
-  bool _gameIsOver = false;
   bool gameIsOver() {
     return _gameIsOver == true;
   }
@@ -87,17 +111,13 @@ class Maze {
     _gameIsOver = gameIsOver;
   }
 
-  String _gameOverMessage = '';
   String getGameOverMessage() {
     return '$_gameOverMessage';
   }
 
-  set gameOverMessage(String gameOverMessage) {
+  setGameOverMessage(String gameOverMessage) {
     _gameOverMessage = gameOverMessage;
   }
-
-  Difficulty difficulty = Difficulty.easy;
-  Ilk _whosTurnIsIt = Ilk.player;
 
   Ilk getWhosTurnIsIt() {
     return _whosTurnIsIt;
@@ -107,42 +127,25 @@ class Maze {
     _whosTurnIsIt = whosTurnIsIt;
   }
 
-  var rand = Math.Random.secure();
-
   bool isEasy() {
-    return difficulty == Difficulty.easy;
+    return difficulty == GameDifficulty.normal;
   }
 
   bool isHard() {
-    return difficulty == Difficulty.hard;
+    return difficulty == GameDifficulty.hard;
   }
 
   bool isTough() {
-    return difficulty == Difficulty.tough;
+    return difficulty == GameDifficulty.tough;
   }
 
-  int get maxRow {
-    return _maxRow;
+  int getMaxRow() {
+    return maxRow;
   }
 
-  int get maxCol {
+  int getMaxCol() {
     return _maxCol;
   }
-
-  set maxRow(int x) {
-    _maxRow = x;
-    _maxCol = x;
-  }
-
-  var numberOfRooms = 0;
-  final playerMoves = 3;
-  Map<String, Room> myLabyrinth = Map();
-  List<String> myStack = [];
-  List<String> specialcells = [];
-  var firstedge = '';
-  var minotaur = Pixie(Ilk.minotaur);
-  var player = Pixie(Ilk.player);
-  var lambs = <Pixie>[];
 
   void clearLocationsOfLambsInThisCondition({Condition condition}) {
     lambs.forEach((lamb) {
@@ -153,33 +156,10 @@ class Maze {
     });
   }
 
-  // create and initialize the labyrinth
-  // squares named b_x_y eg b_1_3 for square A3 on a chess board
-  // each square starts as its own set and has its own number; eg 1-64
-  Maze(this._maxRow) {
-    initMaze();
-  } // END FUNCTION ***********************
-
-  initMaze() {
-    _maxCol = _maxRow;
-    lambs.clear();
-    myLabyrinth.clear();
-    _gameIsOver = false;
-    gameOverMessage = '';
-    _whosTurnIsIt = Ilk.player;
-    Room.badGuyHasMovedThisManyTimes = 0;
-    for (var yloop = 1; yloop < _maxRow + 1; yloop++) {
-      for (var xloop = 1; xloop < _maxCol + 1; xloop++) {
-        myLabyrinth['b_${xloop}_$yloop'] = new Room();
-
-        myLabyrinth['b_${xloop}_$yloop'].x = xloop;
-        myLabyrinth['b_${xloop}_$yloop'].y = yloop;
-      }
-    }
-  }
+  void movePlayer(Directions direction) {}
 
   void preparePlayerForATurn() {
-    player.movesLeft = playerMoves;
+    player.setMovesLeft(getPlayerMoves());
     player.delayComputerMove = true;
     _whosTurnIsIt = Ilk.player;
   }
@@ -189,7 +169,7 @@ class Maze {
     var handled = false;
     //if minotaur on player location then gameover
     if (minotaur.location == player.location) {
-      boss.movesLeft = 0;
+      boss.setMovesLeft(0);
       player.condition = Condition.dead;
       return endGame();
     }
@@ -198,13 +178,13 @@ class Maze {
         return;
       }
       if (el.location == boss.location) {
-        if (boss.ilk == Ilk.minotaur && difficulty != Difficulty.tough) {
-          boss.movesLeft = 0;
+        if (boss.ilk == Ilk.minotaur && difficulty != GameDifficulty.tough) {
+          boss.setMovesLeft(0);
           el.condition = Condition.dead;
           player.lostLambs++;
           print('lost lamb ${el.emoji}');
         } else if (boss.ilk == Ilk.player) {
-          boss.movesLeft = 0;
+          boss.setMovesLeft(0);
           el.condition = Condition.freed;
           player.savedLambs++;
           print('saved lamb ${el.emoji}');
@@ -231,7 +211,7 @@ class Maze {
   }
 
   bool movePixieToXY(Pixie pixie, int x, int y) {
-    print('movePixieToXY b_${x}_$y');
+    //print('movePixieToXY b_${x}_$y');
     final newloc = 'b_${x}_$y';
     if (pixie.ilk == Ilk.lamb && minotaur.location == newloc) {
       return false;
@@ -253,7 +233,7 @@ class Maze {
     pixie.x = x;
     pixie.y = y;
     pixie.location = newloc;
-    pixie.movesLeft--;
+    pixie.setMovesLeft(pixie.getMovesLeft() - 1);
 
     return true;
   }
@@ -318,7 +298,7 @@ class Maze {
   }
 
   bool moveThisPixieInThisDirection(Pixie pixie, Directions direction) {
-    print('moveThisPixieInThisDirection ${pixie.location}');
+    //print('moveThisPixieInThisDirection ${pixie.location}');
     switch (direction) {
       case Directions.down:
         {
@@ -595,7 +575,7 @@ class Maze {
       return playerDirection;
     }
 
-    if (difficulty == Difficulty.tough) return direction;
+    if (difficulty == GameDifficulty.tough) return direction;
 
     var xlesslambs = lambs.where((lamb) {
       return (lamb.y == boss.y &&
@@ -733,7 +713,7 @@ class Maze {
         break;
       case Directions.down:
         var y = pixie['y']; // + 1;
-        if (y == maxCol + 1) return false;
+        if (y == getMaxCol() + 1) return false;
         if (roomIsADeadEnd(room: 'b_${pixie['x']}_$y')) {
           return true;
         }
@@ -747,7 +727,7 @@ class Maze {
         break;
       case Directions.right:
         var x = pixie['x']; // + 1;
-        if (x == maxRow + 1) return false;
+        if (x == getMaxRow() + 1) return false;
         if (roomIsADeadEnd(room: 'b_${x}_${pixie['y']}')) {
           return true;
         }
@@ -784,11 +764,11 @@ class Maze {
 
   bool moveMinotaur() {
     bool minotaurHasNotMovedAtLeastOnceThisTurn() {
-      return minotaur.movesLeft == maxRow;
+      return minotaur.getMovesLeft() == getMaxRow();
     }
 
     bool minotaurHasMovedAtLeastOnceThisTurn() {
-      return minotaur.movesLeft < maxRow;
+      return minotaur.getMovesLeft() < getMaxRow();
     }
     // the minotaur moves in one direction until it eats a pixie,
     // runs into a wall or stops at an intersection.
@@ -815,10 +795,10 @@ class Maze {
       direction = randomDirection(location: minotaur.location);
     }
 
-    minotaur.movesLeft = maxRow;
+    minotaur.setMovesLeft(getMaxRow());
     int tries = 0;
     bool triedFirst = false;
-    while (minotaur.movesLeft > 0) {
+    while (minotaur.getMovesLeft() > 0) {
       if (tries++ > 100) {
         break;
       }
@@ -848,7 +828,7 @@ class Maze {
           thereIsADeadEndFromLocationInDirection(
               location: {'x': minotaur.x, 'y': minotaur.y},
               direction: direction)) {
-        minotaur.movesLeft = 0;
+        minotaur.setMovesLeft(0);
         continue; //try another direction
       }
 
@@ -858,15 +838,15 @@ class Maze {
         // 50% chance to stop on any intersection
         if (bossCannotSeeALamb && minotaurHasMovedAtLeastOnceThisTurn()) {
           if (roomIsAnIntersection(room: minotaur.location)) {
-            if (rand.nextInt(2) == 0) {
-              minotaur.movesLeft = 0;
+            if (Utils.rand.nextInt(2) == 0) {
+              minotaur.setMovesLeft(0);
               continue;
             }
             //check to see if a lamb can be seen from here
             if (direction !=
                 changeDirectionFromBossToNearestLamb(
                     boss: minotaur, direction: direction)) {
-              minotaur.movesLeft = 0;
+              minotaur.setMovesLeft(0);
 
               ///remember the dir the lamb was seen and use it on next turn
               ///to chase the lamb -- or not, that might make to game too hard
@@ -877,7 +857,7 @@ class Maze {
       } else {
         // if the minotaur moved and then failed to move then it has hit a wall so then end its turn
         if (minotaurHasMovedAtLeastOnceThisTurn()) {
-          minotaur.movesLeft = 0;
+          minotaur.setMovesLeft(0);
         }
       }
     }
@@ -887,7 +867,7 @@ class Maze {
 
   Directions randomDirection({String location}) {
     //find the dir of the accessible rooms with the lowest minotaurPath
-    var index = rand.nextInt(Directions.values.length);
+    var index = Utils.rand.nextInt(Directions.values.length);
     var finalDir = Directions.values[index]; //just a default direction
 
     if (location != minotaur.location) {
@@ -928,11 +908,11 @@ class Maze {
     lambs.forEach((lamb) {
       if (lamb.condition == Condition.alive) {
         attemptToMoveThisPixieToAnAdjacentRoom(pix: lamb);
-        lamb.movesLeft = 1;
+        lamb.setMovesLeft(1);
       } else if (lamb.condition == Condition.freed) {
-        lamb.movesLeft = 0;
+        lamb.setMovesLeft(0);
       } else {
-        lamb.movesLeft = 0;
+        lamb.setMovesLeft(0);
       }
     });
     var anyLeftAlive = lambs.any((lamb) => lamb.condition == Condition.alive);
@@ -969,7 +949,7 @@ class Maze {
         aNext.total++;
       }
     }
-    if ((y + 1) <= _maxRow) {
+    if ((y + 1) <= maxRow) {
       if (myLabyrinth['b_${x}_${y + 1}'].visited == false) {
         aNext.four = 'b_${x}_${y + 1}';
         aNext.total++;
@@ -978,8 +958,8 @@ class Maze {
     return aNext;
   }
 
-// return a string giving the room to carve to; b_x_y
-// but does not do the carving
+  // return a string giving the room to carve to; b_x_y
+  // but does not do the carving
   String makePassage(x, y) {
     Next aNext = Next();
 
@@ -1015,7 +995,7 @@ class Maze {
       aNext.max = aNext.three;
       dir = 'b_${x}_${(y - 1)}';
     }
-    if ((y + 1) <= _maxRow && (myLabyrinth['b_${x}_$y']?.upWallIsUp != null)) {
+    if ((y + 1) <= maxRow && (myLabyrinth['b_${x}_$y']?.upWallIsUp != null)) {
       aNext.four = (myLabyrinth['b_${x}_$y'].setid -
               myLabyrinth['b_${x}_${(y + 1)}'].setid)
           .abs()
@@ -1106,15 +1086,15 @@ class Maze {
     //  for MAXROW<12 choose x/y = 4 or 5 for initial cell, ie 4 possible cells,
     //  for larger labyrinths choose size/2-1 to size/2+1, ie 16 possible cells
 
-    numberOfRooms = _maxRow * _maxCol;
+    numberOfRooms = maxRow * _maxCol;
     myStack.clear();
-    specialcells.clear();
+    specialCells.clear();
 
-    var half = (_maxRow / 2).floor();
+    var half = (maxRow / 2).floor();
     var x = 0;
     var y = 0;
     var inc = 2;
-    if (_maxRow > 10) {
+    if (maxRow > 10) {
       half = half - 1;
       inc = inc + 2;
     }
@@ -1133,15 +1113,15 @@ class Maze {
 
     myLabyrinth[currentCell].visited = true;
     myLabyrinth[currentCell].setid = ++visitedCells;
-    specialcells.add(currentCell);
+    specialCells.add(currentCell);
 
     while (visitedCells < numberOfRooms) {
       //find all neighbors of CurrentCell with all walls intact
       x = myLabyrinth[currentCell].x;
       y = myLabyrinth[currentCell].y;
       if (notfoundfirstedge &&
-          (x == 1 || x == _maxCol || y == 1 || y == _maxRow)) {
-        specialcells.add(currentCell);
+          (x == 1 || x == _maxCol || y == 1 || y == maxRow)) {
+        specialCells.add(currentCell);
 
         notfoundfirstedge = false;
         firstedge = currentCell;
@@ -1159,7 +1139,7 @@ class Maze {
         myLabyrinth[currentCell].setid = ++visitedCells;
       } else {
         //every dead end is a special square
-        specialcells.add(currentCell);
+        specialCells.add(currentCell);
         //pop the most recent cell entry off the CellStack
         //and make it CurrentCell
         currentCell = myStack.removeLast();
@@ -1182,15 +1162,15 @@ class Maze {
     var rand = Math.Random.secure();
     if (mustBeNearCenter == true) {
       var inc = 2;
-      var half = (_maxRow / 2).floor();
-      if (_maxRow > 10) {
+      var half = (maxRow / 2).floor();
+      if (maxRow > 10) {
         half = half - 1;
         inc = inc + 2;
       }
       x = half + rand.nextInt(inc);
       y = half + rand.nextInt(inc);
     } else {
-      x = 1 + rand.nextInt(_maxRow - 1);
+      x = 1 + rand.nextInt(maxRow - 1);
       y = 1 + rand.nextInt(_maxCol - 1);
     }
     var p = Pixie(Ilk.lamb);
@@ -1211,8 +1191,8 @@ class Maze {
     loc.ilk = Ilk.minotaur;
     minotaur = loc;
     minotaur.emoji = '👺';
-    minotaur.preferredColor = Colors.red[800];
-    minotaur.movesLeft = maxRow;
+    minotaur.preferredColor = Colors.red[800].value;
+    minotaur.setMovesLeft(getMaxRow());
   }
 
   void placePlayer() {
@@ -1223,8 +1203,8 @@ class Maze {
     loc.ilk = Ilk.player;
     player = loc;
     player.emoji = '👧';
-    player.preferredColor = Colors.orange[800];
-    player.movesLeft = playerMoves;
+    player.preferredColor = Colors.orange[800].value;
+    player.setMovesLeft(getPlayerMoves());
     player.lostLambs = 0;
     player.savedLambs = 0;
   }
@@ -1298,7 +1278,7 @@ class Maze {
 
   void placeLambs() {
     lambs.clear();
-    for (int i = 0; i < _maxRow; i++) {
+    for (int i = 0; i < maxRow; i++) {
       var lamb = placePixie(mustBeNearCenter: false);
 
       while (closeToMinotaur(lamb) ||
@@ -1315,7 +1295,7 @@ class Maze {
   }
 
   void makeloops() {
-    var numloops = (_maxRow / 4).floor();
+    var numloops = (maxRow / 4).floor();
     //for each special room
     //check that there is an orthogonally adjacent square with a setid 9 apart
     //from the special squares setid
@@ -1329,7 +1309,7 @@ class Maze {
     //minimum setid differences
     var indx = 0;
 
-    if (knockextrawall(myLabyrinth[specialcells[indx++]], true)) {
+    if (knockextrawall(myLabyrinth[specialCells[indx++]], true)) {
       numloops--;
     }
     if (knockextrawall(myLabyrinth[firstedge], true)) {
@@ -1337,15 +1317,15 @@ class Maze {
     }
     var tmp = numloops;
     while (tmp > 0) {
-      if (knockextrawall(myLabyrinth[specialcells[indx++]], true)) {
+      if (knockextrawall(myLabyrinth[specialCells[indx++]], true)) {
         numloops--;
       }
       tmp--;
     }
     indx = 1;
     var i = 0;
-    while (numloops > 0 && i < specialcells.length) {
-      if (knockextrawall(myLabyrinth[specialcells[indx++]], false)) {
+    while (numloops > 0 && i < specialCells.length) {
+      if (knockextrawall(myLabyrinth[specialCells[indx++]], false)) {
         numloops--;
       }
       i++;
