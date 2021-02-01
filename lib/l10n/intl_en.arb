@@ -37,5 +37,6 @@
   "nyouWin": "!\nYou WIN! ",
   "rescuedAndCaptured": " rescued and captured.\nResult is a draw. ",
   "normal": "Normal",
-  "version": "Version"
+  "version": "Version",
+  "maze": "Maze"
 }

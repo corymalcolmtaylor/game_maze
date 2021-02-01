@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
+
 import '../generated/l10n.dart';
 import 'room.dart';
 
@@ -8,9 +10,16 @@ enum Ilk { player, minotaur, lamb }
 enum Directions { up, down, right, left }
 enum Condition { alive, dead, freed }
 
+double maxTSF(BuildContext context, {max = 1.14}) {
+  var tsf = MediaQuery.of(context).textScaleFactor;
+  if (tsf > max) tsf = max;
+  return tsf;
+}
+
 class Utils {
   static const wallThickness = 1.0;
   static const borderWallThickness = 1.3;
+
   static var normal = S.current.normal;
   static var hard = S.current.hard;
   static var tough = S.current.tough;

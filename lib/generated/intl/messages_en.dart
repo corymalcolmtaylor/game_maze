@@ -37,6 +37,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ifTheGoblinCap" : MessageLookupByLibrary.simpleMessage("\n\nIf the Goblin captures Alice the game ends in defeat but otherwise once all the animals are out of the maze you win if more animals have been freed than captured."),
     "isASimpleMazeG" : MessageLookupByLibrary.simpleMessage("is a simple maze game inspired by the works of Lewis Carroll.\n  If you have any suggestions or find a bug please let us know.\n\nDeveloper email:"),
     "mailtothesoft" : MessageLookupByLibrary.simpleMessage("mailto:thesoftwaretaylor@gmail.com?subject="),
+    "maze" : MessageLookupByLibrary.simpleMessage("Maze"),
     "mazeSize" : MessageLookupByLibrary.simpleMessage("Maze Size"),
     "modeIsLikeHard" : MessageLookupByLibrary.simpleMessage(" mode is like Hard mode but now the Goblin will not capture any animals.  This way the Goblin will not cause its own defeat by capturing the last animal after Alice has already freed more than half of them and the Goblin will have more time to catch Alice."),
     "modeIsTheDefault" : MessageLookupByLibrary.simpleMessage(" mode is the default mode, in Easy mode you can see everything."),
