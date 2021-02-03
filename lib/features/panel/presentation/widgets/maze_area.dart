@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/services.dart';
+
 import 'package:game_maze/core/maze.dart';
 import 'package:game_maze/core/pixie.dart';
 import 'package:game_maze/core/room.dart';
@@ -13,8 +13,8 @@ import 'package:game_maze/features/game/presentation/bloc/game_bloc.dart';
 import 'package:game_maze/features/game/presentation/widgets/enInfo.dart';
 import 'package:game_maze/features/game/presentation/widgets/enRules.dart';
 import 'package:game_maze/features/game/presentation/widgets/w_MazeBackButton.dart';
-import 'package:game_maze/features/game/presentation/widgets/w_StartNewGame.dart';
 import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
+import 'package:game_maze/features/panel/presentation/widgets/en_options.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
 
@@ -61,14 +61,6 @@ class _MazeAreaState extends State<MazeArea>
 
   PanelBloc getPanelBloc() {
     return BlocProvider.of<PanelBloc>(context);
-  }
-
-  void startNewGameAndSetState() {
-    startNewGame();
-    getPanelBloc().add(const ShowDishPanel());
-    setState(() {
-      print('started new game');
-    });
   }
 
   AnimatedPositioned getAnimatedSpriteIconThisPixie({@required Pixie pixie}) {
@@ -203,7 +195,7 @@ class _MazeAreaState extends State<MazeArea>
     if (getMaze().gameIsOver() ||
         !getMaze().lambs.any((lamb) => lamb.condition == Condition.alive)) {
       getMaze().setGameIsOver(true);
-      handleEndOfGame();
+      //  handleEndOfGame();
       return;
     }
 
@@ -233,7 +225,7 @@ class _MazeAreaState extends State<MazeArea>
       if (gameOver) {
         Future.delayed(
             Duration(milliseconds: 1 * Utils.animDurationMilliSeconds), () {
-          handleEndOfGame();
+          // handleEndOfGame();
         });
       } else {
         getMaze().preparePlayerForATurn();
@@ -251,7 +243,7 @@ class _MazeAreaState extends State<MazeArea>
     });
   }
 
-  void handleEndOfGame() {
+  void handleEndOfGamex() {
     String str = '';
     getMaze().setEogEmoji('');
     if (getMaze().player.condition == Condition.dead) {
@@ -273,7 +265,8 @@ class _MazeAreaState extends State<MazeArea>
     }
     getMaze().setGameOverMessage(str);
 
-    showGameOverMessage();
+    //showGameOverMessage();
+    BlocProvider.of<PanelBloc>(context).add(const ShowSettingsPanel());
   }
 
   Widget makeRoom(Room room) {
@@ -325,7 +318,7 @@ class _MazeAreaState extends State<MazeArea>
       difficulty = GameDifficulty.normal;
   }
 
-  Future<void> showGameOverMessage() async {
+  Future<void> showGameOverMessagex() async {
     var title = S.of(context).gameOver;
     var msg = getMaze().getGameOverMessage();
 
@@ -382,7 +375,7 @@ class _MazeAreaState extends State<MazeArea>
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            'siz', //S.of(context).mazeSize,
+                            S.of(context).mazeSize,
                             style: theme.textTheme.bodyText2,
                           ),
                         ),
@@ -504,21 +497,6 @@ class _MazeAreaState extends State<MazeArea>
                       ],
                     ),
                   ),
-                  if (MediaQuery.of(context).orientation ==
-                      Orientation.landscape)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        StartNewGame(
-                          startgame: startNewGameAndSetState,
-                        ),
-                      ],
-                    ),
-                  if (MediaQuery.of(context).orientation ==
-                      Orientation.portrait)
-                    StartNewGame(
-                      startgame: startNewGameAndSetState,
-                    ),
                   if (title == S.of(context).gameOver) MazeBackButton(),
                 ],
               ),
@@ -559,7 +537,7 @@ class _MazeAreaState extends State<MazeArea>
               width: Utils.borderWallThickness),
           onPressed: () {
             setState(() {
-              handleEndOfGame();
+              //  handleEndOfGame();
             });
           },
           child: Text(
@@ -714,50 +692,8 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget showOptions() {
-    var port = MediaQuery.of(context).orientation == Orientation.portrait;
-
-    return Scrollbar(
-      child: ListView(
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
-        children: <Widget>[
-          Center(
-            child: Text(
-              S.of(context).newGame,
-              textScaleFactor: maxTSF(context),
-              style: theme.textTheme.headline2,
-            ),
-          ),
-          if (port)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  StartNewGame(
-                    startgame: startNewGameAndSetState,
-                  ),
-                ],
-              ),
-            ),
-          if (!port)
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  StartNewGame(
-                    startgame: startNewGameAndSetState,
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
+    //BlocProvider.of<PanelBloc>(context).add(const ShowSettingsPanel());
+    return EnOptions(numRows: numRows, difficulty: difficulty);
   }
 
   @override
@@ -824,7 +760,7 @@ class _MazeAreaState extends State<MazeArea>
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        defineTopRow(),
+                        // defineTopRow(),
                         defineScoreRow(),
                       ],
                     ),
@@ -847,7 +783,7 @@ class _MazeAreaState extends State<MazeArea>
                     children: <Widget>[
                       Column(
                         children: <Widget>[
-                          defineTopRow(),
+                          // defineTopRow(),
                           defineScoreRow(),
                         ],
                       ),

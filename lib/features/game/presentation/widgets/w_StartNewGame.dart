@@ -5,7 +5,10 @@ import 'package:game_maze/generated/l10n.dart';
 
 class StartNewGame extends StatelessWidget {
   final Function startgame;
-  StartNewGame({this.startgame});
+  final int numRows;
+  final GameDifficulty difficulty;
+
+  StartNewGame({this.numRows, this.difficulty, this.startgame});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -20,8 +23,8 @@ class StartNewGame extends StatelessWidget {
               style: BorderStyle.solid,
               width: Utils.borderWallThickness),
           onPressed: () {
-            Navigator.of(context).pop();
-            startgame();
+            //Navigator.of(context).pop();
+            startgame(numRows: numRows, difficulty: difficulty);
           },
           child: Text(
             S.of(context).startGame,

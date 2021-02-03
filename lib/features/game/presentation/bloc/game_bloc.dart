@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:game_maze/core/maze.dart';
 import 'package:game_maze/core/utils.dart';
+import 'package:game_maze/generated/l10n.dart';
 import 'package:meta/meta.dart';
 
 part 'game_event.dart';
@@ -67,12 +68,37 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     super.onError(error, stackTrace);
   }
 
+  void handleEndOfGame(Maze maze) {
+    String str = '';
+    maze.setEogEmoji('');
+    if (maze.player.condition == Condition.dead) {
+      str = S.current.theGoblinGotAlice;
+      maze.setEogEmoji('😞');
+    } else {
+      if (maze.player.savedLambs > maze.player.lostLambs) {
+        str =
+            '${S.current.youRescued} ${maze.player.savedLambs}${S.current.nyouWin}';
+        maze.setEogEmoji('😀');
+      } else if (maze.player.savedLambs == maze.player.lostLambs) {
+        str = '${maze.player.savedLambs} ${S.current.rescuedAndCaptured}';
+        maze.setEogEmoji('😐');
+      } else {
+        str = '${S.current.goblinCaptured}${maze.player.lostLambs}. ';
+        maze.setEogEmoji('😞');
+      }
+    }
+    maze.setGameOverMessage(str);
+
+    //showGameOverMessage();
+    //BlocProvider.of<PanelBloc>(context).add(const ShowSettingsPanel());
+  }
+
   void computerMove({bool delayMove, Maze maze}) async {
     if (maze.gameIsOver() ||
         !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
       maze.setGameIsOver(true);
-      //handleEndOfGame();
-      maze.setGameOverMessage('gameisover');
+      handleEndOfGame(maze);
+      //maze.setGameOverMessage('gameisover');
       return;
     }
 
@@ -95,8 +121,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     if (gameOver) {
       //Future.delayed(
       //    Duration(milliseconds: 1 * Utils.animDurationMilliSeconds), () {
-      //handleEndOfGame();
-      maze.setGameOverMessage('gameisover');
+      handleEndOfGame(maze);
+      //maze.setGameOverMessage('gameisover');
       //});
     } else {
       maze.preparePlayerForATurn();
