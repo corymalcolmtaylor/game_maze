@@ -10,6 +10,11 @@ enum Ilk { player, minotaur, lamb }
 enum Directions { up, down, right, left }
 enum Condition { alive, dead, freed }
 
+class MazeException implements Exception {
+  const MazeException({this.message});
+  final String message;
+}
+
 double maxTSF(BuildContext context, {max = 1.14}) {
   var tsf = MediaQuery.of(context).textScaleFactor;
   if (tsf > max) tsf = max;

@@ -6,7 +6,7 @@ import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
 
-import 'w_MazeBackButton.dart';
+import 'maze_back_button.dart';
 
 class EnInfo extends StatefulWidget {
   EnInfo(this._emailPressRecognizer);
@@ -38,13 +38,13 @@ class _EnInfoState extends State<EnInfo> {
                     style: theme.textTheme.headline4,
                   ),
                   TextSpan(
-                    text: S.of(context).isASimpleMazeG,
-                    style: theme.textTheme.headline6
-                        .copyWith(color: Colors.cyanAccent),
+                    text: ' ${S.of(context).isASimpleMazeG} ',
+                    style: theme.textTheme.bodyText2,
                   ),
                   TextSpan(
                     text: S.of(context).thesoftwaretaylorgmailcom,
-                    style: theme.textTheme.bodyText2,
+                    style: theme.textTheme.headline6
+                        .copyWith(color: Colors.cyanAccent),
                     recognizer: widget._emailPressRecognizer,
                   ),
                   if (!kIsWeb)
@@ -53,7 +53,7 @@ class _EnInfoState extends State<EnInfo> {
                       style: theme.textTheme.bodyText2,
                     ),
                 ])),
-            MazeBackButton(),
+            //  MazeBackButton(),
           ],
         ),
       ),

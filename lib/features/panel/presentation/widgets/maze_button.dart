@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/utils.dart';
 
-class VirusButton extends StatefulWidget {
-  VirusButton(
+class MazeButton extends StatefulWidget {
+  MazeButton(
       {Key key, this.onclick, this.label, this.tstyle, this.radius = 30.0})
       : super(key: key);
   final Function onclick;
@@ -10,10 +10,10 @@ class VirusButton extends StatefulWidget {
   final TextStyle tstyle;
   final double radius;
   @override
-  _VirusButtonState createState() => _VirusButtonState();
+  _MazeButtonState createState() => _MazeButtonState();
 }
 
-class _VirusButtonState extends State<VirusButton> {
+class _MazeButtonState extends State<MazeButton> {
   @override
   Widget build(BuildContext context) {
     var tcolor = widget.onclick == null ? Colors.grey : Colors.white;

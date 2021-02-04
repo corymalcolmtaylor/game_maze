@@ -1,19 +1,22 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:game_maze/core/maze.dart';
 import 'package:game_maze/core/utils.dart';
 import 'package:game_maze/features/game/presentation/bloc/game_bloc.dart';
-import 'package:game_maze/features/game/presentation/widgets/w_MazeBackButton.dart';
-import 'package:game_maze/features/game/presentation/widgets/w_StartNewGame.dart';
+import 'package:game_maze/features/game/presentation/widgets/start_new_game.dart';
 import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
 
+import 'maze_back_button.dart';
+
 class EnOptions extends StatefulWidget {
-  EnOptions({this.numRows, this.difficulty, this.startNewGame});
-  final Function startNewGame;
+  EnOptions({
+    this.numRows,
+    this.difficulty,
+    this.setParentDifficulty,
+  });
+  final Function setParentDifficulty;
   final int numRows;
   final GameDifficulty difficulty;
   @override
@@ -48,6 +51,7 @@ class _EnOptionsState extends State<EnOptions> {
 
   @override
   Widget build(BuildContext context) {
+    print('build enoptions diff== ${widget.difficulty}');
     var title = S.of(context).gameOver;
     var msg = getMaze().getGameOverMessage();
     int numRowsInner = widget.numRows;
@@ -186,14 +190,14 @@ class _EnOptionsState extends State<EnOptions> {
                               canvasColor: Colors.black87,
                             ),
                             child: DropdownButton<String>(
+                              key: Key('PICKDIFFICULTY'),
                               isDense: true,
                               value: getDifficulty(difficulty),
                               onChanged: (String newValue) {
                                 difficulty = setMazeDifficulty(newValue);
-
+                                widget.setParentDifficulty(difficulty);
                                 setState(() {
-                                  print(
-                                      'new diff  ${getDifficulty(difficulty)}');
+                                  print('n dif ${getDifficulty(difficulty)}');
                                 });
                               },
                               items: <String>[
@@ -236,7 +240,7 @@ class _EnOptionsState extends State<EnOptions> {
                 startgame: startGame,
                 numRows: numRowsInner,
                 difficulty: difficulty),
-          if (title == S.of(context).gameOver) MazeBackButton(),
+          //if (title == S.of(context).gameOver) MazeBackButton(),
         ],
       ),
     );

@@ -24,6 +24,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     } else if (event is MoveEvent) {
       print('move alice  event ');
       yield* _mapMoveToState(event);
+    } else if (event is EndTurnEvent) {
+      print('move alice  event ');
+      yield* _mapEndTurnToState(event);
     }
   }
 
@@ -31,8 +34,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       InitializeNewGameEvent event) async* {
     try {
       Maze mz = Maze(event.numberOfRows, event.difficulty);
-      //  ..randomid = DateTime.now().millisecondsSinceEpoch;
-      //mz.carveLabyrinth();
+
       yield LoadedGame(maze: mz, rid: mz.randomid);
     } catch (_) {
       yield GameError('initialize game error');
@@ -62,6 +64,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+  Stream<GameState> _mapEndTurnToState(EndTurnEvent event) async* {
+    Maze mz = state.maze.copyThisMaze();
+    try {
+      mz.player.setMovesLeft(0);
+      mz.setWhosTurnItIs(Ilk.minotaur);
+      mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+      computerMove(delayMove: mz.player.delayComputerMove, maze: mz);
+      mz.setPixiesVisibility();
+      print('_mapMoveToState id ${mz.randomid}');
+      yield LoadedGame(maze: mz, rid: mz.randomid);
+    } catch (_) {
+      yield GameError('move player error');
+    }
+  }
+
   @override
   void onError(Object error, StackTrace stackTrace) {
     print('onError $error, $stackTrace');
@@ -88,9 +105,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
     }
     maze.setGameOverMessage(str);
-
-    //showGameOverMessage();
-    //BlocProvider.of<PanelBloc>(context).add(const ShowSettingsPanel());
   }
 
   void computerMove({bool delayMove, Maze maze}) async {
@@ -98,41 +112,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
       maze.setGameIsOver(true);
       handleEndOfGame(maze);
-      //maze.setGameOverMessage('gameisover');
+
       return;
     }
 
-    //int minoDelay = 0;
-    //if (delayMove) {
-    //  minoDelay = Utils.animDurationMilliSeconds;
-    //}
-    //var lambDelay = 0;
     if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
-      //lambDelay = Utils.animDurationMilliSeconds;
-      //Future.delayed(Duration(milliseconds: minoDelay), () {
       maze.moveMinotaur();
-      //});
     }
 
-    //Future.delayed(Duration(milliseconds: minoDelay + lambDelay), () {
     var gameOver = maze.moveLambs();
     maze.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
 
     if (gameOver) {
-      //Future.delayed(
-      //    Duration(milliseconds: 1 * Utils.animDurationMilliSeconds), () {
       handleEndOfGame(maze);
-      //maze.setGameOverMessage('gameisover');
-      //});
     } else {
       maze.preparePlayerForATurn();
     }
-    // }).then((_) {
-    //Future.delayed(Duration(milliseconds: Utils.animDurationMilliSeconds),
-    //  () {
+
     print('clear freed 2');
     maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
-    //});
-    //});
   }
 }

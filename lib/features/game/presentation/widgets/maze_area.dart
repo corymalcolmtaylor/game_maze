@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -10,13 +9,13 @@ import 'package:game_maze/core/pixie.dart';
 import 'package:game_maze/core/room.dart';
 import 'package:game_maze/core/utils.dart';
 import 'package:game_maze/features/game/presentation/bloc/game_bloc.dart';
-import 'package:game_maze/features/game/presentation/widgets/enInfo.dart';
-import 'package:game_maze/features/game/presentation/widgets/enRules.dart';
-import 'package:game_maze/features/game/presentation/widgets/w_MazeBackButton.dart';
 import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
+import 'package:game_maze/features/panel/presentation/widgets/en_info.dart';
 import 'package:game_maze/features/panel/presentation/widgets/en_options.dart';
+import 'package:game_maze/features/panel/presentation/widgets/en_rules.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MazeArea extends StatefulWidget {
   @override
@@ -44,19 +43,29 @@ class _MazeAreaState extends State<MazeArea>
   @override
   void initState() {
     super.initState();
-    //maze = Maze(numRows, difficulty);
-    //getMaze().carveLabyrinth();
+    _emailPressRecognizer = TapGestureRecognizer()
+      ..onTap = () async {
+        const url = 'mailto:thesoftwaretaylor@gmail.com?'
+            'subject=Alice%20and%20the%20Hedge%20Maze';
+        print('$url');
+        if (await canLaunch(url)) {
+          print(' launch $url');
+          await launch(url);
+        } else {
+          print('cannot launch $url');
+          throw const MazeException(message: 'Could not launch $url');
+        }
+      };
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _emailPressRecognizer.dispose();
   }
 
   Maze getMaze() {
-    GameState gs = BlocProvider.of<GameBloc>(context).state;
-    if (gs is InitialGame) {
-      return gs.maze;
-    }
-    if (gs is LoadedGame) {
-      return gs.maze;
-    }
-    return Maze(8, GameDifficulty.normal);
+    return BlocProvider.of<GameBloc>(context).state.maze;
   }
 
   PanelBloc getPanelBloc() {
@@ -182,91 +191,12 @@ class _MazeAreaState extends State<MazeArea>
 
   double whatIsTheTopOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.y - 1) * roomLength);
-    //retval += roomLength * 0.1;
     return retval + (2 * Utils.wallThickness);
   }
 
   double whatIsTheLeftOffsetOfThisPixie({Pixie pixie}) {
     var retval = ((pixie.x - 1) * roomLength);
     return retval + Utils.wallThickness;
-  }
-
-  void computerMovex({bool delayMove}) async {
-    if (getMaze().gameIsOver() ||
-        !getMaze().lambs.any((lamb) => lamb.condition == Condition.alive)) {
-      getMaze().setGameIsOver(true);
-      //  handleEndOfGame();
-      return;
-    }
-
-    int minoDelay = 0;
-    if (delayMove) {
-      minoDelay = Utils.animDurationMilliSeconds;
-    }
-    var lambDelay = 0;
-    if (getMaze().getWhosTurnIsIt() == Ilk.minotaur) {
-      lambDelay = Utils.animDurationMilliSeconds;
-      Future.delayed(Duration(milliseconds: minoDelay), () {
-        getMaze().moveMinotaur();
-        setState(() {
-          // just force redraw
-        });
-      });
-    }
-
-    Future.delayed(Duration(milliseconds: minoDelay + lambDelay), () {
-      var gameOver = getMaze().moveLambs();
-      getMaze().clearLocationsOfLambsInThisCondition(condition: Condition.dead);
-
-      setState(() {
-        // just force redraw
-      });
-
-      if (gameOver) {
-        Future.delayed(
-            Duration(milliseconds: 1 * Utils.animDurationMilliSeconds), () {
-          // handleEndOfGame();
-        });
-      } else {
-        getMaze().preparePlayerForATurn();
-      }
-    }).then((_) {
-      Future.delayed(Duration(milliseconds: Utils.animDurationMilliSeconds),
-          () {
-        print('clear freed 2');
-        getMaze()
-            .clearLocationsOfLambsInThisCondition(condition: Condition.freed);
-        setState(() {
-          // just force redraw
-        });
-      });
-    });
-  }
-
-  void handleEndOfGamex() {
-    String str = '';
-    getMaze().setEogEmoji('');
-    if (getMaze().player.condition == Condition.dead) {
-      str = S.of(context).theGoblinGotAlice;
-      getMaze().setEogEmoji('😞');
-    } else {
-      if (getMaze().player.savedLambs > getMaze().player.lostLambs) {
-        str =
-            '${S.of(context).youRescued} ${getMaze().player.savedLambs}${S.of(context).nyouWin}';
-        getMaze().setEogEmoji('😀');
-      } else if (getMaze().player.savedLambs == getMaze().player.lostLambs) {
-        str =
-            '${getMaze().player.savedLambs} ${S.of(context).rescuedAndCaptured}';
-        getMaze().setEogEmoji('😐');
-      } else {
-        str = '${S.of(context).goblinCaptured}${getMaze().player.lostLambs}. ';
-        getMaze().setEogEmoji('😞');
-      }
-    }
-    getMaze().setGameOverMessage(str);
-
-    //showGameOverMessage();
-    BlocProvider.of<PanelBloc>(context).add(const ShowSettingsPanel());
   }
 
   Widget makeRoom(Room room) {
@@ -318,195 +248,6 @@ class _MazeAreaState extends State<MazeArea>
       difficulty = GameDifficulty.normal;
   }
 
-  Future<void> showGameOverMessagex() async {
-    var title = S.of(context).gameOver;
-    var msg = getMaze().getGameOverMessage();
-
-    if (!getMaze().gameIsOver()) {
-      title = S.current.options;
-      msg = '';
-    }
-
-    var emojiTextStyle = TextStyle(
-      fontSize: 22,
-      color: Colors.yellow,
-      fontFamily: 'NotoEmoji',
-    );
-
-    return showDialog<void>(
-      context: context,
-
-      barrierDismissible: false, // user must tap button!
-      builder: (context) {
-        var numRowsInner = numRows;
-        return StatefulBuilder(builder: (context, setState) {
-          return AlertDialog(
-            backgroundColor: Colors.black54,
-            contentPadding: EdgeInsets.all(2),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      title,
-                      style: theme.textTheme.headline2,
-                    ),
-                  ),
-                  if (msg != '')
-                    RichText(
-                      text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                          text: msg,
-                          style: theme.textTheme.bodyText1,
-                        ),
-                        TextSpan(
-                          text: getMaze().getEogEmoji(),
-                          style: emojiTextStyle,
-                        ),
-                      ]),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            S.of(context).mazeSize,
-                            style: theme.textTheme.bodyText2,
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Container(
-                              decoration: new BoxDecoration(
-                                border: new Border.all(
-                                    color: Colors.cyanAccent,
-                                    width: Utils.borderWallThickness,
-                                    style: BorderStyle.solid),
-                                borderRadius: new BorderRadius.all(
-                                    new Radius.circular(10.0)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: new Theme(
-                                    data: Theme.of(context).copyWith(
-                                      canvasColor: Colors.black87,
-                                    ),
-                                    child: DropdownButton<String>(
-                                      isDense: true,
-                                      value: numRowsInner.toString(),
-                                      onChanged: (String newValue) {
-                                        numRowsInner = int.parse(newValue);
-                                        numRows = numRowsInner;
-                                        setState(() {
-                                          print('new val == $numRowsInner');
-                                        });
-                                      },
-                                      items: <String>['8', '10', '12', '14']
-                                          .map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            '${value}x$value',
-                                            textScaleFactor: 1.0,
-                                            style: theme.textTheme.bodyText2,
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            S.of(context).difficulty,
-                            style: theme.textTheme.bodyText2,
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Container(
-                              decoration: new BoxDecoration(
-                                border: new Border.all(
-                                    color: Colors.cyanAccent,
-                                    width: Utils.borderWallThickness,
-                                    style: BorderStyle.solid),
-                                borderRadius: new BorderRadius.all(
-                                    new Radius.circular(10.0)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: new Theme(
-                                    data: Theme.of(context).copyWith(
-                                      canvasColor: Colors.black87,
-                                    ),
-                                    child: DropdownButton<String>(
-                                      isDense: true,
-                                      value: getMazeDifficulty(),
-                                      onChanged: (String newValue) {
-                                        setMazeDifficulty(newValue);
-
-                                        setState(() {
-                                          print(' ');
-                                        });
-                                      },
-                                      items: <String>[
-                                        Utils.normal,
-                                        Utils.hard,
-                                        Utils.tough
-                                      ].map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            textScaleFactor: 1.0,
-                                            overflow: TextOverflow.visible,
-                                            style: theme.textTheme.bodyText2,
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (title == S.of(context).gameOver) MazeBackButton(),
-                ],
-              ),
-            ),
-          );
-        });
-      },
-    );
-  }
-
   void setSizes() {
     maxWidth = MediaQuery.of(context).size.width;
     var maxHeight = MediaQuery.of(context).size.height;
@@ -521,33 +262,6 @@ class _MazeAreaState extends State<MazeArea>
         (((maxWidth.floor() - (Utils.wallThickness * (getMaze().getMaxRow()))) /
                 getMaze().getMaxRow()))
             .floorToDouble();
-  }
-
-  Widget defineTopRow() {
-    return Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: Container(
-        child: OutlineButton(
-          shape: new RoundedRectangleBorder(
-            borderRadius: new BorderRadius.circular(30.0),
-          ),
-          borderSide: BorderSide(
-              color: Colors.cyan,
-              style: BorderStyle.solid,
-              width: Utils.borderWallThickness),
-          onPressed: () {
-            setState(() {
-              //  handleEndOfGame();
-            });
-          },
-          child: Text(
-            S.of(context).newGame,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyText2,
-          ),
-        ),
-      ),
-    );
   }
 
   Widget defineScoreRow() {
@@ -680,7 +394,7 @@ class _MazeAreaState extends State<MazeArea>
         message,
       ],
     );
-    //if (maxWidth > 500) return column;
+
     return Scrollbar(
       child: ListView(
         shrinkWrap: true,
@@ -691,9 +405,18 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
+  void setParentDifficulty(GameDifficulty diff) {
+    setState(() {
+      difficulty = diff;
+    });
+  }
+
   Widget showOptions() {
-    //BlocProvider.of<PanelBloc>(context).add(const ShowSettingsPanel());
-    return EnOptions(numRows: numRows, difficulty: difficulty);
+    return EnOptions(
+      numRows: numRows,
+      difficulty: difficulty,
+      setParentDifficulty: setParentDifficulty,
+    );
   }
 
   @override
@@ -728,7 +451,7 @@ class _MazeAreaState extends State<MazeArea>
           ),
         );
       }
-      // add sprites
+
       getMaze().setPixiesVisibility();
 
       var llsprites = List.from(getMaze().myLabyrinth.entries.map(
@@ -760,7 +483,6 @@ class _MazeAreaState extends State<MazeArea>
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        // defineTopRow(),
                         defineScoreRow(),
                       ],
                     ),
@@ -783,7 +505,6 @@ class _MazeAreaState extends State<MazeArea>
                     children: <Widget>[
                       Column(
                         children: <Widget>[
-                          // defineTopRow(),
                           defineScoreRow(),
                         ],
                       ),
@@ -826,8 +547,8 @@ class _MazeAreaState extends State<MazeArea>
       },
       onDoubleTap: () {
         print('dtap');
-        //BlocProvider.of<GameBloc>(context).add(EndTurnEvent(
-        //    'end turn  alice ${DateTime.now().millisecondsSinceEpoch}'));
+        BlocProvider.of<GameBloc>(context).add(EndTurnEvent(
+            'end turn  alice ${DateTime.now().millisecondsSinceEpoch}'));
         //handlePlayerHitAWall();
         // getMaze().setWhosTurnItIs(Ilk.minotaur);
         //computerMove(delayMove: getMaze().player.delayComputerMove);

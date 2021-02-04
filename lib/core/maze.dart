@@ -484,6 +484,9 @@ class Maze {
 
   bool canThisBossSeeThisPixie({Pixie boss, Pixie pixie}) {
     if (boss.x == pixie.x && boss.y == pixie.y) return true;
+    if (boss.ilk == Ilk.player && difficulty == GameDifficulty.normal) {
+      return true;
+    }
     if (whichDirectionTheBossCanLookToSeeThePixie(boss: boss, pixie: pixie) !=
         null) {
       return true;
