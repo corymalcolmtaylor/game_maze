@@ -6,8 +6,6 @@ import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
 
-import 'maze_back_button.dart';
-
 class EnInfo extends StatefulWidget {
   EnInfo(this._emailPressRecognizer);
   final TapGestureRecognizer _emailPressRecognizer;

@@ -8,15 +8,16 @@ import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
 
-import 'maze_back_button.dart';
-
 class EnOptions extends StatefulWidget {
-  EnOptions({
-    this.numRows,
-    this.difficulty,
-    this.setParentDifficulty,
-  });
+  EnOptions(
+      {this.numRows,
+      this.difficulty,
+      this.setParentDifficulty,
+      this.setParentNumRows,
+      this.startNewGame});
   final Function setParentDifficulty;
+  final Function setParentNumRows;
+  final Function startNewGame;
   final int numRows;
   final GameDifficulty difficulty;
   @override
@@ -24,16 +25,16 @@ class EnOptions extends StatefulWidget {
 }
 
 class _EnOptionsState extends State<EnOptions> {
-  String getDifficulty(difficulty) {
-    if (difficulty == GameDifficulty.hard) return Utils.hard;
-    if (difficulty == GameDifficulty.tough) return Utils.tough;
-    return Utils.normal;
+  String translateThisGameDifficultyToString({GameDifficulty difficulty}) {
+    if (difficulty == GameDifficulty.hard) return S.of(context).hard;
+    if (difficulty == GameDifficulty.tough) return S.of(context).tough;
+    return S.of(context).normal;
   }
 
-  GameDifficulty setMazeDifficulty(newValue) {
-    if (newValue == Utils.hard)
+  GameDifficulty translateThisStringToGameDifficulty({String string}) {
+    if (string == S.of(context).hard)
       return GameDifficulty.hard;
-    else if (newValue == Utils.tough)
+    else if (string == S.of(context).tough)
       return GameDifficulty.tough;
     else
       return GameDifficulty.normal;
@@ -128,10 +129,10 @@ class _EnOptionsState extends State<EnOptions> {
                               value: numRowsInner.toString(),
                               onChanged: (String newValue) {
                                 numRowsInner = int.parse(newValue);
-
-                                setState(() {
-                                  print('new val == $numRowsInner');
-                                });
+                                widget.setParentNumRows(numRowsInner);
+                                //setState(() {
+                                //print('new val == $numRowsInner');
+                                // });
                               },
                               items: <String>[
                                 '8',
@@ -192,18 +193,22 @@ class _EnOptionsState extends State<EnOptions> {
                             child: DropdownButton<String>(
                               key: Key('PICKDIFFICULTY'),
                               isDense: true,
-                              value: getDifficulty(difficulty),
+                              value: translateThisGameDifficultyToString(
+                                  difficulty: difficulty),
                               onChanged: (String newValue) {
-                                difficulty = setMazeDifficulty(newValue);
+                                difficulty =
+                                    translateThisStringToGameDifficulty(
+                                        string: newValue);
                                 widget.setParentDifficulty(difficulty);
-                                setState(() {
-                                  print('n dif ${getDifficulty(difficulty)}');
-                                });
+                                //setState(() {
+                                //print(
+                                //  'n dif ${translateThisGameDifficultyToString(difficulty: difficulty)}');
+                                //});
                               },
                               items: <String>[
-                                Utils.normal,
-                                Utils.hard,
-                                Utils.tough
+                                S.of(context).normal,
+                                S.of(context).hard,
+                                S.of(context).tough
                               ].map<DropdownMenuItem<String>>((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
@@ -230,17 +235,16 @@ class _EnOptionsState extends State<EnOptions> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 StartNewGame(
-                    startgame: startGame,
                     numRows: numRowsInner,
-                    difficulty: difficulty),
+                    difficulty: difficulty,
+                    startgame: widget.startNewGame),
               ],
             ),
           if (MediaQuery.of(context).orientation == Orientation.portrait)
             StartNewGame(
-                startgame: startGame,
                 numRows: numRowsInner,
-                difficulty: difficulty),
-          //if (title == S.of(context).gameOver) MazeBackButton(),
+                difficulty: difficulty,
+                startgame: widget.startNewGame),
         ],
       ),
     );

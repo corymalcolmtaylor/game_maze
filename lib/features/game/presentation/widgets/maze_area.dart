@@ -405,9 +405,15 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  void setParentDifficulty(GameDifficulty diff) {
+  void setDifficulty(GameDifficulty diff) {
     setState(() {
       difficulty = diff;
+    });
+  }
+
+  void setNumRows(int val) {
+    setState(() {
+      numRows = val;
     });
   }
 
@@ -415,7 +421,9 @@ class _MazeAreaState extends State<MazeArea>
     return EnOptions(
       numRows: numRows,
       difficulty: difficulty,
-      setParentDifficulty: setParentDifficulty,
+      setParentDifficulty: setDifficulty,
+      setParentNumRows: setNumRows,
+      startNewGame: startNewGame,
     );
   }
 
@@ -549,9 +557,6 @@ class _MazeAreaState extends State<MazeArea>
         print('dtap');
         BlocProvider.of<GameBloc>(context).add(EndTurnEvent(
             'end turn  alice ${DateTime.now().millisecondsSinceEpoch}'));
-        //handlePlayerHitAWall();
-        // getMaze().setWhosTurnItIs(Ilk.minotaur);
-        //computerMove(delayMove: getMaze().player.delayComputerMove);
       },
       child: SizedBox(
         width: stackSize,
@@ -581,7 +586,6 @@ class _MazeAreaState extends State<MazeArea>
     }
   }
 
-  /*return true if the minotaur should move next, otherwise false */
   void movePlayer({Directions direction}) {
     if (getMaze().gameIsOver()) return;
     if (getMaze().getWhosTurnIsIt() != Ilk.player) return;
@@ -594,5 +598,6 @@ class _MazeAreaState extends State<MazeArea>
   void startNewGame() {
     BlocProvider.of<GameBloc>(context)
         .add(InitializeNewGameEvent(numRows, difficulty));
+    BlocProvider.of<PanelBloc>(context).add(ShowDishPanel());
   }
 }

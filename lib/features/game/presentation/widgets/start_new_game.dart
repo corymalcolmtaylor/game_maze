@@ -4,9 +4,9 @@ import 'package:game_maze/core/utils.dart';
 import 'package:game_maze/generated/l10n.dart';
 
 class StartNewGame extends StatelessWidget {
-  final Function startgame;
   final int numRows;
   final GameDifficulty difficulty;
+  final startgame;
 
   StartNewGame({this.numRows, this.difficulty, this.startgame});
   @override
@@ -23,8 +23,7 @@ class StartNewGame extends StatelessWidget {
               style: BorderStyle.solid,
               width: Utils.borderWallThickness),
           onPressed: () {
-            //Navigator.of(context).pop();
-            startgame(numRows: numRows, difficulty: difficulty);
+            startgame();
           },
           child: Text(
             S.of(context).startGame,
