@@ -19,6 +19,7 @@ class EnOptions extends StatefulWidget {
   final Function setParentNumRows;
   final Function startNewGame;
   final int numRows;
+
   final GameDifficulty difficulty;
   @override
   _EnOptionsState createState() => _EnOptionsState();
@@ -105,9 +106,9 @@ class _EnOptionsState extends State<EnOptions> {
                     style: theme.textTheme.bodyText2,
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Center(
                     child: Container(
                       decoration: new BoxDecoration(
                         border: new Border.all(
@@ -126,13 +127,11 @@ class _EnOptionsState extends State<EnOptions> {
                             ),
                             child: DropdownButton<String>(
                               isDense: true,
+                              dropdownColor: Colors.grey[850],
                               value: numRowsInner.toString(),
                               onChanged: (String newValue) {
                                 numRowsInner = int.parse(newValue);
                                 widget.setParentNumRows(numRowsInner);
-                                //setState(() {
-                                //print('new val == $numRowsInner');
-                                // });
                               },
                               items: <String>[
                                 '8',
@@ -171,9 +170,9 @@ class _EnOptionsState extends State<EnOptions> {
                     style: theme.textTheme.bodyText2,
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
+                Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Center(
                     child: Container(
                       decoration: new BoxDecoration(
                         border: new Border.all(
@@ -193,6 +192,7 @@ class _EnOptionsState extends State<EnOptions> {
                             child: DropdownButton<String>(
                               key: Key('PICKDIFFICULTY'),
                               isDense: true,
+                              dropdownColor: Colors.grey[850],
                               value: translateThisGameDifficultyToString(
                                   difficulty: difficulty),
                               onChanged: (String newValue) {
@@ -200,10 +200,6 @@ class _EnOptionsState extends State<EnOptions> {
                                     translateThisStringToGameDifficulty(
                                         string: newValue);
                                 widget.setParentDifficulty(difficulty);
-                                //setState(() {
-                                //print(
-                                //  'n dif ${translateThisGameDifficultyToString(difficulty: difficulty)}');
-                                //});
                               },
                               items: <String>[
                                 S.of(context).normal,

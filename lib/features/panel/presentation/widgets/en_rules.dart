@@ -28,7 +28,7 @@ class EnRules extends StatelessWidget {
             style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: '\n${S.of(context).alice}',
+            text: '${S.of(context).alice}',
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
@@ -40,7 +40,7 @@ class EnRules extends StatelessWidget {
             style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: '\n${S.of(context).goblin}',
+            text: '${S.of(context).goblin}',
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
