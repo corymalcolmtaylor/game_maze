@@ -35,6 +35,7 @@ class _MazeScaffoldState extends State<MazeScaffold> {
       var showOptionsButton =
           !showDishButton && getPanelBloc().state is! SettingsPanel;
       return Scaffold(
+        backgroundColor: Colors.black,
         appBar: AppBar(
           elevation: 1,
           backgroundColor: Colors.black,

@@ -28,7 +28,7 @@ class EnRules extends StatelessWidget {
             style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: S.of(context).alice,
+            text: '\n${S.of(context).alice}',
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
@@ -36,11 +36,11 @@ class EnRules extends StatelessWidget {
             style: !Platform.isAndroid ? notoalice : theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: S.of(context).toTouchThem,
+            text: ' ${S.of(context).toTouchThem}',
             style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: S.of(context).goblin,
+            text: '\n${S.of(context).goblin}',
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
@@ -64,7 +64,7 @@ class EnRules extends StatelessWidget {
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
-            text: S.of(context).easy,
+            text: '\n${S.of(context).easy}',
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
@@ -72,18 +72,18 @@ class EnRules extends StatelessWidget {
             style: theme.textTheme.bodyText2,
           ),
           TextSpan(
-            text: S.of(context).hard,
+            text: '\n\n${S.of(context).hard}',
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
               text: S.of(context).modeMeansThat,
               style: theme.textTheme.bodyText2),
           TextSpan(
-            text: S.of(context).tough,
+            text: '\n\n${S.of(context).tough}',
             style: theme.textTheme.bodyText1,
           ),
           TextSpan(
-            text: S.of(context).modeIsLikeHard,
+            text: '${S.of(context).modeIsLikeHard} \n\n',
             style: theme.textTheme.bodyText2,
           ),
         ],

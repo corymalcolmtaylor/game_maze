@@ -478,49 +478,40 @@ class _MazeAreaState extends State<MazeArea>
       if (BlocProvider.of<PanelBloc>(context).state is DishPanel) {
         print('is dish panel');
         if (MediaQuery.of(context).orientation == Orientation.landscape) {
-          panel = Container(
-            color: Colors.black,
-            child: Center(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    color: Colors.black,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        defineScoreRow(),
-                      ],
-                    ),
-                  ),
-                  buildCenter(trs, maxWidth),
-                ],
-              ),
+          panel = Center(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    defineScoreRow(),
+                  ],
+                ),
+                buildCenter(trs, maxWidth),
+              ],
             ),
           );
         } else {
           panel = Center(
-            child: Container(
-              color: Colors.black,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          defineScoreRow(),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Center(child: buildCenter(trs, roomLength * numRows)),
-                ],
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        defineScoreRow(),
+                      ],
+                    ),
+                  ],
+                ),
+                Center(child: buildCenter(trs, roomLength * numRows)),
+              ],
             ),
           );
         }
