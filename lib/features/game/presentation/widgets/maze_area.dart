@@ -141,7 +141,7 @@ class _MazeAreaState extends State<MazeArea>
       top: endTop,
       height: whatIsTheEmojiFontSizeOfThisPixie(pixie: pixie),
       curve: Curves.linear,
-      duration: Duration(milliseconds: Utils.animDurationMilliSeconds),
+      duration: const Duration(milliseconds: Utils.animDurationMilliSeconds),
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Transform(
@@ -201,17 +201,18 @@ class _MazeAreaState extends State<MazeArea>
 
   Widget makeRoom(Room room) {
     /*  rooms shall be changed to square containers in rows of a set width */
-    var floorColor = Colors.green[200];
-    var northColor =
+    final floorColor = Colors.green[200];
+    final northColor =
         (room.downWallIsUp == true) ? Colors.green[700] : floorColor;
-    var southColor = (room.upWallIsUp == true) ? Colors.green[700] : floorColor;
-    var westColor =
+    final southColor =
+        (room.upWallIsUp == true) ? Colors.green[700] : floorColor;
+    final westColor =
         (room.leftWallIsUp == true) ? Colors.green[700] : floorColor;
-    var eastColor =
+    final eastColor =
         (room.rightWallIsUp == true) ? Colors.green[700] : floorColor;
 
-    var endLeft = ((room.x - 1) * roomLength);
-    var endTop = ((room.y - 1) * roomLength);
+    final endLeft = ((room.x - 1) * roomLength);
+    final endTop = ((room.y - 1) * roomLength);
 
     return Positioned(
       key: Key("room${room.x}_${room.y}"),
@@ -445,6 +446,7 @@ class _MazeAreaState extends State<MazeArea>
       print('BlocBuilder build 1 ${mazestate.maze.randomid}  ');
       print('BlocBuilder build 2 ${getMaze().randomid}  ');
       print('BlocBuilder build 3 ');
+      trs.clear();
       for (int i = 1; i <= getMaze().getMaxRow(); i++) {
         trs.addAll(
           List.from(
@@ -459,6 +461,7 @@ class _MazeAreaState extends State<MazeArea>
           ),
         );
       }
+      print('BlocBuilder build 4 trs== ${trs.length}');
 
       getMaze().setPixiesVisibility();
 
@@ -473,7 +476,7 @@ class _MazeAreaState extends State<MazeArea>
       sprites.add(getAnimatedSpriteIconThisPixie(pixie: getMaze().player));
 
       sprites.add(getAnimatedSpriteIconThisPixie(pixie: getMaze().minotaur));
-
+      print('BlocBuilder build 4 sprite==${sprites.length}');
       Widget panel;
       if (BlocProvider.of<PanelBloc>(context).state is DishPanel) {
         print('is dish panel');
