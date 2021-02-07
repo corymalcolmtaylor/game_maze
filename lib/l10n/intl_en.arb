@@ -34,9 +34,11 @@
   "couldNotLaunch": "Could not launch ",
   "theGoblinGotAlice": "The Goblin got Alice! ️",
   "youRescued": "You rescued ",
-  "nyouWin": "!\nYou WIN! ",
+  "nyouWin": "You WIN! ",
   "rescuedAndCaptured": " rescued and captured.\nResult is a draw. ",
+  "draw": " Game drawn. ",
   "normal": "Normal",
   "version": "Version",
-  "maze": "Maze"
+  "maze": "Maze",
+  "itWins": " it wins."
 }

@@ -18,14 +18,16 @@ class _MazeButtonState extends State<MazeButton> {
   Widget build(BuildContext context) {
     var tcolor = widget.onclick == null ? Colors.grey : Colors.white;
     return Container(
-      child: OutlineButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(widget.radius),
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30.0),
+          ),
+          side: BorderSide(
+              color: Colors.cyan,
+              style: BorderStyle.solid,
+              width: Utils.borderWallThickness),
         ),
-        borderSide: const BorderSide(
-            color: Colors.cyan,
-            style: BorderStyle.solid,
-            width: Utils.borderWallThickness),
         onPressed: widget.onclick,
         child: Text(
           widget.label,

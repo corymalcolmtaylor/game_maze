@@ -375,10 +375,10 @@ class S {
     );
   }
 
-  /// `!\nYou WIN! `
+  /// `You WIN! `
   String get nyouWin {
     return Intl.message(
-      '!\nYou WIN! ',
+      'You WIN! ',
       name: 'nyouWin',
       desc: '',
       args: [],
@@ -390,6 +390,16 @@ class S {
     return Intl.message(
       ' rescued and captured.\nResult is a draw. ',
       name: 'rescuedAndCaptured',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// ` Game drawn. `
+  String get draw {
+    return Intl.message(
+      ' Game drawn. ',
+      name: 'draw',
       desc: '',
       args: [],
     );
@@ -420,6 +430,16 @@ class S {
     return Intl.message(
       'Maze',
       name: 'maze',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// ` it wins.`
+  String get itWins {
+    return Intl.message(
+      ' it wins.',
+      name: 'itWins',
       desc: '',
       args: [],
     );

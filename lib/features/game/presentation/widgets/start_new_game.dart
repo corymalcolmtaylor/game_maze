@@ -14,14 +14,16 @@ class StartNewGame extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       child: Container(
-        child: OutlineButton(
-          shape: new RoundedRectangleBorder(
-            borderRadius: new BorderRadius.circular(30.0),
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+            side: BorderSide(
+                color: Colors.cyan,
+                style: BorderStyle.solid,
+                width: Utils.borderWallThickness),
           ),
-          borderSide: BorderSide(
-              color: Colors.cyan,
-              style: BorderStyle.solid,
-              width: Utils.borderWallThickness),
           onPressed: () {
             startgame();
           },

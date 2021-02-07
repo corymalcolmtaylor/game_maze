@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:game_maze/core/maze.dart';
 import 'package:game_maze/core/utils.dart';
+import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:meta/meta.dart';
 
@@ -53,10 +54,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
         if (mz.getWhosTurnIsIt() == Ilk.minotaur) {
           mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+          mz.setPixiesVisibility();
+          print('1 _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid); // Do something
+          await Future.delayed(
+              const Duration(milliseconds: Utils.animDurationMilliSeconds));
           computerMove(delayMove: mz.player.delayComputerMove, maze: mz);
         }
         mz.setPixiesVisibility();
-        print('_mapMoveToState id ${mz.randomid}');
+
+        mz.randomid++;
+        print('2 _mapMoveToState id ${mz.randomid}');
         yield LoadedGame(maze: mz, rid: mz.randomid);
       } catch (_) {
         yield GameError('move player error');
@@ -70,8 +78,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       mz.player.setMovesLeft(0);
       mz.setWhosTurnItIs(Ilk.minotaur);
       mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+      yield LoadedGame(maze: mz, rid: mz.randomid);
+      await Future.delayed(
+          const Duration(milliseconds: Utils.animDurationMilliSeconds));
       computerMove(delayMove: mz.player.delayComputerMove, maze: mz);
       mz.setPixiesVisibility();
+      mz.randomid++;
       print('_mapMoveToState id ${mz.randomid}');
       yield LoadedGame(maze: mz, rid: mz.randomid);
     } catch (_) {
@@ -86,21 +98,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void handleEndOfGame(Maze maze) {
-    String str = '';
+    String str = '${S.current.gameOver}\n';
     maze.setEogEmoji('');
+
     if (maze.player.condition == Condition.dead) {
-      str = S.current.theGoblinGotAlice;
+      str += '${S.current.theGoblinGotAlice}';
       maze.setEogEmoji('😞');
     } else {
       if (maze.player.savedLambs > maze.player.lostLambs) {
-        str =
-            '${S.current.youRescued} ${maze.player.savedLambs}${S.current.nyouWin}';
+        str +=
+            '${S.current.youRescued} ${maze.player.savedLambs}\n${S.current.nyouWin}';
         maze.setEogEmoji('😀');
       } else if (maze.player.savedLambs == maze.player.lostLambs) {
-        str = '${maze.player.savedLambs} ${S.current.rescuedAndCaptured}';
+        str += '${maze.player.savedLambs} ${S.current.rescuedAndCaptured}';
         maze.setEogEmoji('😐');
       } else {
-        str = '${S.current.goblinCaptured}${maze.player.lostLambs}. ';
+        str +=
+            '${S.current.goblinCaptured} ${maze.player.lostLambs},\n${S.current.itWins}';
         maze.setEogEmoji('😞');
       }
     }
