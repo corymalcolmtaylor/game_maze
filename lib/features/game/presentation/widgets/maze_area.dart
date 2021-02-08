@@ -10,6 +10,7 @@ import 'package:game_maze/core/room.dart';
 import 'package:game_maze/core/utils.dart';
 import 'package:game_maze/features/game/presentation/bloc/game_bloc.dart';
 import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
+import 'package:game_maze/features/panel/presentation/widgets/en_dish.dart';
 import 'package:game_maze/features/panel/presentation/widgets/en_info.dart';
 import 'package:game_maze/features/panel/presentation/widgets/en_options.dart';
 import 'package:game_maze/features/panel/presentation/widgets/en_rules.dart';
@@ -32,12 +33,11 @@ class _MazeAreaState extends State<MazeArea>
   final maximumMoveAttempts = 8;
 
   var sprites = <Widget>[];
+
   var roomLength = 0.0;
   var maxWidth = 0.0;
-  var hDelta = 0.0;
-  var vDelta = 0.0;
+
   GameDifficulty difficulty = GameDifficulty.normal;
-  Directions dir;
 
   TapGestureRecognizer _emailPressRecognizer;
 
@@ -235,21 +235,6 @@ class _MazeAreaState extends State<MazeArea>
     );
   }
 
-  String getMazeDifficulty() {
-    if (getMaze().difficulty == GameDifficulty.hard) return Utils.hard;
-    if (getMaze().difficulty == GameDifficulty.tough) return Utils.tough;
-    return Utils.normal;
-  }
-
-  void setMazeDifficulty(newValue) {
-    if (newValue == Utils.hard)
-      difficulty = GameDifficulty.hard;
-    else if (newValue == Utils.tough)
-      difficulty = GameDifficulty.tough;
-    else
-      difficulty = GameDifficulty.normal;
-  }
-
   void setSizes() {
     maxWidth = MediaQuery.of(context).size.width;
     var maxHeight = MediaQuery.of(context).size.height;
@@ -266,147 +251,6 @@ class _MazeAreaState extends State<MazeArea>
             .floorToDouble();
   }
 
-  Widget defineScoreRow() {
-    return Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            children: <Widget>[
-              Text(
-                S.of(context).aliceSaved,
-                style: theme.textTheme.bodyText2,
-              ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                  child: Text(
-                    '${getMaze().player.savedLambs.toString()} ' +
-                        S.of(context).xf +
-                        ' ${getMaze().getMaxRow().toString()}',
-                    style: theme.textTheme.bodyText2,
-                  )),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              Text(
-                S.of(context).goblinCaptured,
-                style: theme.textTheme.bodyText2,
-              ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                  child: Text(
-                    '${getMaze().player.lostLambs.toString()}',
-                    style: theme.textTheme.bodyText2,
-                  )),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              Text(
-                S.of(context).movesLeft,
-                style: theme.textTheme.bodyText2,
-              ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0, 20, 0),
-                  child: Text(
-                    '${getMaze().player.getMovesLeft()}',
-                    style: theme.textTheme.bodyText2,
-                  )),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget showRules(double stackSize) {
-    var rulesTitle = RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(children: <TextSpan>[
-        TextSpan(
-          text: '${S.of(context).rules}\n',
-          style: theme.textTheme.headline2,
-        ),
-      ]),
-    );
-
-    Widget message;
-
-    message = EnRules();
-    if (maxWidth > 500 ||
-        MediaQuery.of(context).orientation == Orientation.landscape) {
-      message = Padding(
-        padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
-        child: message,
-      );
-    }
-    if (kIsWeb) {
-      message = Container(width: maxWidth, child: message);
-    }
-
-    return Scrollbar(
-      child: ListView(
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
-        padding: const EdgeInsets.all(8.0),
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              rulesTitle,
-              message,
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget showAbout(double stackSize) {
-    var infoTitle = RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(children: <TextSpan>[
-        TextSpan(
-          text: '${S.of(context).about}\n',
-          style: theme.textTheme.headline2,
-        ),
-      ]),
-    );
-
-    Widget message = EnInfo(
-      _emailPressRecognizer,
-    );
-    if (maxWidth > 500 ||
-        MediaQuery.of(context).orientation == Orientation.landscape) {
-      message = Padding(
-        padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
-        child: message,
-      );
-    }
-    if (kIsWeb) {
-      message = Container(width: maxWidth, child: message);
-    }
-    var column = Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        infoTitle,
-        message,
-      ],
-    );
-
-    return Scrollbar(
-      child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(8.0),
-        scrollDirection: Axis.vertical,
-        children: [column],
-      ),
-    );
-  }
-
   void setDifficulty(GameDifficulty diff) {
     setState(() {
       difficulty = diff;
@@ -419,16 +263,6 @@ class _MazeAreaState extends State<MazeArea>
     });
   }
 
-  Widget showOptions() {
-    return EnOptions(
-      numRows: numRows,
-      difficulty: difficulty,
-      setParentDifficulty: setDifficulty,
-      setParentNumRows: setNumRows,
-      startNewGame: startNewGame,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     print('mazearea build id ${getMaze().randomid}');
@@ -437,11 +271,17 @@ class _MazeAreaState extends State<MazeArea>
     Widget otherPanel;
 
     if (getPanelBloc().state is RulesPanel) {
-      otherPanel = showRules(maxWidth);
+      otherPanel = EnRules(maxWidth);
     } else if (getPanelBloc().state is SettingsPanel) {
-      otherPanel = showOptions();
+      otherPanel = EnOptions(
+        numRows: numRows,
+        difficulty: difficulty,
+        setParentDifficulty: setDifficulty,
+        setParentNumRows: setNumRows,
+        startNewGame: startNewGame,
+      );
     } else if (getPanelBloc().state is AboutPanel) {
-      otherPanel = showAbout(maxWidth);
+      otherPanel = EnInfo(maxWidth, _emailPressRecognizer);
     }
     return BlocBuilder<GameBloc, GameState>(builder: (context, mazestate) {
       print('BlocBuilder build 1 ${mazestate.maze.randomid}  ');
@@ -477,94 +317,13 @@ class _MazeAreaState extends State<MazeArea>
       Widget panel;
       if (BlocProvider.of<PanelBloc>(context).state is DishPanel) {
         print('state is dish panel');
-        if (MediaQuery.of(context).orientation == Orientation.landscape) {
-          panel = Center(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    defineScoreRow(),
-                    if (getMaze().gameIsOver())
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    getMaze().getGameOverMessage(),
-                                    style: theme.textTheme.headline1,
-                                  ),
-                                ),
-                              ),
-                              StartNewGame(
-                                  numRows: numRows,
-                                  difficulty: difficulty,
-                                  startgame: startNewGame),
-                            ],
-                          ),
-                        ),
-                      )
-
-                    //////
-                  ],
-                ),
-                buildCenter(trs, maxWidth),
-              ],
-            ),
-          );
-        } else {
-          panel = Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        defineScoreRow(),
-                      ],
-                    ),
-                  ],
-                ),
-                Center(child: buildCenter(trs, roomLength * numRows)),
-                if (getMaze().gameIsOver())
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                getMaze().getGameOverMessage(),
-                                style: theme.textTheme.headline1,
-                              ),
-                            ),
-                          ),
-                          StartNewGame(
-                              numRows: numRows,
-                              difficulty: difficulty,
-                              startgame: startNewGame),
-                        ],
-                      ),
-                    ),
-                  )
-              ],
-            ),
-          );
-        }
+        panel = EnDish(
+            maxWidth: maxWidth,
+            roomLength: roomLength,
+            numRows: numRows,
+            sprites: [...sprites],
+            trs: [...trs],
+            startNewGame: startNewGame);
       } else {
         print('state is NOT dish panel');
         panel = otherPanel;
@@ -577,80 +336,6 @@ class _MazeAreaState extends State<MazeArea>
         print('state is about panel ');
       return panel;
     });
-  }
-
-  GestureDetector buildCenter(List<Widget> trs, double stackSize) {
-    return GestureDetector(
-      onHorizontalDragEnd: (dragDetails) {
-        if (getMaze().gameIsOver()) {
-          BlocProvider.of<PanelBloc>(context).add(ShowSettingsPanel());
-        } else {
-          if (hDelta.abs() > 25) {
-            movePlayer(direction: dir);
-          }
-        }
-        hDelta = 0;
-      },
-      onVerticalDragEnd: (dragDetails) {
-        if (getMaze().gameIsOver()) {
-          BlocProvider.of<PanelBloc>(context).add(ShowSettingsPanel());
-        } else {
-          if (vDelta.abs() > 25) {
-            movePlayer(direction: dir);
-          }
-        }
-        vDelta = 0;
-      },
-      onVerticalDragUpdate: (dragDetails) {
-        vertaicalDragUpdate(dragDetails);
-      },
-      onHorizontalDragUpdate: (dragDetails) {
-        horizontalDragUpdate(dragDetails);
-      },
-      onDoubleTap: () {
-        print('dtap');
-        if (getMaze().gameIsOver()) {
-          BlocProvider.of<PanelBloc>(context).add(ShowSettingsPanel());
-        } else {
-          BlocProvider.of<GameBloc>(context).add(EndTurnEvent(
-              'end turn alice ${DateTime.now().millisecondsSinceEpoch}'));
-        }
-      },
-      child: SizedBox(
-        width: stackSize,
-        height: stackSize,
-        child: Stack(clipBehavior: Clip.none, children: [...trs, ...sprites]),
-      ),
-    );
-  }
-
-  void horizontalDragUpdate(DragUpdateDetails dragDetails) {
-    hDelta += dragDetails.primaryDelta;
-    if (dragDetails.primaryDelta > 0) {
-      dir = Directions.right;
-    } else {
-      if (dragDetails.primaryDelta < 0) {
-        dir = Directions.left;
-      }
-    }
-  }
-
-  void vertaicalDragUpdate(DragUpdateDetails dragDetails) {
-    vDelta += dragDetails.primaryDelta;
-    if (dragDetails.primaryDelta > 0) {
-      dir = Directions.down;
-    } else if (dragDetails.primaryDelta < 0) {
-      dir = Directions.up;
-    }
-  }
-
-  void movePlayer({Directions direction}) {
-    if (getMaze().gameIsOver()) return;
-    if (getMaze().getWhosTurnIsIt() != Ilk.player) return;
-    if (getMaze().player.getMovesLeft() <= 0) return;
-
-    BlocProvider.of<GameBloc>(context)
-        .add(MoveEvent('move alice $direction', direction));
   }
 
   void startNewGame() {

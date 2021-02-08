@@ -54,13 +54,12 @@ class _EnOptionsState extends State<EnOptions> {
   @override
   Widget build(BuildContext context) {
     print('build enoptions diff== ${widget.difficulty}');
-    var title = S.of(context).gameOver;
+    var title = S.current.options;
     var msg = getMaze().getGameOverMessage();
     int numRowsInner = widget.numRows;
     GameDifficulty difficulty = widget.difficulty;
 
     if (!getMaze().gameIsOver()) {
-      title = S.current.options;
       msg = '';
     }
 
@@ -87,10 +86,6 @@ class _EnOptionsState extends State<EnOptions> {
                 TextSpan(
                   text: msg,
                   style: theme.textTheme.bodyText1,
-                ),
-                TextSpan(
-                  text: getMaze().getEogEmoji(),
-                  style: emojiTextStyle,
                 ),
               ]),
             ),

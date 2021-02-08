@@ -1,14 +1,25 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
 
 class EnRules extends StatelessWidget {
-  EnRules();
+  final double maxWidth;
+  EnRules(this.maxWidth);
 
   @override
   Widget build(BuildContext context) {
+    var rulesTitle = RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(children: <TextSpan>[
+        TextSpan(
+          text: '${S.of(context).rules}\n',
+          style: theme.textTheme.headline2,
+        ),
+      ]),
+    );
     var notoalice = TextStyle(
       fontSize: 22,
       color: Colors.orange[800],
@@ -20,7 +31,9 @@ class EnRules extends StatelessWidget {
         color: Colors.red[800],
         fontFamily: 'NotoEmoji',
         backgroundColor: Colors.green[200]);
-    return RichText(
+    Widget message;
+
+    message = RichText(
       text: TextSpan(
         children: <TextSpan>[
           TextSpan(
@@ -85,6 +98,33 @@ class EnRules extends StatelessWidget {
           TextSpan(
             text: '${S.of(context).modeIsLikeHard} \n\n',
             style: theme.textTheme.bodyText2,
+          ),
+        ],
+      ),
+    );
+    if (maxWidth > 500 ||
+        MediaQuery.of(context).orientation == Orientation.landscape) {
+      message = Padding(
+        padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
+        child: message,
+      );
+    }
+    if (kIsWeb) {
+      message = Container(width: maxWidth, child: message);
+    }
+
+    return Scrollbar(
+      child: ListView(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        padding: const EdgeInsets.all(8.0),
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              rulesTitle,
+              message,
+            ],
           ),
         ],
       ),

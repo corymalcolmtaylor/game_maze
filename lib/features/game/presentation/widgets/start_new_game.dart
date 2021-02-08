@@ -12,7 +12,7 @@ class StartNewGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
       child: Container(
         child: OutlinedButton(
           style: OutlinedButton.styleFrom(

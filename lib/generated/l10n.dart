@@ -215,20 +215,20 @@ class S {
     );
   }
 
-  /// ` mode is like Hard mode but now the Goblin will not capture any animals.  This way the Goblin will not cause its own defeat by capturing the last animal after Alice has already freed more than half of them and the Goblin will have more time to catch Alice.`
+  /// ` mode is like Hard mode but now the Goblin will try not to capture any animals if the Alice has already freed more than half of the animals.  This way the Goblin will not assist in its own defeat and will have more time to catch Alice.`
   String get modeIsLikeHard {
     return Intl.message(
-      ' mode is like Hard mode but now the Goblin will not capture any animals.  This way the Goblin will not cause its own defeat by capturing the last animal after Alice has already freed more than half of them and the Goblin will have more time to catch Alice.',
+      ' mode is like Hard mode but now the Goblin will try not to capture any animals if the Alice has already freed more than half of the animals.  This way the Goblin will not assist in its own defeat and will have more time to catch Alice.',
       name: 'modeIsLikeHard',
       desc: '',
       args: [],
     );
   }
 
-  /// `is a simple maze game inspired by the works of Lewis Carroll.\n  If you have any suggestions or find a bug please let us know.\n\nDeveloper email:`
+  /// `is a simple maze game inspired by the works of Lewis Carroll.\nIf you have any suggestions or find a bug please send an email about it to...\nDeveloper email:`
   String get isASimpleMazeG {
     return Intl.message(
-      'is a simple maze game inspired by the works of Lewis Carroll.\n  If you have any suggestions or find a bug please let us know.\n\nDeveloper email:',
+      'is a simple maze game inspired by the works of Lewis Carroll.\nIf you have any suggestions or find a bug please send an email about it to...\nDeveloper email:',
       name: 'isASimpleMazeG',
       desc: '',
       args: [],
@@ -255,10 +255,10 @@ class S {
     );
   }
 
-  /// `Game Over`
+  /// `Game Over!`
   String get gameOver {
     return Intl.message(
-      'Game Over',
+      'Game Over!',
       name: 'gameOver',
       desc: '',
       args: [],
@@ -355,50 +355,50 @@ class S {
     );
   }
 
-  /// `The Goblin got Alice! ️`
+  /// `The Goblin got Alice`
   String get theGoblinGotAlice {
     return Intl.message(
-      'The Goblin got Alice! ️',
+      'The Goblin got Alice',
       name: 'theGoblinGotAlice',
       desc: '',
       args: [],
     );
   }
 
-  /// `You rescued `
+  /// `You rescued`
   String get youRescued {
     return Intl.message(
-      'You rescued ',
+      'You rescued',
       name: 'youRescued',
       desc: '',
       args: [],
     );
   }
 
-  /// `You WIN! `
+  /// `, so you WIN! `
   String get nyouWin {
     return Intl.message(
-      'You WIN! ',
+      ', so you WIN! ',
       name: 'nyouWin',
       desc: '',
       args: [],
     );
   }
 
-  /// ` rescued and captured.\nResult is a draw. `
+  /// `rescued and captured`
   String get rescuedAndCaptured {
     return Intl.message(
-      ' rescued and captured.\nResult is a draw. ',
+      'rescued and captured',
       name: 'rescuedAndCaptured',
       desc: '',
       args: [],
     );
   }
 
-  /// ` Game drawn. `
+  /// `, so game drawn.`
   String get draw {
     return Intl.message(
-      ' Game drawn. ',
+      ', so game drawn.',
       name: 'draw',
       desc: '',
       args: [],
@@ -435,10 +435,20 @@ class S {
     );
   }
 
-  /// ` it wins.`
+  /// `The Goblin captured `
+  String get thegoblincaptured {
+    return Intl.message(
+      'The Goblin captured ',
+      name: 'thegoblincaptured',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `, so it wins.`
   String get itWins {
     return Intl.message(
-      ' it wins.',
+      ', so it wins.',
       name: 'itWins',
       desc: '',
       args: [],

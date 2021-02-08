@@ -175,25 +175,27 @@ class Maze {
     }
     lambs.forEach((el) {
       if (el.condition != Condition.alive) {
-        return;
+        return handled;
       }
       if (el.location == boss.location) {
-        if (boss.ilk == Ilk.minotaur && difficulty != GameDifficulty.tough) {
+        if (boss.ilk == Ilk.minotaur) {
           boss.setMovesLeft(0);
           el.condition = Condition.dead;
           player.lostLambs++;
           print('lost lamb ${el.emoji}');
+          handled = true;
         } else if (boss.ilk == Ilk.player) {
           boss.setMovesLeft(0);
           el.condition = Condition.freed;
           player.savedLambs++;
           print('saved lamb ${el.emoji}');
+          handled = true;
         } else {
           print(
               'lost lamb difficulty=$difficulty, ${el.emoji}, ${el.location}');
           print('*****');
+          handled = false;
         }
-        handled = true;
       }
     });
 
@@ -578,8 +580,6 @@ class Maze {
       return playerDirection;
     }
 
-    if (difficulty == GameDifficulty.tough) return direction;
-
     var xlesslambs = lambs.where((lamb) {
       return (lamb.y == boss.y &&
           lamb.x < boss.x &&
@@ -592,6 +592,10 @@ class Maze {
           whichDirectionTheBossCanLookToSeeThePixie(
                   boss: minotaur, pixie: temp) !=
               null) {
+        if (difficulty == GameDifficulty.tough &&
+            player.savedLambs > maxRow / 2) {
+          return direction;
+        }
         seenPixies.add(temp);
       }
     }
@@ -919,6 +923,7 @@ class Maze {
       }
     });
     var anyLeftAlive = lambs.any((lamb) => lamb.condition == Condition.alive);
+    setWhosTurnItIs(Ilk.player);
     if (!anyLeftAlive) {
       return endGame();
     }
