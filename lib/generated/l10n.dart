@@ -215,10 +215,10 @@ class S {
     );
   }
 
-  /// ` mode is like Hard mode but now the Goblin will try not to capture any animals if the Alice has already freed more than half of the animals.  This way the Goblin will not assist in its own defeat and will have more time to catch Alice.`
+  /// ` mode is like Hard mode but now the Goblin will not capture any animals if the Alice has already freed more than half of them so as to not hasten its own defeat and to have more time to catch Alice.`
   String get modeIsLikeHard {
     return Intl.message(
-      ' mode is like Hard mode but now the Goblin will try not to capture any animals if the Alice has already freed more than half of the animals.  This way the Goblin will not assist in its own defeat and will have more time to catch Alice.',
+      ' mode is like Hard mode but now the Goblin will not capture any animals if the Alice has already freed more than half of them so as to not hasten its own defeat and to have more time to catch Alice.',
       name: 'modeIsLikeHard',
       desc: '',
       args: [],

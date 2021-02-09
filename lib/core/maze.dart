@@ -164,7 +164,7 @@ class Maze {
     _whosTurnIsIt = Ilk.player;
   }
 
-  bool bossGoHandleAnyLambsAtYourLocation({Pixie boss}) {
+  bool bossGoHandleAnyLambAtYourLocation({Pixie boss}) {
     if (boss.ilk == Ilk.lamb) return false;
     var handled = false;
     //if minotaur on player location then gameover
@@ -179,11 +179,16 @@ class Maze {
       }
       if (el.location == boss.location) {
         if (boss.ilk == Ilk.minotaur) {
-          boss.setMovesLeft(0);
-          el.condition = Condition.dead;
-          player.lostLambs++;
-          print('lost lamb ${el.emoji}');
-          handled = true;
+          if (difficulty == GameDifficulty.tough &&
+              player.savedLambs > maxRow / 2) {
+            return handled;
+          } else {
+            boss.setMovesLeft(0);
+            el.condition = Condition.dead;
+            player.lostLambs++;
+            print('lost lamb ${el.emoji}');
+            handled = true;
+          }
         } else if (boss.ilk == Ilk.player) {
           boss.setMovesLeft(0);
           el.condition = Condition.freed;
@@ -346,9 +351,9 @@ class Maze {
   bool moveThisSpriteInThisDirection(Pixie sprite, Directions direction) {
     if (moveThisPixieInThisDirection(sprite, direction)) {
       if (sprite.ilk != Ilk.minotaur) {
-        bossGoHandleAnyLambsAtYourLocation(boss: player);
+        bossGoHandleAnyLambAtYourLocation(boss: player);
       } else {
-        bossGoHandleAnyLambsAtYourLocation(boss: sprite);
+        bossGoHandleAnyLambAtYourLocation(boss: sprite);
       }
 
       sprite.direction = direction;
@@ -579,6 +584,9 @@ class Maze {
     if (playerDirection != null) {
       return playerDirection;
     }
+    if (difficulty == GameDifficulty.tough && player.savedLambs > maxRow / 2) {
+      return direction;
+    }
 
     var xlesslambs = lambs.where((lamb) {
       return (lamb.y == boss.y &&
@@ -592,10 +600,6 @@ class Maze {
           whichDirectionTheBossCanLookToSeeThePixie(
                   boss: minotaur, pixie: temp) !=
               null) {
-        if (difficulty == GameDifficulty.tough &&
-            player.savedLambs > maxRow / 2) {
-          return direction;
-        }
         seenPixies.add(temp);
       }
     }
@@ -653,6 +657,7 @@ class Maze {
           boss: minotaur, pixie: seenPixies.first);
     }
     //  no lamb seen just return
+
     return direction;
   }
 

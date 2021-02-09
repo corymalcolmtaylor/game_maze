@@ -219,6 +219,7 @@ class _EnDishState extends State<EnDish> {
                                 child: Text(
                                   getMaze().getGameOverMessage(),
                                   maxLines: 12,
+                                  textAlign: TextAlign.center,
                                   style: theme.textTheme.bodyText1,
                                 ),
                               ),
@@ -266,10 +267,12 @@ class _EnDishState extends State<EnDish> {
                           startgame: widget.startNewGame),
                       Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(2.0),
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 2.0, 8.0, 2.0),
                           child: Text(
                             getMaze().getGameOverMessage(),
                             maxLines: 2,
+                            textAlign: TextAlign.center,
                             style: theme.textTheme.bodyText1,
                           ),
                         ),

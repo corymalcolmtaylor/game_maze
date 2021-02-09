@@ -41,7 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "mailtothesoft" : MessageLookupByLibrary.simpleMessage("mailto:thesoftwaretaylor@gmail.com?subject="),
     "maze" : MessageLookupByLibrary.simpleMessage("Maze"),
     "mazeSize" : MessageLookupByLibrary.simpleMessage("Maze Size"),
-    "modeIsLikeHard" : MessageLookupByLibrary.simpleMessage(" mode is like Hard mode but now the Goblin will try not to capture any animals if the Alice has already freed more than half of the animals.  This way the Goblin will not assist in its own defeat and will have more time to catch Alice."),
+    "modeIsLikeHard" : MessageLookupByLibrary.simpleMessage(" mode is like Hard mode but now the Goblin will not capture any animals if the Alice has already freed more than half of them so as to not hasten its own defeat and to have more time to catch Alice."),
     "modeIsTheDefault" : MessageLookupByLibrary.simpleMessage(" mode is the default mode, in Easy mode you can see everything."),
     "modeMeansThat" : MessageLookupByLibrary.simpleMessage(" mode means that you cannot see the other characters until Alice can."),
     "movesLeft" : MessageLookupByLibrary.simpleMessage("Moves left:"),

@@ -18,7 +18,7 @@
   "difficultyModes": "\n\nDifficulty modes:",
   "modeIsTheDefault": " mode is the default mode, in Easy mode you can see everything.",
   "modeMeansThat": " mode means that you cannot see the other characters until Alice can.",
-  "modeIsLikeHard": " mode is like Hard mode but now the Goblin will try not to capture any animals if the Alice has already freed more than half of the animals.  This way the Goblin will not assist in its own defeat and will have more time to catch Alice.",
+  "modeIsLikeHard": " mode is like Hard mode but now the Goblin will not capture any animals if the Alice has already freed more than half of them so as to not hasten its own defeat and to have more time to catch Alice.",
   "isASimpleMazeG": "is a simple maze game inspired by the works of Lewis Carroll.\nIf you have any suggestions or find a bug please send an email about it to...\nDeveloper email:",
   "thesoftwaretaylorgmailcom": "thesoftwaretaylor@gmail.com",
   "options": "Options",

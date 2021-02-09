@@ -46,8 +46,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     if (state is LoadedGame || state is InitialGame) {
       Maze mz = state.maze.copyThisMaze();
       try {
-        print('1 _mapMoveToState id ${mz.randomid}');
+        print('_mapMoveToState  ');
         if (mz.getWhosTurnIsIt() == Ilk.player) {
+          print('1 _mapMoveToState id ${mz.randomid}');
           if (!mz.moveThisSpriteInThisDirection(mz.player, event.direction)) {
             mz.player.setMovesLeft(0);
           }
@@ -58,6 +59,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               const Duration(milliseconds: Utils.animDurationMilliSeconds));
           mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
           mz.setPixiesVisibility();
+          mz.randomid++;
+          print('1b _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid); // Do somethin
           if (mz.player.getMovesLeft() <= 0) {
             mz.setWhosTurnItIs(Ilk.minotaur);
           }
@@ -69,8 +73,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           yield LoadedGame(maze: mz, rid: mz.randomid); // Do something
           await Future.delayed(
               const Duration(milliseconds: Utils.animDurationMilliSeconds));
-          mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
+          mz.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
           mz.setPixiesVisibility();
+          mz.randomid++;
+          print('2b _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid); // Do something
         }
         if (mz.getWhosTurnIsIt() == Ilk.lamb) {
           lambsMove(delayMove: mz.player.delayComputerMove, maze: mz);
@@ -81,6 +88,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               const Duration(milliseconds: Utils.animDurationMilliSeconds));
           mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
           mz.setPixiesVisibility();
+          mz.randomid++;
+          print('3b _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid);
         }
       } catch (_) {
         yield GameError('move player error');
