@@ -15,7 +15,6 @@ class Maze {
   final int maxRow;
   int _maxCol;
 
-  //final _playerMoves = 3;
   int randomid = 0;
   bool _gameIsOver = false;
   var numberOfRooms = 0;
@@ -38,19 +37,23 @@ class Maze {
   factory Maze.fromJson(Map<String, dynamic> json) => _$MazeFromJson(json);
   Map<String, dynamic> toJson() => _$MazeToJson(this);
 
-  factory Maze.initial() {
-    Maze mz = Maze(8, GameDifficulty.normal);
-    mz.initMaze();
-    return mz;
-  }
-
   // create and initialize the labyrinth
-  //s squares named b_x_y eg b_1_3 for square A3 on a chess board
+  // squares named b_x_y eg b_1_3 for square A3 on a chess board
   // each square starts as its own set and has its own number; eg 1-64
   Maze(this.maxRow, this.difficulty) {
     initMaze();
     carveLabyrinth();
   } // END FUNCTION ***********************
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Maze &&
+          runtimeType == other.runtimeType &&
+          randomid == other.randomid;
+
+  @override
+  int get hashCode => randomid.hashCode;
 
   initMaze() {
     _maxCol = maxRow;
@@ -70,10 +73,6 @@ class Maze {
     }
   }
 
-  //int newRandomId() {
-  //  return DateTime.now().millisecondsSinceEpoch${} + 1;
-  //}
-
   Maze copyThisMaze() {
     var mz = Maze(maxRow, difficulty)
       ..myLabyrinth = Utils.deepCopyRoomMap(myLabyrinth)
@@ -91,7 +90,7 @@ class Maze {
     return mz;
   }
 
-  int getPlayerMoves() {
+  int getMaxPlayerMoves() {
     return 3;
   }
 
@@ -159,7 +158,7 @@ class Maze {
   void movePlayer(Directions direction) {}
 
   void preparePlayerForATurn() {
-    player.setMovesLeft(getPlayerMoves());
+    player.setMovesLeft(getMaxPlayerMoves());
     player.delayComputerMove = true;
     _whosTurnIsIt = Ilk.player;
   }
@@ -218,7 +217,6 @@ class Maze {
   }
 
   bool movePixieToXY(Pixie pixie, int x, int y) {
-    //print('movePixieToXY b_${x}_$y');
     final newloc = 'b_${x}_$y';
     if (pixie.ilk == Ilk.lamb && minotaur.location == newloc) {
       return false;
@@ -305,7 +303,6 @@ class Maze {
   }
 
   bool moveThisPixieInThisDirection(Pixie pixie, Directions direction) {
-    //print('moveThisPixieInThisDirection ${pixie.location}');
     switch (direction) {
       case Directions.down:
         {
@@ -569,7 +566,7 @@ class Maze {
   }
 
   ///
-  /// if the boss can see another pixie  return the direction to that pixie,
+  /// if the boss can see another pixie return the direction to that pixie,
   /// else return direction passed in
   ///
   Directions changeDirectionFromBossToNearestLamb(
@@ -789,7 +786,7 @@ class Maze {
     // unless the maze is in in Tough mode in which case the goblin
     // will ignore the pixies if the player has freed more pixies than it
     // has captured.
-    // If no pixie is targeted it moves at random until it reaches a wall
+    // If no pixie is targeted it moves almost at random until it reaches a wall
     // or an intersection (there is a 50% chance it stops at an intersection
     // unless it can now see a lamb when it will stop)
 
@@ -1217,7 +1214,7 @@ class Maze {
     player = loc;
     player.emoji = '👧';
     player.preferredColor = Colors.orange[800].value;
-    player.setMovesLeft(getPlayerMoves());
+    player.setMovesLeft(getMaxPlayerMoves());
     player.lostLambs = 0;
     player.savedLambs = 0;
   }

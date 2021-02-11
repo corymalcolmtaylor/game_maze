@@ -41,5 +41,6 @@
   "version": "Version",
   "maze": "Maze",
   "thegoblincaptured": "The Goblin captured ",
-  "itWins": ", so it wins."
+  "itWins": ", so it wins.",
+  "theGameHasHitABug": "The Game has hit a bug, please try to start a new game and sned us an email at "
 }

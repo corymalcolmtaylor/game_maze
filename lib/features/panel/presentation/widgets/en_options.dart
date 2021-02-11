@@ -63,12 +63,6 @@ class _EnOptionsState extends State<EnOptions> {
       msg = '';
     }
 
-    var emojiTextStyle = TextStyle(
-      fontSize: 22,
-      color: Colors.yellow,
-      fontFamily: 'NotoEmoji',
-    );
-
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -185,7 +179,7 @@ class _EnOptionsState extends State<EnOptions> {
                               canvasColor: Colors.black87,
                             ),
                             child: DropdownButton<String>(
-                              key: Key('PICKDIFFICULTY'),
+                              //key: Key('PICKDIFFICULTY'),
                               isDense: true,
                               dropdownColor: Colors.grey[850],
                               value: translateThisGameDifficultyToString(

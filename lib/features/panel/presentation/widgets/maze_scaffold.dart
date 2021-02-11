@@ -48,7 +48,6 @@ class _MazeScaffoldState extends State<MazeScaffold> {
                 child: MazeButton(
                   key: const Key('Dish'),
                   onclick: () {
-                    // Respond to button press
                     getPanelBloc().add(const ShowDishPanel());
                     print('VirusButton, Show dish ');
                   },
@@ -62,7 +61,6 @@ class _MazeScaffoldState extends State<MazeScaffold> {
                 margin: const EdgeInsets.all(10.0),
                 child: MazeButton(
                   onclick: () {
-                    // Respond to button press
                     getPanelBloc().add(const ShowSettingsPanel());
                     print('icon button, Show settings ');
                   },
@@ -77,11 +75,9 @@ class _MazeScaffoldState extends State<MazeScaffold> {
                   getPanelBloc().add(const ShowSettingsPanel());
                   print('PopupMenuButton, Show options');
                 } else if (result == GameActions.rules) {
-                  //showRules(context);
                   getPanelBloc().add(const ShowRulesPanel());
                   print('icon button, Show Rules');
                 } else if (result == GameActions.about) {
-                  //showInformation(context);
                   getPanelBloc().add(const ShowAboutPanel());
                   print('icon button, Show about');
                 }

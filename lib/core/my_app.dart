@@ -7,7 +7,6 @@ import 'package:game_maze/features/panel/presentation/widgets/maze_scaffold.dart
 import 'package:game_maze/generated/l10n.dart';
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

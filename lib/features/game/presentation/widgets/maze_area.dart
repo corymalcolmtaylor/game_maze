@@ -14,11 +14,8 @@ import 'package:game_maze/features/panel/presentation/widgets/en_dish.dart';
 import 'package:game_maze/features/panel/presentation/widgets/en_info.dart';
 import 'package:game_maze/features/panel/presentation/widgets/en_options.dart';
 import 'package:game_maze/features/panel/presentation/widgets/en_rules.dart';
-import 'package:game_maze/generated/l10n.dart';
 import 'package:game_maze/theme.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'start_new_game.dart';
 
 class MazeArea extends StatefulWidget {
   @override
@@ -31,14 +28,10 @@ class _MazeAreaState extends State<MazeArea>
     with SingleTickerProviderStateMixin {
   int numRows = 8;
   final maximumMoveAttempts = 8;
-
   var sprites = <Widget>[];
-
   var roomLength = 0.0;
   var maxWidth = 0.0;
-
   GameDifficulty difficulty = GameDifficulty.normal;
-
   TapGestureRecognizer _emailPressRecognizer;
 
   @override
@@ -81,7 +74,6 @@ class _MazeAreaState extends State<MazeArea>
     if (pixie.lastX > 0 && pixie.x < pixie.lastX) {
       radians = 3.0;
     }
-    //if earlier versions of android the goblin needs to switch direction facing
     if (pixie.ilk == Ilk.minotaur) {
       if (radians == 3) {
         radians = 0.0;
@@ -201,7 +193,6 @@ class _MazeAreaState extends State<MazeArea>
   }
 
   Widget makeRoom(Room room) {
-    /*  rooms shall be changed to square containers in rows of a set width */
     final floorColor = Colors.green[200];
     final northColor =
         (room.downWallIsUp == true) ? Colors.green[700] : floorColor;
@@ -286,44 +277,56 @@ class _MazeAreaState extends State<MazeArea>
     return BlocBuilder<GameBloc, GameState>(builder: (context, mazestate) {
       print('BlocBuilder build 1 ${mazestate.maze.randomid}  ');
 
-      trs.clear();
-      for (int i = 1; i <= getMaze().getMaxRow(); i++) {
-        trs.addAll(
-          List.from(
-            getMaze()
-                .myLabyrinth
-                .entries
-                .where((elroom) => elroom.value.y == i)
-                .map(
-                  (el) => makeRoom(el.value),
-                )
-                .toList(),
-          ),
-        );
-      }
-
-      var llsprites = List.from(getMaze().myLabyrinth.entries.map(
-            (el) => getAnimatedSpriteIconsForLambs(el.value),
-          ));
-
-      sprites.clear();
-      llsprites.forEach((ll) {
-        sprites.addAll(ll);
-      });
-      sprites.add(getAnimatedSpriteIconThisPixie(pixie: getMaze().player));
-
-      sprites.add(getAnimatedSpriteIconThisPixie(pixie: getMaze().minotaur));
-
       Widget panel;
       if (BlocProvider.of<PanelBloc>(context).state is DishPanel) {
         print('state is dish panel');
-        panel = EnDish(
-            maxWidth: maxWidth,
-            roomLength: roomLength,
-            numRows: numRows,
-            sprites: [...sprites],
-            trs: [...trs],
-            startNewGame: startNewGame);
+        if (BlocProvider.of<GameBloc>(context).state is GameError) {
+          panel = Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                BlocProvider.of<GameBloc>(context).state.message,
+                style: theme.textTheme.bodyText1,
+              ),
+            ),
+          );
+        } else {
+          trs.clear();
+          for (int i = 1; i <= getMaze().getMaxRow(); i++) {
+            trs.addAll(
+              List.from(
+                getMaze()
+                    .myLabyrinth
+                    .entries
+                    .where((elroom) => elroom.value.y == i)
+                    .map(
+                      (el) => makeRoom(el.value),
+                    )
+                    .toList(),
+              ),
+            );
+          }
+
+          var llsprites = List.from(getMaze().myLabyrinth.entries.map(
+                (el) => getAnimatedSpriteIconsForLambs(el.value),
+              ));
+
+          sprites.clear();
+          llsprites.forEach((ll) {
+            sprites.addAll(ll);
+          });
+          sprites.add(getAnimatedSpriteIconThisPixie(pixie: getMaze().player));
+
+          sprites
+              .add(getAnimatedSpriteIconThisPixie(pixie: getMaze().minotaur));
+          panel = EnDish(
+              maxWidth: maxWidth,
+              roomLength: roomLength,
+              numRows: numRows,
+              sprites: [...sprites],
+              trs: [...trs],
+              startNewGame: startNewGame);
+        }
       } else {
         print('state is NOT dish panel');
         panel = otherPanel;

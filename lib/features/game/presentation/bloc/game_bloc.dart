@@ -3,7 +3,6 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:game_maze/core/maze.dart';
 import 'package:game_maze/core/utils.dart';
-import 'package:game_maze/features/panel/presentation/bloc/panel_bloc.dart';
 import 'package:game_maze/generated/l10n.dart';
 import 'package:meta/meta.dart';
 
@@ -11,7 +10,7 @@ part 'game_event.dart';
 part 'game_state.dart';
 
 class GameBloc extends Bloc<GameEvent, GameState> {
-  GameBloc() : super(InitialGame());
+  GameBloc() : super(InitialGame(DateTime.now().millisecondsSinceEpoch));
 
   Maze oldMaze;
 
@@ -36,9 +35,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     try {
       Maze mz = Maze(event.numberOfRows, event.difficulty);
       mz.setPixiesVisibility();
+      mz.randomid = DateTime.now().millisecondsSinceEpoch;
       yield LoadedGame(maze: mz, rid: mz.randomid);
     } catch (_) {
-      yield GameError('initialize game error');
+      yield GameError(
+          '${S.current.theGameHasHitABug} ${S.current.thesoftwaretaylorgmailcom}');
     }
   }
 
@@ -48,52 +49,53 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       try {
         print('_mapMoveToState  ');
         if (mz.getWhosTurnIsIt() == Ilk.player) {
-          print('1 _mapMoveToState id ${mz.randomid}');
           if (!mz.moveThisSpriteInThisDirection(mz.player, event.direction)) {
             mz.player.setMovesLeft(0);
           }
           mz.randomid++;
-
-          yield LoadedGame(maze: mz, rid: mz.randomid); // Do something
+          print('1 player _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid);
           await Future.delayed(
               const Duration(milliseconds: Utils.animDurationMilliSeconds));
           mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
           mz.setPixiesVisibility();
           mz.randomid++;
-          print('1b _mapMoveToState id ${mz.randomid}');
-          yield LoadedGame(maze: mz, rid: mz.randomid); // Do somethin
+          print('1b player _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid);
           if (mz.player.getMovesLeft() <= 0) {
+            mz.player.setMovesLeft(mz.getMaxPlayerMoves());
             mz.setWhosTurnItIs(Ilk.minotaur);
           }
         }
         if (mz.getWhosTurnIsIt() == Ilk.minotaur) {
-          minotaurMove(delayMove: mz.player.delayComputerMove, maze: mz);
+          minotaurMove(maze: mz);
           mz.randomid++;
-          print('2 _mapMoveToState id ${mz.randomid}');
-          yield LoadedGame(maze: mz, rid: mz.randomid); // Do something
+          print('2 mino _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid);
           await Future.delayed(
               const Duration(milliseconds: Utils.animDurationMilliSeconds));
           mz.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
           mz.setPixiesVisibility();
           mz.randomid++;
-          print('2b _mapMoveToState id ${mz.randomid}');
-          yield LoadedGame(maze: mz, rid: mz.randomid); // Do something
+          print('2b mino _mapMoveToState id ${mz.randomid}');
+          yield LoadedGame(maze: mz, rid: mz.randomid);
         }
         if (mz.getWhosTurnIsIt() == Ilk.lamb) {
-          lambsMove(delayMove: mz.player.delayComputerMove, maze: mz);
+          lambsMove(maze: mz);
           mz.randomid++;
-          print('3 _mapMoveToState id ${mz.randomid}');
+          print('3 lambs _mapMoveToState id ${mz.randomid}');
           yield LoadedGame(maze: mz, rid: mz.randomid);
           await Future.delayed(
               const Duration(milliseconds: Utils.animDurationMilliSeconds));
           mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
           mz.setPixiesVisibility();
           mz.randomid++;
-          print('3b _mapMoveToState id ${mz.randomid}');
+          print('3b lambs _mapMoveToState id ${mz.randomid}');
           yield LoadedGame(maze: mz, rid: mz.randomid);
         }
       } catch (_) {
-        yield GameError('move player error');
+        yield GameError(
+            '${S.current.theGameHasHitABug} ${S.current.thesoftwaretaylorgmailcom}');
       }
     }
   }
@@ -104,27 +106,34 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       mz.player.setMovesLeft(0);
       mz.setWhosTurnItIs(Ilk.minotaur);
       if (mz.getWhosTurnIsIt() == Ilk.minotaur) {
-        minotaurMove(delayMove: mz.player.delayComputerMove, maze: mz);
+        minotaurMove(maze: mz);
         mz.randomid++;
-        print('2 _mapMoveToState id ${mz.randomid}');
-        yield LoadedGame(maze: mz, rid: mz.randomid); // Do something
+        print('1 _mapEndTurnToState id ${mz.randomid}');
+        yield LoadedGame(maze: mz, rid: mz.randomid);
         await Future.delayed(
             const Duration(milliseconds: Utils.animDurationMilliSeconds));
         mz.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
         mz.setPixiesVisibility();
+        mz.randomid++;
+        print('1b _mapEndTurnToState id ${mz.randomid}');
+        yield LoadedGame(maze: mz, rid: mz.randomid);
       }
       if (mz.getWhosTurnIsIt() == Ilk.lamb) {
-        lambsMove(delayMove: mz.player.delayComputerMove, maze: mz);
+        lambsMove(maze: mz);
         mz.randomid++;
-        print('3 _mapMoveToState id ${mz.randomid}');
+        print('2 _mapEndTurnToState id ${mz.randomid}');
         yield LoadedGame(maze: mz, rid: mz.randomid);
         await Future.delayed(
             const Duration(milliseconds: Utils.animDurationMilliSeconds));
         mz.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
         mz.setPixiesVisibility();
+        mz.randomid++;
+        print('2b _mapEndTurnToState id ${mz.randomid}');
+        yield LoadedGame(maze: mz, rid: mz.randomid);
       }
     } catch (_) {
-      yield GameError('move player error');
+      yield GameError(
+          '${S.current.theGameHasHitABug} ${S.current.thesoftwaretaylorgmailcom}');
     }
   }
 
@@ -159,12 +168,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     maze.setGameOverMessage(str);
   }
 
-  void minotaurMove({bool delayMove, Maze maze}) async {
+  void minotaurMove({Maze maze}) async {
     if (maze.gameIsOver() ||
         !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
       maze.setGameIsOver(true);
       handleEndOfGame(maze);
-
       return;
     }
 
@@ -172,50 +180,25 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       maze.moveMinotaur();
     }
     print(' fin minotaurMove');
-    //var gameOver = maze.moveLambs();
-    //maze.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
-
-    /*
-    if (gameOver) {
-      handleEndOfGame(maze);
-    } else {
-      maze.preparePlayerForATurn();
-    }
-
-    print('clear freed 2');
-    maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
-    */
   }
 
-  void lambsMove({bool delayMove, Maze maze}) async {
+  void lambsMove({Maze maze}) async {
     if (maze.gameIsOver() ||
         !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
       maze.setGameIsOver(true);
       handleEndOfGame(maze);
-
       return;
     }
-    /*
-    if (maze.getWhosTurnIsIt() == Ilk.minotaur) {
-      maze.moveMinotaur();
-    }
-    */
 
-    var gameOver = maze.moveLambs();
-    maze.setWhosTurnItIs(Ilk.player);
-    maze.player.setMovesLeft(3);
-    print('fin lambsMove');
-    /*
-    maze.clearLocationsOfLambsInThisCondition(condition: Condition.dead);
-
-    if (gameOver) {
+    maze.moveLambs();
+    if (maze.gameIsOver() ||
+        !maze.lambs.any((lamb) => lamb.condition == Condition.alive)) {
+      maze.setGameIsOver(true);
       handleEndOfGame(maze);
-    } else {
-      maze.preparePlayerForATurn();
+      return;
     }
-
-    print('clear freed 2');
-    maze.clearLocationsOfLambsInThisCondition(condition: Condition.freed);
-    */
+    maze.setWhosTurnItIs(Ilk.player);
+    maze.player.setMovesLeft(maze.getMaxPlayerMoves());
+    print('fin lambsMove');
   }
 }

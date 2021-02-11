@@ -4,11 +4,13 @@ part of 'game_bloc.dart';
 abstract class GameState extends Equatable {
   GameState();
   final Maze maze = null;
+  final int rid = 0;
+  final String message = '';
 }
 
 class InitialGame extends GameState {
-  InitialGame();
-  final int rid = 0;
+  InitialGame(this.rid);
+  final int rid;
   @override
   final Maze maze = Maze(8, GameDifficulty.normal);
 

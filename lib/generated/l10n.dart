@@ -454,6 +454,16 @@ class S {
       args: [],
     );
   }
+
+  /// `The Game has hit a bug, please try to start a new game and sned us an email at `
+  String get theGameHasHitABug {
+    return Intl.message(
+      'The Game has hit a bug, please try to start a new game and sned us an email at ',
+      name: 'theGameHasHitABug',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

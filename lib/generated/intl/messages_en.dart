@@ -55,6 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sheMovesOneStep" : MessageLookupByLibrary.simpleMessage(".  She moves one step at a time and gets three steps per turn.\n\nEnd her turn early by touching an animal or moving into a wall or double tapping on the Hedge Maze."),
     "startGame" : MessageLookupByLibrary.simpleMessage("Start Game"),
     "swipeVerticallyOrH" : MessageLookupByLibrary.simpleMessage(" captures them.\n\nSwipe vertically or horizontally on the maze to move Alice"),
+    "theGameHasHitABug" : MessageLookupByLibrary.simpleMessage("The Game has hit a bug, please try to start a new game and sned us an email at "),
     "theGoblinGotAlice" : MessageLookupByLibrary.simpleMessage("The Goblin got Alice"),
     "thegoblincaptured" : MessageLookupByLibrary.simpleMessage("The Goblin captured "),
     "thesoftwaretaylorgmailcom" : MessageLookupByLibrary.simpleMessage("thesoftwaretaylor@gmail.com"),
